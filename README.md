@@ -52,6 +52,8 @@
 * Determine better scheme for renaming unannotated genes in the new isolate model
     - model genes renamed to match the isolate gene locus\_tag, unnannotated does not have this info
     - currently naming as '{old\_name}\_unannotated'
+* Fix help message
+    - all arguments appear in optional section
 
 
 # Planned features
