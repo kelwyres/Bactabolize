@@ -71,12 +71,8 @@ def write_gbk_to_fasta(filepath, dirpath):
 
 def extract_nucleotides_from_ref(hit, fasta):
     if hit.sstart > hit.send:
-        start = hit.send
-        end = hit.sstart
         seq = fasta[hit.sseqid][hit.send-1:hit.sstart].reverse_complement()
     else:
-        start = hit.sstart
-        end = hit.send
         seq = fasta[hit.sseqid][hit.sstart-1:hit.send]
     return seq
 
