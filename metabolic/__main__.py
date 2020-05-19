@@ -19,7 +19,6 @@ def entry():
     # Get orthologs of genes in model
     isolate_orthologs = orthologs.identify(args.ref_gbk_fp, args.isolate_fp, model_genes)
 
-    # TODO: have orthologs.identify construct list of model genes missing in isolate
     # Remove genes from model that have no ortholog in the isolate
     missing_genes = list()
     for gene in model_genes - set(isolate_orthologs):
