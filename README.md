@@ -1,18 +1,26 @@
 # Notes
-* Genes can be considered orthologs on the basis of 25% of the protein length
-    - not sure if we want to increase requirement for this
+* Implementing as python package rather than nextflow pipeline
+    - easier for end-users to install
+    - writing in a way that this can easily be turned into a nf pipeline
+        - idea would be to complement the standalone package if people wanted it
+* Script is currently designed to process a single isolate per command
+    - this can be parallelised itself with comparatively low memory overhead
+    - only additional computation in this approach is create BLAST databases for the reference
+        - this is negligible though
+
+
+# Queries
+* Genes can be considered orthologous from only 25% of the protein sequenc
     - currently filtering alignments with <25% coverage
     - if a pair of proteins have the highest PID to each other, then they're orthologs
+    - not sure if we want to increase coverage requirement for this
 * When capturing unannotated genes with BLASTn, we're only doing a one-way alignment
-    - we probably should be taking this hits and alignment them against the reference
-        - aligning translated sequence most appropriate here I would think
-    - then checking if they qualify as orthologs by definition
+    - we probably should be taking these hits and align them against the reference
+        - aligning translated sequence is most appropriate here I would think
+    - then checking if they qualify as orthologs by the standard definition
 * BLASTn hits are only checked for premature stop codon
-    - should also check start codon is good
-* Implementing as python package rather than nextflow
-    - easier to end-users to install
-    - writing in a way that this can easily be turned into a nf pipeline
-        - idea would be to complement the standalone package
+    - I think we should also check start codon is good
+    - the whole approach of identifying genes that couldn't be annotated is dicey
 
 
 # Current implementation
@@ -25,17 +33,25 @@
     - defined as a protein pair that are most similar to each other (by pident)
 * Collect model genes that have no ortholog to search at nucleotide level
 * Uni-directional BLASTn for unannotated gene detection
+    - filter on evalue <= 1e-3, coverage >= 80%, pident >= 80%
+    - require translated sequence to not have a truncating mutation
+* Any BLASTn hit that passes filtering is automatically considered ortholog
+    - I don't think this is the best approach
+* Remove models genes that do not have an ortholog in the isolate
+    - Artifical genes are excepted here
+* Rename identified orthologs to match locus\_tags in isolate
+* Write model to disk
 
 
 # TODO
 * Getting 1182 orthologs on K\_quasi\_quasi\_01A030T, tut notes have 1186
-    - 1185 after unannotated gene search
+    - 1185 after unannotated gene search (tut detected no annotated genes)
     - resolve differences
-* Also detecting unannotated genes in K\_quasi\_quasi\_01A030T where tut did not
 * Test BLASTn alignment sequence extraction
-* Have orthologs.identify create a set of models genes that do NOT have orthologs in isolate
+    - tested this to some extent and I think it's correct but tut notes have different offsets...
 * Determine better scheme for renaming unannotated genes in the new isolate model
-    - model genes renamed to match the isolate gene locus\_tag, unnanntated does not have this info
+    - model genes renamed to match the isolate gene locus\_tag, unnannotated does not have this info
+    - currently naming as '{old\_name}\_unannotated'
 
 
 # Planned features
