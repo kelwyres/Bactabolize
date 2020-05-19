@@ -1,5 +1,7 @@
+metabolic.egg-info/
 __pycache__/
 conda_env/
 pickled/
 output/
+build/
 tests/
