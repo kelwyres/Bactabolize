@@ -5,12 +5,12 @@
         - idea would be to complement the standalone package if people wanted it
 * Script is currently designed to process a single isolate per command
     - this can be parallelised itself with comparatively low memory overhead
-    - only additional computation in this approach is create BLAST databases for the reference
+    - only additional computation in this approach is creating BLAST databases for the reference
         - this is negligible though
 
 
 # Queries
-* Genes can be considered orthologous from only 25% of the protein sequenc
+* Genes can be considered orthologous from only 25% of the protein sequence
     - currently filtering alignments with <25% coverage
     - if a pair of proteins have the highest PID to each other, then they're orthologs
     - not sure if we want to increase coverage requirement for this
@@ -38,7 +38,7 @@
 * Any BLASTn hit that passes filtering is automatically considered ortholog
     - I don't think this is the best approach
 * Remove models genes that do not have an ortholog in the isolate
-    - Artifical genes are excepted here
+    - Artificial genes are excepted here
 * Rename identified orthologs to match locus\_tags in isolate
 * Write model to disk
 
@@ -63,7 +63,7 @@
     - deadends likely important wrt to quality of model
 * Reannotate inputs
     - using prodigal model trained on input set
-        - computionally intensive for large inputs, optimise conditionally required
+        - computationally intensive for large inputs, optimise conditionally required
 * Faster alternative to BLASTp
     - e.g. diamond
     - will need to demonstrate consistency between results
@@ -75,12 +75,12 @@
 
 # Planned implementation
 * Input as graphs or flat formats (FASTA, genbank, etc)
-    - prefering graphs for additional QC
+    - preferring graphs for additional QC
     - (deadends to be demonstrated as important through analysis later)
 * QC of assemblies
 * Annotation using same prodigal model
 * Ortholog detection
-* Draft model creatation
+* Draft model creation
 * Model optimisation
     - failing models set aside for manual investigation
     - large amount of info provide to help this process
