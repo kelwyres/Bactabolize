@@ -21,7 +21,7 @@ def get_args():
     parser.add_argument('--ref_gbk_fp', required=True, type=pathlib.Path,
             help='Reference genbank filepath')
     parser.add_argument('--ref_model_fp', required=True, type=pathlib.Path,
-            help='Reference model filepath')
+            help='Reference model filepath (JSON format)')
 
     parser.add_argument('--output_fp', required=True, type=pathlib.Path,
             help='Output filepath')

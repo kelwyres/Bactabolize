@@ -22,12 +22,12 @@ def entry():
     # Remove genes from model that have no ortholog in the isolate
     missing_genes = list()
     for gene in model_genes - set(isolate_orthologs):
-        # TODO: handle artifical genes better
+        # TODO: handle artificial genes better
         if gene == 'KPN_SPONT':
             continue
         missing_genes.append(model.genes.get_by_id(gene))
     # Mutate model inplace and rename genes
-    # NOTE: will need deep copy if we're to process more than one isolate
+    # NOTE: will need copy.deepcopy() if we're to process more than one isolate here
     model.id = args.isolate_fp.stem
     cobra.manipulation.remove_genes(model, missing_genes, remove_reactions=True)
     cobra.manipulation.modify.rename_genes(model, isolate_orthologs)

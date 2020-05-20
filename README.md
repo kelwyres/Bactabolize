@@ -52,8 +52,30 @@
 * Determine better scheme for renaming unannotated genes in the new isolate model
     - model genes renamed to match the isolate gene locus\_tag, unnannotated does not have this info
     - currently naming as '{old\_name}\_unannotated'
+* Validate input model format (json)
+    - check all genes are present in reference?
+        - this may not be desired - certainly not for pan-models
 * Fix help message
     - all arguments appear in optional section
+* Test quality of models using flux balance analysis
+    - using a objective function and a matrix of metabolite stoichiometric coeffs.
+        - stoichiometric coefficients should be experimentally derived
+        - object function is just a vector of linear objective coefficients
+            - default is 1
+        - combined create system to linear eqs. to solve flux for different components
+    - calculates flow of metabolites through metabolic network
+        - specifically optimises for reaction rates (fluxes)
+    - enable prediction of growth rate of organism or production rate of specific metabolite
+    - for our purposes objective function will return growth rate
+    - presumably growth media simulation takes the same process but contrains available precursors
+        - we should then use a simple FBA to quickly perform shallow validation of critical pathways
+* Troubleshooting
+    - retain all BLAST results
+    - check for more distance homologs
+    - run Bandage graph blast
+        - help diagnose bad assembly
+    - check in BiGG database for different genes have the same functionality
+    - report known problem genes such as those in capsule loci
 
 
 # Planned features

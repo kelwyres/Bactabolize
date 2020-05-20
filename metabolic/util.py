@@ -37,6 +37,7 @@ def write_gbk_sequence(filepath, dirpath, retain=None, *, seq_type):
                 seq_lines = [seq[i:i+80] for i in range(0, len(seq), 80)]
                 print(desc, file=fh_out)
                 print(*seq_lines, sep='\n', file=fh_out)
+    # TODO: move this to pre-flight reference and model validation
     # If we were retaining genes ensure all were found, otherwise warn
     if retain and len(retain ^ genes_seen) > 0:
         missing_genes = retain ^ genes_seen
