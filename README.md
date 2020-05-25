@@ -35,7 +35,7 @@
 * Uni-directional BLASTn for unannotated gene detection
     - filter on evalue <= 1e-3, coverage >= 80%, pident >= 80%
     - require translated sequence to not have a truncating mutation
-* Any BLASTn hit that passes filtering is automatically considered ortholog
+* Any BLASTn hit that passes filtering is automatically considered orthologous
     - I don't think this is the best approach
 * Remove models genes that do not have an ortholog in the isolate
     - Artificial genes are excepted here
@@ -67,9 +67,22 @@
         - specifically optimises for reaction rates (fluxes)
     - enable prediction of growth rate of organism or production rate of specific metabolite
     - for our purposes objective function will return growth rate
-    - presumably growth media simulation takes the same process but contrains available precursors
+    - presumably growth media simulation takes the same process but constrains available precursors
         - we should then use a simple FBA to quickly perform shallow validation of critical pathways
+            - i.e. validate on minimal media before proceeding to FBA for specific media types
 * Troubleshooting
+    - gather all essential metabolic genes from model
+        - this should only be done once
+        - must be done in a way that is decoupled from the current single-isolate command
+        - in the future, the current single-isolate command will be wrapped by other code
+            - which manages execution of draft model creation
+        - check which are missing
+    - collect essential reactions
+        - see above notes
+        - discover missing
+    - the two above points appear to be done by cobra gapfill
+        - might be reaction-specific and not indicate which genes are missing
+        - solver is heuristic - run several times to check for convergence/ consistency
     - retain all BLAST results
     - check for more distance homologs
     - run Bandage graph blast
