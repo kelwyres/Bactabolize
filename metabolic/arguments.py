@@ -37,10 +37,11 @@ def parse():
     parser = ArgumentParserCustomHelp(add_help=False)
     subparsers = parser.add_subparsers(dest='command')
 
-    parser.add_argument('--assembly_fp', type=pathlib.Path, nargs='+')
+    parser.add_argument('--assembly_fp', type=pathlib.Path)
     parser.add_argument('--ref_gbk_fp', type=pathlib.Path)
     parser.add_argument('--ref_model_fp', type=pathlib.Path)
-    parser.add_argument('--output_fp', type=pathlib.Path)
+    parser.add_argument('--prodigal_model_fp', type=pathlib.Path)
+    parser.add_argument('--output_dir', type=pathlib.Path)
 
     parser.add_argument('--no_qc', default=False, action='store_true')
     parser.add_argument('--no_annotation', default=False, action='store_true')
@@ -87,7 +88,7 @@ def check_arguments(args):
         sys.exit(0)
     # Check we have required arguments, this is purposely decouped from argparse
     required_args = {
-        'base': ('assembly_fp', 'ref_gbk_fp', 'ref_model_fp', 'output_fp'),
+        'base': ('assembly_fp', 'ref_gbk_fp', 'ref_model_fp', 'prodigal_model_fp', 'output_dir'),
         'assembly_qc': ('assembly_fp', 'output_fp'),
         'annotate': ('assembly_fp', 'model_fp', 'output_fp'),
         'draft_model': ('assembly_fp', 'ref_gbk_fp', 'ref_model_fp', 'output_fp'),
@@ -126,6 +127,7 @@ def help_text(command):
                       '  --assembly_fp FILES         Isolate genbank filepaths\n'
                       '  --ref_gbk_fp FILE           Reference genbank filepath\n'
                       '  --ref_model_fp FILE         Reference model filepath (JSON)\n'
+                      '  --prodigal_model_fp FILE    Prodigal model file path\n'
                       '  --output_dir DIR            Output directory\n\n'
                       'Optional stage execution:\n'
                       '  --no_qc                     Do not run assembly QC\n'
