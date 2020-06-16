@@ -42,9 +42,9 @@ def parse():
     parser.add_argument('--ref_model_fp', type=pathlib.Path)
     parser.add_argument('--output_fp', type=pathlib.Path)
 
-    parser.add_argument('--no_qc', default=False, type=bool, action='store_true')
-    parser.add_argument('--no_annotation', default=False, type=bool, action='store_true')
-    parser.add_argument('--no_fba', default=False, type=bool, action='store_true')
+    parser.add_argument('--no_qc', default=False, action='store_true')
+    parser.add_argument('--no_annotation', default=False, action='store_true')
+    parser.add_argument('--no_fba', default=False, action='store_true')
 
     parser.add_argument('-v', '--version', action='store_true')
     parser.add_argument('-h', '--help', action='store_true')
