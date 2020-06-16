@@ -1,5 +1,6 @@
 import copy
 import pathlib
+import sys
 import tempfile
 
 
@@ -10,10 +11,14 @@ import cobra.manipulation.modify
 
 
 from . import alignment
+from . import media_definitions
 from . import util
 
 
 def run(assembly_fp, ref_gbk_fp, model, output_fp):
+    print('\n==============================')
+    print('running draft model creation')
+    print('==============================')
     # Get orthologs of genes in model
     model_genes = {gene.id for gene in model.genes}
     isolate_orthologs = identify(assembly_fp, ref_gbk_fp, model_genes)
@@ -30,26 +35,49 @@ def run(assembly_fp, ref_gbk_fp, model, output_fp):
     cobra.manipulation.remove_genes(model, missing_genes, remove_reactions=True)
     cobra.manipulation.modify.rename_genes(model, isolate_orthologs)
 
+    # Assess model by observing whether the objective function for biomass optimises
+    # We perform an FBA on minimal media (m9)
+    for reaction in model.reactions:
+        if reaction.id.startswith('EX_'):
+            reaction.lower_bound = 0
+    for reaction_id, lower_bound in media_definitions.m9.items():
+        try:
+            reaction = model.reactions.get_by_id(reaction_id)
+        except KeyError:
+            msg = f'warning: draft model {assembly_fp.stem} does not contain reaction {reaction_id}'
+            print(msg, file=sys.stderr)
+        reaction.lower_bound = lower_bound
+    solution = model.optimize()
+
+    # Somewhat arbitrary threshold for whether a model produces biomass
+    if solution.objective_value < 1e-4:
+        # TODO: troubleshooting information if FBA fails to optimise to target
+        msg = f'warning: model for {assembly_fp.stem} failed to produce biomass on minimal media'
+        print(msg, file=sys.stderr)
+
+    # TODO: report in more meaningful way
+    import warnings
+    with warnings.catch_warnings():
+        warnings.simplefilter('ignore')
+        print(model.summary())
+
     # Write model to disk
     with output_fp.open('w') as fh:
         cobra.io.save_json_model(model, fh)
 
-    # TODO: draft model FBA in basic media for QC
-    # TODO: troubleshooting information if FBA fails to optimise to target
-
 
 def identify(iso_fp, ref_fp, model_genes):
-    pickle_mode = 'read'
+    #pickle_mode = 'read'
     #pickle_mode = 'write'
-    #pickle_mode = 'noop'
+    pickle_mode = 'noop'
     # First we perform a standard best bi-directional hit analysis to identify orthologs
     # Extract protein sequences from both genomes but only keep model genes from the reference
     dh = tempfile.TemporaryDirectory()  # fs directory deleted this is out of scope
     iso_protein_fp = util.write_gbk_sequence(iso_fp, dh.name, seq_type='prot')
     ref_protein_fp = util.write_gbk_sequence(ref_fp, dh.name, model_genes, seq_type='prot')
     # Run BLASTp bidirectionally (filtering with evalue <=1e-3, coverage >=25%, and pident >=80%)
-    #blastp_iso = alignment.run_blastp(iso_protein_fp, ref_protein_fp, dh.name)
-    #blastp_ref = alignment.run_blastp(ref_protein_fp, iso_protein_fp, dh.name)
+    blastp_iso = alignment.run_blastp(iso_protein_fp, ref_protein_fp, dh.name)
+    blastp_ref = alignment.run_blastp(ref_protein_fp, iso_protein_fp, dh.name)
 
     # TEMP: store/load blastp results to/from disk so we dont have to recompute
     import pickle
@@ -94,11 +122,16 @@ def identify(iso_fp, ref_fp, model_genes):
     with iso_fp.open('r') as fh:
         iso_fasta = {record.name: record.seq for record in Bio.SeqIO.parse(iso_fp, 'genbank')}
     for ref_gene_name, hits in blastn_res.items():
+        assert ref_gene_name not in model_orthologs
         for hit in hits:
             # Get nucleotide sequence and check for premature stop codons
             nucleotide_seq = util.extract_nucleotides_from_ref(hit, iso_fasta)
+            # Append trailing N if we have a partial codon
+            seq_n = (3 - len(nucleotide_seq)) % 3
+            nucleotide_seq = nucleotide_seq + 'N' * seq_n
             if '*' in nucleotide_seq.translate()[:-1]:
                 continue
-            assert ref_gene_name not in model_orthologs
-            model_orthologs[ref_gene_name] = f'{hit.qseqid}_unannotated'
+            else:
+                model_orthologs[ref_gene_name] = f'{hit.qseqid}_unannotated'
+                break
     return model_orthologs
