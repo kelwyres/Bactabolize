@@ -45,12 +45,29 @@ def parse():
     parser.add_argument('-v', '--version', action='store_true')
     parser.add_argument('-h', '--help', action='store_true')
 
-    parser_identorth = subparsers.add_parser('draft_model', add_help=False)
-    parser_identorth.add_argument('--assembly_fp', type=pathlib.Path)
-    parser_identorth.add_argument('--ref_gbk_fp', type=pathlib.Path)
-    parser_identorth.add_argument('--ref_model_fp', type=pathlib.Path)
-    parser_identorth.add_argument('--output_fp', type=pathlib.Path)
-    parser_identorth.add_argument('-h', '--help', action='store_true')
+    parser_stats = subparsers.add_parser('assembly_qc', add_help=False)
+    parser_stats.add_argument('--assembly_fp', type=pathlib.Path)
+    parser_stats.add_argument('--output_fp', type=pathlib.Path)
+    parser_stats.add_argument('-h', '--help', action='store_true')
+
+    parser_annotate = subparsers.add_parser('annotate', add_help=False)
+    parser_annotate.add_argument('--assembly_fp', type=pathlib.Path)
+    parser_annotate.add_argument('--model_fp', type=pathlib.Path)
+    parser_annotate.add_argument('--output_fp', type=pathlib.Path)
+    parser_annotate.add_argument('-h', '--help', action='store_true')
+
+    parser_draft = subparsers.add_parser('draft_model', add_help=False)
+    parser_draft.add_argument('--assembly_fp', type=pathlib.Path)
+    parser_draft.add_argument('--ref_gbk_fp', type=pathlib.Path)
+    parser_draft.add_argument('--ref_model_fp', type=pathlib.Path)
+    parser_draft.add_argument('--output_fp', type=pathlib.Path)
+    parser_draft.add_argument('-h', '--help', action='store_true')
+
+    parser_fba = subparsers.add_parser('model_fba', add_help=False)
+    parser_fba.add_argument('--model_fp', type=pathlib.Path)
+    parser_fba.add_argument('--fba_spec_fp', type=pathlib.Path)
+    parser_fba.add_argument('--output_fp', type=pathlib.Path)
+    parser_fba.add_argument('-h', '--help', action='store_true')
 
     args = parser.parse_args()
     check_arguments(args)
@@ -67,7 +84,10 @@ def check_arguments(args):
     # Check we have required arguments, this is purposely decouped from argparse
     required_args = {
         'base': ('assembly_fps', 'ref_gbk_fp', 'ref_model_fp', 'output_fp'),
-        'draft_model': ('assembly_fp', 'ref_gbk_fp', 'ref_model_fp', 'output_fp')
+        'assembly_qc': ('assembly_fp', 'output_fp'),
+        'annotate': ('assembly_fp', 'output_fp'),
+        'draft_model': ('assembly_fp', 'ref_gbk_fp', 'ref_model_fp', 'output_fp'),
+        'model_fba': ('model_fp', 'fba_spec_fp'),
     }
     command = 'base' if not args.command else args.command
     assert command in required_args
@@ -107,25 +127,42 @@ def help_text(command):
                      f'Single stage usage: {__program_name__} <stage> [options]\n\n'
                       'Pipeline options:\n'
                       '  --assembly_fps FILES        Isolate genbank filepaths\n'
-                      '  --ref_gbk_fp FILE           Reference gebank filepath\n'
-                      '  --ref_model_fp FILE         Reference gebank filepath (JSON)\n'
-                      '  --output_fp DIR             Output directory\n\n'
+                      '  --ref_gbk_fp FILE           Reference genbank filepath\n'
+                      '  --ref_model_fp FILE         Reference model filepath (JSON)\n'
+                      '  --output_dir DIR            Output directory\n\n'
                       'Other options:\n'
                       '  --version                   Print program name and version, and exit\n'
                       '  --help                      Print this message and exit)\n\n'
                       'Single stage subcommands:\n'
                       '  assembly_qc                 QC for input assembly\n'
-                      '  annotation                  Annotate assembly ORFs\n'
+                      '  annotate                    Annotate assembly ORFs\n'
                       '  draft_model                 Create a draft model\n'
                       '  model_fba                   Simulate growth on media with FBA\n\n'
                      f'For more information about single stage subcommands run: {__program_name__} <stage> --help\n')
+    elif command == 'assembly_qc':
+        help_text = (f'Usage: {__program_name__} {command} [options]\n'
+                      'Options:\n'
+                      '  --assembly_fp FILE          Isolate genbank filepath\n'
+                      '  --output_fp FILE            Output filepath\n')
+    elif command == 'annotate':
+        help_text = (f'Usage: {__program_name__} {command} [options]\n'
+                      'Options:\n'
+                      '  --assembly_fp FILE          Isolate genbank filepath\n'
+                      '  --model_fp FILE             Prodigal model to use\n'
+                      '  --output_fp FILE            Output filepath\n')
     elif command == 'draft_model':
         help_text = (f'Usage: {__program_name__} {command} [options]\n'
                       'Options:\n'
-                      '  --assembly_fp FILES         Isolate genbank filepath\n'
-                      '  --ref_gbk_fp FILE           Reference gebank filepath\n'
-                      '  --ref_model_fp FILE         Reference gebank filepath (JSON)\n'
-                      '  --output_fp DIR             Output directory\n')
+                      '  --assembly_fp FILE          Isolate genbank filepath\n'
+                      '  --ref_gbk_fp FILE           Reference genbank filepath\n'
+                      '  --ref_model_fp FILE         Reference model filepath (JSON)\n'
+                      '  --output_fp FILE            Output filepath\n')
+    elif command == 'model_fba':
+        help_text = (f'Usage: {__program_name__} {command} [options]\n'
+                      'Options:\n'
+                      '  --model_fp FILE             Isolate model filepath\n'
+                      '  --fba_spec_fp FILE          FBA spec filepath\n'
+                      '  --output_fp FILE            Output filepath\n')
     else:
         assert False
     return f'{info_text}\n{help_text}'
