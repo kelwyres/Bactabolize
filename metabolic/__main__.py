@@ -1,40 +1,26 @@
-import cobra.io
-import cobra.manipulation
-import cobra.manipulation.modify
-
-
 from . import arguments
-from . import orthologs
+from . import draft_model
+from . import util
 
 
 def entry():
     # Get command line arguments
     args = arguments.parse()
 
-    # Parse model and get list of genes
-    with args.ref_model_fp.open('r') as fh:
-        model = cobra.io.load_json_model(fh)
-    model_genes = {gene.id for gene in model.genes}
-
-    # Get orthologs of genes in model
-    isolate_orthologs = orthologs.identify(args.ref_gbk_fp, args.isolate_fp, model_genes)
-
-    # Remove genes from model that have no ortholog in the isolate
-    missing_genes = list()
-    for gene in model_genes - set(isolate_orthologs):
-        # TODO: handle artificial genes better
-        if gene == 'KPN_SPONT':
-            continue
-        missing_genes.append(model.genes.get_by_id(gene))
-    # Mutate model inplace and rename genes
-    # NOTE: will need copy.deepcopy() if we're to process more than one isolate here
-    model.id = args.isolate_fp.stem
-    cobra.manipulation.remove_genes(model, missing_genes, remove_reactions=True)
-    cobra.manipulation.modify.rename_genes(model, isolate_orthologs)
-
-    # Write model to disk
-    with args.output_fp.open('w') as fh:
-        cobra.io.save_json_model(model, fh)
+    # Execute workflows
+    if args.command is None:
+        pass
+    elif args.command == 'assembly_qc':
+        pass
+    elif args.command == 'annotation':
+        pass
+    elif args.command == 'draft_model':
+        model = util.read_model_and_check(args.ref_model_fp, args.ref_gbk_fp)
+        draft_model.run(args.assembly_fp, args.ref_gbk_fp, model, args.output_fp)
+    elif args.command == 'model_fba':
+        pass
+    else:
+        assert False
 
 
 if __name__ == '__main__':

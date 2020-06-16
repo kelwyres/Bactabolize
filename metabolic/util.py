@@ -5,6 +5,31 @@ import tempfile
 
 
 import Bio.SeqIO
+import cobra.io
+
+
+def read_model_and_check(model_fp, gbk_fp):
+    with model_fp.open('r') as fh:
+        model = cobra.io.load_json_model(fh)
+    # Get genbank genes
+    gbk_genes = set()
+    with gbk_fp.open('r') as fh:
+        for record in Bio.SeqIO.parse(fh, 'genbank'):
+            for feature in record.features:
+                if feature.type != 'CDS':
+                    continue
+                [locus_tag] = feature.qualifiers['locus_tag']
+                gbk_genes.add(locus_tag)
+    # Check all model genes are in genbank
+    model_genes = {gene.id for gene in model.genes}
+    missing_genes = model_genes.difference(gbk_genes)
+    if missing_genes:
+        plurality = 'gene' if len(missing_genes) == 1 else 'genes'
+        gene_list_str = [f'\t{gene}' for gene in missing_genes]
+        msg = f'warning: could not find {len(missing_genes)} model {plurality} in referece genbank:'
+        print(msg, file=sys.stderr)
+        print(*gene_list_str, sep='\n', file=sys.stderr)
+    return model
 
 
 def write_gbk_sequence(filepath, dirpath, retain=None, *, seq_type):
@@ -15,8 +40,7 @@ def write_gbk_sequence(filepath, dirpath, retain=None, *, seq_type):
         fh_in = stack.enter_context(filepath.open('r'))
         fh_out = stack.enter_context(tempfile.NamedTemporaryFile('wt', delete=False, dir=dirpath))
         sequence_fp = fh_out.name
-        # Iterate coding features, record seen genes if retaining
-        genes_seen = set()
+        # Iterate coding features
         for record in Bio.SeqIO.parse(fh_in, 'genbank'):
             for feature, nucleotide_seq in iterate_coding_features(record):
                 # Get appropriate output sequence type
@@ -30,21 +54,11 @@ def write_gbk_sequence(filepath, dirpath, retain=None, *, seq_type):
                 # Skip if we do not intend to retain
                 if retain and locus_tag not in retain:
                     continue
-                elif retain:
-                    genes_seen.add(locus_tag)
                 # Write to disk
                 desc = f'>{locus_tag}'
                 seq_lines = [seq[i:i+80] for i in range(0, len(seq), 80)]
                 print(desc, file=fh_out)
                 print(*seq_lines, sep='\n', file=fh_out)
-    # TODO: move this to pre-flight reference and model validation
-    # If we were retaining genes ensure all were found, otherwise warn
-    if retain and len(retain ^ genes_seen) > 0:
-        missing_genes = retain ^ genes_seen
-        plurality = 'gene' if len(missing_genes) == 1 else 'genes'
-        gene_list_str = [f'\t{gene}' for gene in missing_genes]
-        print(f'warning: could not find {len(missing_genes)} {plurality}:', file=sys.stderr)
-        print(*gene_list_str, sep='\n', file=sys.stderr)
     return sequence_fp
 
 
