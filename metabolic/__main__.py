@@ -1,3 +1,4 @@
+from . import annotate
 from . import arguments
 from . import assembly_stats
 from . import draft_model
