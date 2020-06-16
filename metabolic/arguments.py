@@ -37,7 +37,7 @@ def parse():
     parser = ArgumentParserCustomHelp(add_help=False)
     subparsers = parser.add_subparsers(dest='command')
 
-    parser.add_argument('--assembly_fps', type=pathlib.Path, nargs='+')
+    parser.add_argument('--assembly_fp', type=pathlib.Path, nargs='+')
     parser.add_argument('--ref_gbk_fp', type=pathlib.Path)
     parser.add_argument('--ref_model_fp', type=pathlib.Path)
     parser.add_argument('--output_fp', type=pathlib.Path)
@@ -83,7 +83,7 @@ def check_arguments(args):
         sys.exit(0)
     # Check we have required arguments, this is purposely decouped from argparse
     required_args = {
-        'base': ('assembly_fps', 'ref_gbk_fp', 'ref_model_fp', 'output_fp'),
+        'base': ('assembly_fp', 'ref_gbk_fp', 'ref_model_fp', 'output_fp'),
         'assembly_qc': ('assembly_fp', 'output_fp'),
         'annotate': ('assembly_fp', 'model_fp', 'output_fp'),
         'draft_model': ('assembly_fp', 'ref_gbk_fp', 'ref_model_fp', 'output_fp'),
@@ -111,13 +111,6 @@ def check_arguments(args):
             if not value.exists():
                 print(f'{__program_name__}: error: input {value} does not exist', file=sys.stderr)
                 sys.exit(1)
-        elif isinstance(value, list):
-            for v in value:
-                if not isinstance(value, pathlib.Path):
-                    continue
-                if not v.exists():
-                    print(f'{__program_name__}: error: input {v} does not exist', file=sys.stderr)
-                    sys.exit(1)
 
 
 def help_text(command):
@@ -126,7 +119,7 @@ def help_text(command):
         help_text = (f'Pipeline usage: {__program_name__} [options]\n'
                      f'Single stage usage: {__program_name__} <stage> [options]\n\n'
                       'Pipeline options:\n'
-                      '  --assembly_fps FILES        Isolate genbank filepaths\n'
+                      '  --assembly_fp FILES         Isolate genbank filepaths\n'
                       '  --ref_gbk_fp FILE           Reference genbank filepath\n'
                       '  --ref_model_fp FILE         Reference model filepath (JSON)\n'
                       '  --output_dir DIR            Output directory\n\n'
