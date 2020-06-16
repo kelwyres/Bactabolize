@@ -12,9 +12,12 @@ def entry():
     if args.command is None:
         pass
     elif args.command == 'assembly_qc':
-        print(assembly_stats.run(args.assembly_fp))
-    elif args.command == 'annotation':
-        pass
+        stats = assembly_stats.run(args.assembly_fp)
+        with args.output_fp.open('w') as fh:
+            print(*stats, sep='\t', file=fh)
+            print(*stats.values(), sep='\t', file=fh)
+    elif args.command == 'annotate':
+        annotate.run(args.assembly_fp, args.model_fp, args.output_fp)
     elif args.command == 'draft_model':
         model = util.read_model_and_check(args.ref_model_fp, args.ref_gbk_fp)
         draft_model.run(args.assembly_fp, args.ref_gbk_fp, model, args.output_fp)

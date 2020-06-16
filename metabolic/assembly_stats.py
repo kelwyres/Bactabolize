@@ -14,10 +14,10 @@ def run(assembly_fp):
     q1, q2, q3 = calculate_quartiles(contig_lengths)
     stats['contig_number'] = len(contig_lengths)
     # If we only have one contig, use that as n50 (otherwise n50 calc fails)
-    if contig_number == 1:
+    if len(contig_lengths) == 1:
         stats['n50'] = largest
     else:
-        stats['n50'] = calculate_n50(contig_lengths, length/2)
+        stats['n50'] = calculate_n50(contig_lengths, sum(contig_lengths)/2)
     stats['q1'] = q1
     stats['q2'] = q2
     stats['q3'] = q3
@@ -25,6 +25,9 @@ def run(assembly_fp):
     stats['smallest'] = min(contig_lengths)
     stats['largest'] = max(contig_lengths)
     stats['length'] = sum(contig_lengths)
+
+    # TODO: apply some thresholds for QC
+
     return stats
 
 
