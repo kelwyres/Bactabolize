@@ -5,17 +5,20 @@ import statistics
 from Bio.SeqIO.FastaIO import SimpleFastaParser
 
 
-def run(assembly_fp):
+def run(assembly_fp, output_fp):
+    print('\n==============================')
+    print('running assembly qc')
+    print('==============================')
     # Get contig lengths
     stats = dict()
     with assembly_fp.open('r') as f:
         contig_lengths = [len(s) for d, s in SimpleFastaParser(f)]
     # Calculate stats
     q1, q2, q3 = calculate_quartiles(contig_lengths)
-    stats['contig_number'] = len(contig_lengths)
+    stats['contigs'] = len(contig_lengths)
     # If we only have one contig, use that as n50 (otherwise n50 calc fails)
     if len(contig_lengths) == 1:
-        stats['n50'] = largest
+        stats['n50'] = max(contig_lengths)
     else:
         stats['n50'] = calculate_n50(contig_lengths, sum(contig_lengths)/2)
     stats['q1'] = q1
@@ -27,8 +30,9 @@ def run(assembly_fp):
     stats['length'] = sum(contig_lengths)
 
     # TODO: apply some thresholds for QC
-
-    return stats
+    key_size = max(len(key) for key in stats)
+    for key, val in stats.items():
+        print(key, ':', ' '*(key_size+1-len(key)), val, sep='')
 
 
 def calculate_quartiles(lengths):
