@@ -39,9 +39,9 @@ def run(assembly_fp, ref_gbk_fp, model, output_fp):
 
 
 def identify(iso_fp, ref_fp, model_genes):
-    #pickle_mode = 'read'
-    #pickle_mode = 'write'
     pickle_mode = 'read'
+    #pickle_mode = 'write'
+    #pickle_mode = 'noop'
     # First we perform a standard best bi-directional hit analysis to identify orthologs
     # Extract protein sequences from both genomes but only keep model genes from the reference
     dh = tempfile.TemporaryDirectory()  # fs directory deleted this is out of scope
