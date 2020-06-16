@@ -9,7 +9,7 @@ from . import orthologs
 
 def entry():
     # Get command line arguments
-    args = arguments.get_args()
+    args = arguments.parse()
 
     # Parse model and get list of genes
     with args.ref_model_fp.open('r') as fh:
