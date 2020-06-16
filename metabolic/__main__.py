@@ -1,4 +1,5 @@
 from . import arguments
+from . import assembly_stats
 from . import draft_model
 from . import util
 
@@ -11,7 +12,7 @@ def entry():
     if args.command is None:
         pass
     elif args.command == 'assembly_qc':
-        pass
+        print(assembly_stats.run(args.assembly_fp))
     elif args.command == 'annotation':
         pass
     elif args.command == 'draft_model':
