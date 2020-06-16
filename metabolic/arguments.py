@@ -85,7 +85,7 @@ def check_arguments(args):
     required_args = {
         'base': ('assembly_fps', 'ref_gbk_fp', 'ref_model_fp', 'output_fp'),
         'assembly_qc': ('assembly_fp', 'output_fp'),
-        'annotate': ('assembly_fp', 'output_fp'),
+        'annotate': ('assembly_fp', 'model_fp', 'output_fp'),
         'draft_model': ('assembly_fp', 'ref_gbk_fp', 'ref_model_fp', 'output_fp'),
         'model_fba': ('model_fp', 'fba_spec_fp'),
     }
