@@ -44,6 +44,7 @@
 
 
 # TODO
+* Check required programs are in PATH and have correct versions
 * Getting 1182 orthologs on K\_quasi\_quasi\_01A030T, tut notes have 1186
     - 1185 after unannotated gene search (tut detected no annotated genes)
     - resolve differences
