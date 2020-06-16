@@ -35,6 +35,10 @@ def run(assembly_fp, ref_gbk_fp, model, output_fp):
     cobra.manipulation.remove_genes(model, missing_genes, remove_reactions=True)
     cobra.manipulation.modify.rename_genes(model, isolate_orthologs)
 
+    # Write model to disk
+    with output_fp.open('w') as fh:
+        cobra.io.save_json_model(model, fh)
+
     # Assess model by observing whether the objective function for biomass optimises
     # We perform an FBA on minimal media (m9)
     for reaction in model.reactions:
@@ -52,19 +56,17 @@ def run(assembly_fp, ref_gbk_fp, model, output_fp):
     # Somewhat arbitrary threshold for whether a model produces biomass
     if solution.objective_value < 1e-4:
         # TODO: troubleshooting information if FBA fails to optimise to target
-        msg = f'warning: model for {assembly_fp.stem} failed to produce biomass on minimal media'
+        msg = (f'error: model for {assembly_fp.stem} failed to produce biomass on minimal media, '
+                'manual intervention is required to fix the draft model')
         print(msg, file=sys.stderr)
-
-    # TODO: report in more meaningful way
-    import warnings
-    with warnings.catch_warnings():
-        warnings.simplefilter('ignore')
-        print()
-        print(model.summary())
-
-    # Write model to disk
-    with output_fp.open('w') as fh:
-        cobra.io.save_json_model(model, fh)
+        sys.exit(1)
+    else:
+        # TODO: report in more meaningful way
+        import warnings
+        with warnings.catch_warnings():
+            warnings.simplefilter('ignore')
+            print()
+            print(model.summary())
 
 
 def identify(iso_fp, ref_fp, model_genes):
