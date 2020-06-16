@@ -13,10 +13,13 @@ from . import util
 
 
 def run(assembly_fp, model_fp, output_fp):
-    pickle_mode = 'read'
-    #pickle_mode = 'write'
+    print('\n==============================')
+    print('running annotation')
+    print('==============================')
+    #pickle_mode = 'read'
+    pickle_mode = 'write'
     #pickle_mode = 'noop'
-    #prodigal_data = run_prodigal(assembly_fp, model_fp)
+    prodigal_data = run_prodigal(assembly_fp, model_fp)
 
     # TEMP: store/load prodigal results
     import pickle
@@ -70,10 +73,13 @@ def create_genbank(orfs, assembly_fp):
             sequence_record = Bio.Seq.Seq(''.join(seq), Bio.Alphabet.IUPAC.ambiguous_dna)
             genbank_records[contig_id] = Bio.SeqRecord.SeqRecord(seq=sequence_record, id=contig_id, name=contig_id)
     # Annotate records with prodigal ORFs
+    gene_n = 0
     for contig, (start_str, end_str, strand_str) in orfs:
+        gene_n += 1
         contig_id = contig.split(' ', maxsplit=1)[0]
         strand = +1 if strand_str == '+' else -1
+        quals = {'gene': gene_n, 'locus_tag': gene_n}
         feature_loc = Bio.SeqFeature.FeatureLocation(start=int(start_str), end=int(end_str), strand=strand)
-        feature = Bio.SeqFeature.SeqFeature(location=feature_loc, type='CDS')
+        feature = Bio.SeqFeature.SeqFeature(location=feature_loc, type='CDS', qualifiers=quals)
         genbank_records[contig_id].features.append(feature)
     return [record for record in genbank_records.values()]
