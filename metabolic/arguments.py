@@ -1,5 +1,4 @@
 import argparse
-import collections
 import pathlib
 import sys
 
@@ -67,8 +66,8 @@ def check_arguments(args):
         sys.exit(0)
     # Check we have required arguments, this is purposely decouped from argparse
     required_args = {
-        'base': {'assembly_fps', 'ref_gbk_fp', 'ref_model_fp', 'output_fp'},
-        'draft_model': {'assembly_fp', 'ref_gbk_fp', 'ref_model_fp', 'output_fp'}
+        'base': ('assembly_fps', 'ref_gbk_fp', 'ref_model_fp', 'output_fp'),
+        'draft_model': ('assembly_fp', 'ref_gbk_fp', 'ref_model_fp', 'output_fp')
     }
     command = 'base' if not args.command else args.command
     assert command in required_args
@@ -92,8 +91,10 @@ def check_arguments(args):
             if not value.exists():
                 print(f'{__program_name__}: error: input {value} does not exist', file=sys.stderr)
                 sys.exit(1)
-        elif isinstance(value, collections.Iterable):
+        elif isinstance(value, list):
             for v in value:
+                if not isinstance(value, pathlib.Path):
+                    continue
                 if not v.exists():
                     print(f'{__program_name__}: error: input {v} does not exist', file=sys.stderr)
                     sys.exit(1)
