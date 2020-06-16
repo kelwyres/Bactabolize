@@ -10,6 +10,9 @@ import cobra.io
 
 
 def read_model_and_check(model_fp, gbk_fp):
+    print('\n========================================')
+    print('reading reference model and gbk')
+    print('========================================')
     with model_fp.open('r') as fh:
         model = cobra.io.load_json_model(fh)
     # Get genbank genes

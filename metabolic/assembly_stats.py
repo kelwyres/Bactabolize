@@ -6,9 +6,9 @@ from Bio.SeqIO.FastaIO import SimpleFastaParser
 
 
 def run(assembly_fp, output_fp):
-    print('\n==============================')
+    print('\n========================================')
     print('running assembly qc')
-    print('==============================')
+    print('========================================')
     # Get contig lengths
     stats = dict()
     with assembly_fp.open('r') as f:

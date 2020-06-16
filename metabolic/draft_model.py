@@ -16,9 +16,9 @@ from . import util
 
 
 def run(assembly_fp, ref_gbk_fp, model, output_fp):
-    print('\n==============================')
+    print('\n========================================')
     print('running draft model creation')
-    print('==============================')
+    print('========================================')
     # Get orthologs of genes in model
     model_genes = {gene.id for gene in model.genes}
     isolate_orthologs = identify(assembly_fp, ref_gbk_fp, model_genes)
@@ -59,6 +59,7 @@ def run(assembly_fp, ref_gbk_fp, model, output_fp):
     import warnings
     with warnings.catch_warnings():
         warnings.simplefilter('ignore')
+        print()
         print(model.summary())
 
     # Write model to disk

@@ -21,7 +21,7 @@ def entry():
     elif args.command == 'assembly_qc':
         assembly_stats.run(args.assembly_fp, args.output_fp)
     elif args.command == 'annotate':
-        annotate.run(args.assembly_fp, args.model_fp, args.output_fp)
+        annotate.run(args.assembly_fp, args.prodigal_model_fp, args.output_fp)
     elif args.command == 'draft_model':
         model = util.read_model_and_check(args.ref_model_fp, args.ref_gbk_fp)
         draft_model.run(args.assembly_fp, args.ref_gbk_fp, model, args.output_fp)

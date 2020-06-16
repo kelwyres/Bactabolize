@@ -13,9 +13,9 @@ from . import util
 
 
 def run(assembly_fp, model_fp, output_fp):
-    print('\n==============================')
+    print('\n========================================')
     print('running annotation')
-    print('==============================')
+    print('========================================')
     #pickle_mode = 'read'
     pickle_mode = 'write'
     #pickle_mode = 'noop'

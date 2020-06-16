@@ -57,7 +57,7 @@ def parse():
 
     parser_annotate = subparsers.add_parser('annotate', add_help=False)
     parser_annotate.add_argument('--assembly_fp', type=pathlib.Path)
-    parser_annotate.add_argument('--model_fp', type=pathlib.Path)
+    parser_annotate.add_argument('--prodigal_model_fp', type=pathlib.Path)
     parser_annotate.add_argument('--output_fp', type=pathlib.Path)
     parser_annotate.add_argument('-h', '--help', action='store_true')
 
@@ -90,7 +90,7 @@ def check_arguments(args):
     required_args = {
         'base': ('assembly_fp', 'ref_gbk_fp', 'ref_model_fp', 'prodigal_model_fp', 'output_dir'),
         'assembly_qc': ('assembly_fp', 'output_fp'),
-        'annotate': ('assembly_fp', 'model_fp', 'output_fp'),
+        'annotate': ('assembly_fp', 'prodigal_model_fp', 'output_fp'),
         'draft_model': ('assembly_fp', 'ref_gbk_fp', 'ref_model_fp', 'output_fp'),
         'model_fba': ('model_fp', 'fba_spec_fp'),
     }
@@ -145,13 +145,13 @@ def help_text(command):
     elif command == 'assembly_qc':
         help_text = (f'Usage: {__program_name__} {command} [options]\n'
                       'Options:\n'
-                      '  --assembly_fp FILE          Isolate genbank filepath\n'
+                      '  --assembly_fp FILE          Isolate FASTA filepath\n'
                       '  --output_fp FILE            Output filepath\n')
     elif command == 'annotate':
         help_text = (f'Usage: {__program_name__} {command} [options]\n'
                       'Options:\n'
-                      '  --assembly_fp FILE          Isolate genbank filepath\n'
-                      '  --model_fp FILE             Prodigal model to use\n'
+                      '  --assembly_fp FILE          Isolate FASTA filepath\n'
+                      '  --prodigal_model_fp FILE    Prodigal model to use\n'
                       '  --output_fp FILE            Output filepath\n')
     elif command == 'draft_model':
         help_text = (f'Usage: {__program_name__} {command} [options]\n'

@@ -8,9 +8,9 @@ from . import media_definitions
 
 
 def run(model_fp):
-    print('\n==============================')
+    print('\n========================================')
     print('running FBA')
-    print('==============================')
+    print('========================================')
     #import pickle
     with model_fp.open('r') as fh:
         model = cobra.io.load_json_model(fh)
@@ -42,4 +42,5 @@ def run(model_fp):
     import warnings
     with warnings.catch_warnings():
         warnings.simplefilter('ignore')
+        print()
         print(model.summary())
