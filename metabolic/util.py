@@ -1,4 +1,5 @@
 import contextlib
+import pathlib
 import subprocess
 import sys
 import tempfile
@@ -24,11 +25,13 @@ def read_model_and_check(model_fp, gbk_fp):
     model_genes = {gene.id for gene in model.genes}
     missing_genes = model_genes.difference(gbk_genes)
     if missing_genes:
-        plurality = 'gene' if len(missing_genes) == 1 else 'genes'
-        gene_list_str = [f'\t{gene}' for gene in missing_genes]
-        msg = f'warning: could not find {len(missing_genes)} model {plurality} in referece genbank:'
-        print(msg, file=sys.stderr)
-        print(*gene_list_str, sep='\n', file=sys.stderr)
+        if len(missing_genes) > 10:
+            msg = f'warning: could not find {len(missing_genes)} model {plurality} in referece genbank'
+            print(msg, file=sys.stderr)
+        else:
+            plurality = 'gene' if len(missing_genes) == 1 else 'genes'
+            msg = f'warning: could not find {len(missing_genes)} model {plurality} in referece genbank:'
+            print(msg, ', '.join(missing_genes), file=sys.stderr)
     return model
 
 
@@ -45,6 +48,9 @@ def write_gbk_sequence(filepath, dirpath, retain=None, *, seq_type):
             for feature, nucleotide_seq in iterate_coding_features(record):
                 # Get appropriate output sequence type
                 if seq_type == 'prot':
+                    # Append trailing N if we have a partial codon
+                    seq_n = (3 - len(nucleotide_seq)) % 3
+                    nucleotide_seq = nucleotide_seq + 'N' * seq_n
                     seq = nucleotide_seq.translate()
                 elif seq_type == 'nucl':
                     seq = nucleotide_seq
@@ -81,7 +87,7 @@ def write_gbk_to_fasta(filepath, dirpath):
             seq_lines = [record.seq[i:i+80] for i in range(0, len(record.seq), 80)]
             print(desc, file=fh_out)
             print(*seq_lines, sep='\n', file=fh_out)
-    return fasta_fp
+    return pathlib.Path(fasta_fp)
 
 
 def extract_nucleotides_from_ref(hit, fasta):
