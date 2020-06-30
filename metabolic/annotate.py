@@ -17,8 +17,8 @@ def run(assembly_fp, model_fp, output_fp):
     print('running annotation')
     print('========================================')
     #pickle_mode = 'read'
-    pickle_mode = 'write'
-    #pickle_mode = 'noop'
+    #pickle_mode = 'write'
+    pickle_mode = 'noop'
     prodigal_data = run_prodigal(assembly_fp, model_fp)
 
     # TEMP: store/load prodigal results
