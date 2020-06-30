@@ -8,8 +8,6 @@ include annotate from './processes.nf'
 include draft_model from './processes.nf'
 include model_fba from './processes.nf'
 
-
-
 // Print splash
 log.info('--------------------------------------------------------------------')
 log.info("""
