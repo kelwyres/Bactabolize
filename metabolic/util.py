@@ -9,24 +9,24 @@ import Bio.SeqIO
 import cobra.io
 
 
-def read_model_and_check(model_fp, gbk_fp):
+def read_model_and_check(model_fp, genbank_fp):
     print('\n========================================')
     print('reading reference model and genbank')
     print('========================================')
     with model_fp.open('r') as fh:
         model = cobra.io.load_json_model(fh)
     # Get genbank genes
-    gbk_genes = set()
-    with gbk_fp.open('r') as fh:
+    genbank_genes = set()
+    with genbank_fp.open('r') as fh:
         for record in Bio.SeqIO.parse(fh, 'genbank'):
             for feature in record.features:
                 if feature.type != 'CDS':
                     continue
                 [locus_tag] = feature.qualifiers['locus_tag']
-                gbk_genes.add(locus_tag)
+                genbank_genes.add(locus_tag)
     # Check all model genes are in genbank
     model_genes = {gene.id for gene in model.genes}
-    missing_genes = model_genes.difference(gbk_genes)
+    missing_genes = model_genes.difference(genbank_genes)
     if missing_genes:
         if len(missing_genes) > 10:
             msg = f'warning: could not find {len(missing_genes)} model {plurality} in referece genbank'
@@ -38,13 +38,41 @@ def read_model_and_check(model_fp, gbk_fp):
     return model
 
 
-def write_gbk_sequence(filepath, dirpath, retain=None, *, seq_type):
+def determine_assembly_filetype(filepath):
+    accepted_types = ('genbank', 'fasta')
+    expected_map = {
+        'fasta': 'fasta',
+        'fna': 'fasta',
+        'fa': 'fasta',
+        'gbk': 'genbank',
+        'gb': 'genbank',
+    }
+    file_extension = filepath.suffix[1:]
+    expected_filetype = expected_map.get(file_extension, 'unknown')
+    for filetype in accepted_types:
+        with filepath.open('r') as fh:
+            if list(Bio.SeqIO.parse(fh, filetype)):
+                break
+    else:
+        print(f'error: could not parse {filepath} as either GenBank or FASTA format', file=sys.stderr)
+        sys.exit(1)
+    if expected_filetype != filetype:
+        msg = f'warning: parsed {filepath} as {filetype}'
+        if expected_filetype == 'unknown':
+            print(f'{msg} but had an unknown file extension (.{file_extension})', file=sys.stderr)
+        else:
+            print(f'{msg} but expected {expected_filetype}', file=sys.stderr)
+    return filetype
+
+
+def write_genbank_coding_sequence(filepath, dirpath, retain=None, *, seq_type):
     assert isinstance(retain, set) or retain is None
     assert seq_type in {'prot', 'nucl'}
     sequence_fp = str()
+    output_fp = pathlib.Path(dirpath, f'{filepath.stem}.fasta')
     with contextlib.ExitStack() as stack:
         fh_in = stack.enter_context(filepath.open('r'))
-        fh_out = stack.enter_context(tempfile.NamedTemporaryFile('wt', delete=False, dir=dirpath))
+        fh_out = stack.enter_context(output_fp.open('w'))
         sequence_fp = fh_out.name
         # Iterate coding features
         for record in Bio.SeqIO.parse(fh_in, 'genbank'):
@@ -71,19 +99,23 @@ def write_gbk_sequence(filepath, dirpath, retain=None, *, seq_type):
     return sequence_fp
 
 
-def iterate_coding_features(record):
+def iterate_coding_features(record, sequence=True):
     for feature in record.features:
         if feature.type != 'CDS':
             continue
         assert 'locus_tag' in feature.qualifiers
-        yield feature, feature.extract(record.seq)
+        if sequence:
+            yield feature, feature.extract(record.seq)
+        else:
+            yield feature
 
 
-def write_gbk_to_fasta(filepath, dirpath):
+def write_genbank_to_fasta(filepath, dirpath):
     fasta_fp = str()
+    output_fp = pathlib.Path(dirpath,  f'{filepath.stem}.fasta')
     with contextlib.ExitStack() as stack:
         fh_in = stack.enter_context(filepath.open('r'))
-        fh_out = stack.enter_context(tempfile.NamedTemporaryFile('wt', delete=False, dir=dirpath))
+        fh_out = stack.enter_context(output_fp.open('w'))
         fasta_fp = fh_out.name
         for record in Bio.SeqIO.parse(fh_in, 'genbank'):
             desc = f'>{record.name}'
