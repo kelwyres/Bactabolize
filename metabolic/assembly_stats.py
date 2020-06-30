@@ -13,7 +13,7 @@ def run(assembly_fp, output_fp):
     stats = dict()
     with assembly_fp.open('r') as f:
         contig_lengths = [len(s) for d, s in SimpleFastaParser(f)]
-    # Calculate stats
+    # Calculate stats - assign them in order we want to display
     q1, q2, q3 = calculate_quartiles(contig_lengths)
     stats['contigs'] = len(contig_lengths)
     # If we only have one contig, use that as n50 (otherwise n50 calc fails)
@@ -30,9 +30,15 @@ def run(assembly_fp, output_fp):
     stats['length'] = sum(contig_lengths)
 
     # TODO: apply some thresholds for QC
+    # Print
     key_size = max(len(key) for key in stats)
     for key, val in stats.items():
         print(key, ':', ' '*(key_size+1-len(key)), val, sep='')
+
+    # Write
+    with output_fp.open('w') as fh:
+        print('name', *stats.keys(), sep='\t', file=fh)
+        print(assembly_fp.stem, *stats.values(), sep='\t', file=fh)
 
 
 def calculate_quartiles(lengths):
