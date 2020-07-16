@@ -68,6 +68,9 @@
 * Gracefully handle draft model failure in nf
     - either rework draft model code, change exit code
     - or allow specific exit code failure to be ignored in nf
+    - alternatively, split channel into pass and into failed
+        - add some custom resume function (intended to run after fixing draft issues)
+            - e.g. search output directory, minimal FBA check, then proceed to full
 * Check required programs are in PATH and have correct versions
 * Getting 1182 orthologs on K\_quasi\_quasi\_01A030T, tut notes have 1186
     - 1185 after unannotated gene search (tut detected no annotated genes)
