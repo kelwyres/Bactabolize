@@ -41,6 +41,9 @@ def run_complete_workflow(args):
     else:
         assert False
 
+    # Explicitly remove temporary directory
+    dh.cleanup()
+
     # If we have a FASTA input, require that we annotate
     if assembly_filetype == 'fasta' and args.no_reannotation:
         print('error: cannot specify --no_reannotation with a FASTA input assembly', file=sys.stderr)

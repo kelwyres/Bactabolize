@@ -171,6 +171,9 @@ def identify(iso_fp, ref_fp, model_genes):
     # Run BLASTn (filtering with evalue <=1e-3, coverage >=80%, and pident >=80%)
     blastn_res = alignment.run_blastn(ref_gene_fp, iso_fasta_fp, dh.name)
 
+    # Explicitly remove temporary directory
+    dh.cleanup()
+
     # Discover unannotated model genes in isolate
     with iso_fp.open('r') as fh:
         iso_fasta = {record.name: record.seq for record in Bio.SeqIO.parse(iso_fp, 'genbank')}
