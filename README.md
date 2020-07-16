@@ -58,6 +58,9 @@
 # TODO
 * Collate compiled troubleshooting info into a single file
 * Output results of draft model assessment FBA to file
+* Do we need to pull all forumlas from BiGG API?
+    - I don't think every metabolite has a formula in the example model
+* When iterating carbon/sulfur/phosphorus sources for FBA, restrict to extracellular sources
 * For single-stage execution
     - annotation
         - convert genbank to FASTA, at least in nf
