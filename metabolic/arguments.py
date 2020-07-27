@@ -71,6 +71,7 @@ def parse():
     parser_fba = subparsers.add_parser('model_fba', add_help=False)
     parser_fba.add_argument('--model_fp', type=pathlib.Path)
     parser_fba.add_argument('--fba_spec_fp', type=pathlib.Path)
+    parser_fba.add_argument('--fba_types', nargs='+', choices=('individual', 'media', 'spec'))
     parser_fba.add_argument('--output_fp', type=pathlib.Path)
     parser_fba.add_argument('-h', '--help', action='store_true')
 
@@ -164,7 +165,9 @@ def help_text(command):
         help_text = (f'Usage: {__program_name__} {command} [options]\n'
                       'Options:\n'
                       '  --model_fp FILE             Isolate model filepath\n'
-                      '  --fba_spec_fp FILE          FBA spec filepath\n'
+                      '  --fba_spec_fp FILE          FBA spec filepath (JSON format)\n'
+                      '  --fba_types TYPE ...        Type(s) of FBA to run, space separated '
+                      '(choices: individual, media, spec)\n'
                       '  --output_fp FILE            Output filepath\n')
     else:
         assert False

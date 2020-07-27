@@ -26,7 +26,7 @@ def entry():
         model = util.read_model_and_check(args.ref_model_fp, args.ref_genbank_fp)
         draft_model.run(args.assembly_fp, args.ref_genbank_fp, model, args.output_fp)
     elif args.command == 'model_fba':
-        model_fba.run(args.model_fp)
+        model_fba.run(args.model_fp, args.fba_types, args.fba_spec_fp)
     else:
         assert False
 

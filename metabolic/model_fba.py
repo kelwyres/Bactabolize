@@ -1,5 +1,6 @@
 import gzip
 import pathlib
+import json
 import re
 import sys
 import warnings
@@ -11,14 +12,27 @@ import cobra.io
 from . import media_definitions
 
 
-def run(model_fp):
+def run(model_fp, fba_types, spec_fp):
     print('\n========================================')
     print('running FBA')
     print('========================================')
+    # Read in model
     with model_fp.open('r') as fh:
         model = cobra.io.load_json_model(fh)
-    fba_media(model)
-    fba_individal_sources(model)
+    # Run FBA
+    if not fba_types or 'individual' in fba_types:
+        fba_individal_sources(model)
+    if not fba_types or 'media' in fba_types:
+        fba_media(model)
+    if not fba_types or 'spec' in fba_types:
+        fba_spec(model, spec_fp)
+
+
+def fba_spec(model, spec_fp):
+    with spec_fp.open('r') as fh:
+        spec_reaction_bounds = json.load(fh)
+    for spec, reaction_bounds in spec_reaction_bounds.items():
+        run_fba(model, reaction_bounds)
 
 
 def fba_individal_sources(model):
