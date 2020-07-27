@@ -58,55 +58,8 @@ def run(assembly_fp, ref_genbank_fp, model, output_fp):
         msg = (f'error: model for {assembly_fp.stem} failed to produce biomass on minimal media, '
                 'manual intervention is required to fix the draft model')
         print(msg, file=sys.stderr)
-
-        # TODO: place this troubleshooting information in an output
-        gapfilled = cobra.flux_analysis.gapfill(model_draft, model, demand_reactions=False, iterations=5)
-        reaction_counts = dict()
-        for result in gapfilled:
-            for reaction in result:
-                if reaction not in reaction_counts:
-                    reaction_counts[reaction] = 0
-                reaction_counts[reaction] += 1
-        print('\n', 'Gapfilling results', sep='')
-        for reaction, count in reaction_counts.items():
-            print(reaction.id, count)
-
-        print('\n', 'BLASTp hits', sep='')
-        for reaction in reaction_counts:
-            for gene in reaction.genes:
-                hits = blast_results['blastp_ref'].get(gene.id, list())
-                print(reaction.id, gene.id, len(hits))
-
-        print('\n', 'BLASTn hits', sep='')
-        for reaction in reaction_counts:
-            for gene in reaction.genes:
-                hits = blast_results['blastn'].get(gene.id, list())
-                print(reaction.id, gene.id, len(hits))
-
-        with open('data/bigg_models_reactions.txt', 'r') as fh:
-            line_token_gen = (line.rstrip().split('\t') for line in fh)
-            header_tokens = next(line_token_gen)
-            records = dict()
-            for line_tokens in line_token_gen:
-                record = {k: v for k, v in zip(header_tokens, line_tokens)}
-                assert record['bigg_id'] not in records
-                records[record['bigg_id']] = record
-
-        print('\n', 'BiGG info', sep='')
-        for reaction in reaction_counts:
-            record = records[reaction.id]
-            print('name: ', reaction.id, sep='')
-            print('reaction:', record['reaction_string'])
-            print('urls:')
-            for url_entry in record['database_links'].split('; '):
-                print('\t', url_entry, sep='')
-            print()
-
-        # Other information about these genes
-        #       - is the gene ORF complete
-        #           - see genbank notes if reannotated
-        #           - check if at bounds
-
+        ts_fp = pathlib.Path(f'{output_fp}.troubleshoot.tsv')
+        create_troubleshooter(model, model_draft, blast_results, ts_fp)
         sys.exit(1)
     else:
         # TODO: report in more meaningful way
@@ -115,6 +68,61 @@ def run(assembly_fp, ref_genbank_fp, model, output_fp):
             warnings.simplefilter('ignore')
             print()
             print(model.summary())
+
+
+def create_troubleshooter(model, model_draft, blast_results, output_fp):
+    # Determine which genes are missing
+    gapfilled = cobra.flux_analysis.gapfill(model_draft, model, demand_reactions=False, iterations=5)
+    reaction_counts = dict()
+    for result in gapfilled:
+        for reaction in result:
+            if reaction not in reaction_counts:
+                reaction_counts[reaction] = 0
+            reaction_counts[reaction] += 1
+    # Set base URLs for reaction annotations
+    reaction_external_urls = {
+        'bigg.reaction': 'http://bigg.ucsd.edu/universal/reactions/',
+        'biocyc': 'http://identifiers.org/biocyc/',
+        'ec-code': 'http://identifiers.org/ec-code/',
+        'kegg.reaction': 'http://identifiers.org/kegg.reaction/',
+        'metanetx.reaction': 'http://identifiers.org/metanetx.reaction/',
+        'rhea': 'http://identifiers.org/rhea/',
+        'seed.reaction': 'http://identifiers.org/seed.reaction/',
+    }
+    # Write some info
+    with output_fp.open('w') as fh:
+        print('Gapfilling results (5 iterations)', sep='', file=fh)
+        for reaction, count in reaction_counts.items():
+            print(reaction.id, f'{count}/5', file=fh)
+
+        print('\n', 'BLASTp hits', sep='', file=fh)
+        for reaction in reaction_counts:
+            for gene in reaction.genes:
+                hits = blast_results['blastp_ref'].get(gene.id, list())
+                print(reaction.id, gene.id, len(hits), file=fh)
+
+        print('\n', 'BLASTn hits', sep='', file=fh)
+        for reaction in reaction_counts:
+            for gene in reaction.genes:
+                hits = blast_results['blastn'].get(gene.id, list())
+                print(reaction.id, gene.id, len(hits), file=fh)
+
+        print('\n', 'BiGG info', sep='', file=fh)
+        for reaction in reaction_counts:
+            print('name: ', reaction.id, sep='', file=fh)
+            print('reaction:', reaction.reaction, file=fh)
+            print('urls:', file=fh)
+            for url_type, url_ids in reaction.annotation.items():
+                if url_type in {'sbo', 'sabiork'}:
+                    continue
+                for url_id in url_ids:
+                    print('\t', reaction_external_urls[url_type] + url_id, sep='', file=fh)
+            print(file=fh)
+
+    # Other information about these genes
+    #       - is the gene ORF complete
+    #           - see genbank notes if reannotated
+    #           - check if at bounds
 
 
 def identify(iso_fp, ref_fp, model_genes):
