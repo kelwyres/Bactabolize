@@ -54,7 +54,7 @@ def fba_individal_sources(model):
 
     # Set up regex for selecting source type
     # NOTE: checking for single element characters insufficient as element symbol domain is degenerative
-    element_base_re = '^.*%s($|[0-9]+)'
+    element_base_re = '^.*%s([0-9A-Z]+.*)?$'
     carbon_re = re.compile(element_base_re % 'C')
     phosphate_re = re.compile(element_base_re % 'P')
     nitrogen_re = re.compile(element_base_re % 'N')
