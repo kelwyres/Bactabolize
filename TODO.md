@@ -1,9 +1,5 @@
 # TODO
 * Collate compiled troubleshooting info into a single file
-* Allow user to specific what FBA to run
-    - media
-    - individual rx
-    - user defined
 * Output results FBA to file
     - draft model assessment
     - media FBA

@@ -48,6 +48,7 @@
 * FBA for carbon sources
     - iterate all metabolites that contain carbon, sulfur, nitrogen, etc
     - FBA on specific media set
+    - FBA on user-provided spec (JSON format)
 
 # Planned features
 * Faster alternative to BLASTp
