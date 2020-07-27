@@ -26,7 +26,7 @@ def entry():
         model = util.read_model_and_check(args.ref_model_fp, args.ref_genbank_fp)
         draft_model.run(args.assembly_fp, args.ref_genbank_fp, model, args.output_fp)
     elif args.command == 'model_fba':
-        model_fba.run(args.model_fp, args.fba_types, args.fba_spec_fp)
+        model_fba.run(args.model_fp, args.fba_types, args.fba_spec_fp, args.output_fp)
     else:
         assert False
 
@@ -51,7 +51,7 @@ def run_complete_workflow(args):
         assembly_stats.run(assembly_fasta_fp, stats_fp)
 
     if not args.no_reannotation:
-        assembly_genbank_fp = pathlib.Path(args.output_dir, f'{args.assembly_fp.stem}_reannotated.gbk')
+        assembly_genbank_fp = args.output_dir, f'{args.assembly_fp.stem}_reannotated.gbk'
         annotate.run(assembly_fasta_fp, args.prodigal_model_fp, assembly_genbank_fp)
     else:
         assembly_genbank_fp = args.assembly_fp
@@ -64,12 +64,13 @@ def run_complete_workflow(args):
         annotate.match_existing_orfs_updated_annotations(assembly_genbank_fp, args.assembly_fp)
 
     # Create draft model
-    draft_model_fp = pathlib.Path(args.output_dir / f'{args.assembly_fp.stem}_model.json')
+    draft_model_fp = args.output_dir / f'{args.assembly_fp.stem}_model.json'
     model = util.read_model_and_check(args.ref_model_fp, args.ref_genbank_fp)
     draft_model.run(assembly_genbank_fp, args.ref_genbank_fp, model, draft_model_fp)
     # Run requested FBA
     if not args.no_fba:
-        model_fba.run(draft_model_fp, args.fba_types, args.fba_spec_fp)
+        fba_results_fp = args.output_dir / f'{args.assembly_fp.stem}_fba.tsv'
+        model_fba.run(draft_model_fp, args.fba_types, args.fba_spec_fp, fba_results_fp)
 
 
 if __name__ == '__main__':

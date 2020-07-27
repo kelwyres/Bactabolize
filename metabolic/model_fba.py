@@ -12,7 +12,7 @@ import cobra.io
 from . import media_definitions
 
 
-def run(model_fp, fba_types, spec_fp):
+def run(model_fp, fba_types, spec_fp, output_fp):
     print('\n========================================')
     print('running FBA')
     print('========================================')
@@ -20,19 +20,23 @@ def run(model_fp, fba_types, spec_fp):
     with model_fp.open('r') as fh:
         model = cobra.io.load_json_model(fh)
     # Run FBA
+    results = dict()
     if not fba_types or 'individual' in fba_types:
-        fba_individal_sources(model)
+        results['individual'] = fba_individal_sources(model)
     if not fba_types or 'media' in fba_types:
-        fba_media(model)
+        results['media'] = fba_media(model)
     if spec_fp and (not fba_types or 'spec' in fba_types):
-        fba_spec(model, spec_fp)
-
-
-def fba_spec(model, spec_fp):
-    with spec_fp.open('r') as fh:
-        spec_reaction_bounds = json.load(fh)
-    for spec, reaction_bounds in spec_reaction_bounds.items():
-        run_fba(model, reaction_bounds)
+        results['spec'] = fba_spec(model, spec_fp)
+    # Write results
+    with output_fp.open('w') as fh:
+        print('fba_type', 'name/reaction', 'categories', 'objective_value', sep='\t', file=fh)
+        for fba_type, data in results.items():
+            if fba_type == 'individual':
+                for (reaction, cats), value in data.items():
+                    print(fba_type, reaction, ','.join(cats), value, sep='\t', file=fh)
+            else:
+                for name, value in data.items():
+                    print(fba_type, name, '-', value, sep='\t', file=fh)
 
 
 def fba_individal_sources(model):
@@ -53,7 +57,7 @@ def fba_individal_sources(model):
     }
 
     # Set up regex for selecting source type
-    # NOTE: checking for single element characters insufficient as element symbol domain is degenerative
+    # NOTE: checking for single element characters insufficient
     element_base_re = '^.*%s([0-9A-Z]+.*)?$'
     carbon_re = re.compile(element_base_re % 'C')
     phosphate_re = re.compile(element_base_re % 'P')
@@ -91,12 +95,16 @@ def fba_individal_sources(model):
             continue
         fba_data.append((reaction_list, categories))
 
-    # TODO: record this information in some parsable format
     # Execute FBAs
+    fba_results = dict()
     for reaction_list, categories in fba_data:
         # Set lower bounds for reactions
         reaction_bounds = {r: -1000 for r in reaction_list}
-        run_fba(model, reaction_bounds)
+        objective_value = run_fba(model, reaction_bounds)
+        fba_key = (reaction_list[0], tuple(categories))
+        assert fba_key not in fba_results
+        fba_results[fba_key] = objective_value
+    return fba_results
 
 
 def fba_media(model):
@@ -107,10 +115,21 @@ def fba_media(model):
     #           medium['EX_o2_e'] = 0.0
     #           model.medium = medium
     # TODO: enable iterating all defined media
-    run_fba(model, media_definitions.m9)
+    return {'m9': run_fba(model, media_definitions.m9)}
+
+
+def fba_spec(model, spec_fp):
+    with spec_fp.open('r') as fh:
+        spec_reaction_bounds = json.load(fh)
+    fba_results = dict()
+    for spec, reaction_bounds in spec_reaction_bounds.items():
+        objective_value = run_fba(model, reaction_bounds)
+        fba_results[spec] = objective_value
+    return fba_results
 
 
 def run_fba(model, reaction_bounds):
+    # Set reaction lower bounds
     for reaction in model.exchanges:
         reaction.lower_bound = 0
     for reaction_id, lower_bound in reaction_bounds.items():
@@ -120,17 +139,15 @@ def run_fba(model, reaction_bounds):
             msg = f'warning: model does not contain reaction {reaction_id}'
             print(msg, file=sys.stderr)
         reaction.lower_bound = lower_bound
-
     # Prevent warnings from cobrapy
     with warnings.catch_warnings():
         warnings.simplefilter('ignore')
         # Attempt to optimise
         solution = model.optimize()
         if solution.status == 'infeasible':
-            print('warning: infeasible solution', file=sys.stderr)
+            return 'infeasible'
         else:
-            print()
-            print(model.summary())
+            return solution.objective_value
 
 
 def get_formulas(queries):
