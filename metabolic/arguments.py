@@ -43,6 +43,9 @@ def parse():
     parser.add_argument('--prodigal_model_fp', type=pathlib.Path)
     parser.add_argument('--output_dir', type=pathlib.Path)
 
+    parser.add_argument('--fba_types', nargs='+', choices=('individual', 'media', 'spec'))
+    parser.add_argument('--fba_spec_fp', type=pathlib.Path)
+
     parser.add_argument('--no_qc', default=False, action='store_true')
     parser.add_argument('--no_reannotation', default=False, action='store_true')
     parser.add_argument('--no_fba', default=False, action='store_true')
@@ -93,7 +96,7 @@ def check_arguments(args):
         'assembly_qc': ('assembly_fp', 'output_fp'),
         'annotate': ('assembly_fp', 'prodigal_model_fp', 'output_fp'),
         'draft_model': ('assembly_fp', 'ref_genbank_fp', 'ref_model_fp', 'output_fp'),
-        'model_fba': ('model_fp', 'fba_spec_fp'),
+        'model_fba': ('model_fp', ),
     }
     command = 'base' if not args.command else args.command
     assert command in required_args
@@ -117,6 +120,10 @@ def check_arguments(args):
             if not value.exists():
                 print(f'{__program_name__}: error: input {value} does not exist', file=sys.stderr)
                 sys.exit(1)
+    # If spec FBA is requested, required a spec FBA
+    if args.fba_types and 'spec' in args.fba_types and args.fba_spec_fp == None:
+        print('error: --fba_spec_fp is required for --fba_types spec', file=sys.stderr)
+        exit(1)
 
 
 def help_text(command):
@@ -124,13 +131,17 @@ def help_text(command):
     if not command:
         help_text = (f'Pipeline usage: {__program_name__} [options]\n'
                      f'Single stage usage: {__program_name__} <stage> [options]\n\n'
-                      'Pipeline options:\n'
+                      'Required arguments:\n'
                       '  --assembly_fp FILE          Isolate assembly filepath (GenBank or FASTA format)\n'
                       '  --ref_genbank_fp FILE       Reference genbank filepath\n'
                       '  --ref_model_fp FILE         Reference model filepath (JSON)\n'
                       '  --prodigal_model_fp FILE    Prodigal model file path\n'
                       '  --output_dir DIR            Output directory\n\n'
-                      'Optional stage execution:\n'
+                      'Optional arguments:\n'
+                      '  --fba_spec_fp FILE          FBA spec filepath (JSON format)\n'
+                      '  --fba_types TYPE ...        Type(s) of FBA to run, space separated '
+                      '(choices: individual, media, spec)\n\n'
+                      'Stage execution:\n'
                       '  --no_qc                     Do not run assembly QC\n'
                       '  --no_reannotation           Do not reannotate input assemblies\n'
                       '  --no_fba                    Do not run FBA\n\n'

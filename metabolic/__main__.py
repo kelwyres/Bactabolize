@@ -41,9 +41,6 @@ def run_complete_workflow(args):
     else:
         assert False
 
-    # Explicitly remove temporary directory
-    dh.cleanup()
-
     # If we have a FASTA input, require that we annotate
     if assembly_filetype == 'fasta' and args.no_reannotation:
         print('error: cannot specify --no_reannotation with a FASTA input assembly', file=sys.stderr)
@@ -59,6 +56,9 @@ def run_complete_workflow(args):
     else:
         assembly_genbank_fp = args.assembly_fp
 
+    # Explicitly remove temporary directory
+    dh.cleanup()
+
     # Relate new annotations to existing ones, update reannotated genbank with existing information
     if assembly_filetype and not args.no_reannotation:
         annotate.match_existing_orfs_updated_annotations(assembly_genbank_fp, args.assembly_fp)
@@ -67,8 +67,9 @@ def run_complete_workflow(args):
     draft_model_fp = pathlib.Path(args.output_dir / f'{args.assembly_fp.stem}_model.json')
     model = util.read_model_and_check(args.ref_model_fp, args.ref_genbank_fp)
     draft_model.run(assembly_genbank_fp, args.ref_genbank_fp, model, draft_model_fp)
-    # Simulate growth on media
-    model_fba.run(draft_model_fp)
+    # Run requested FBA
+    if not args.no_fba:
+        model_fba.run(draft_model_fp, args.fba_types, args.fba_spec_fp)
 
 
 if __name__ == '__main__':

@@ -24,7 +24,7 @@ def run(model_fp, fba_types, spec_fp):
         fba_individal_sources(model)
     if not fba_types or 'media' in fba_types:
         fba_media(model)
-    if not fba_types or 'spec' in fba_types:
+    if spec_fp and (not fba_types or 'spec' in fba_types):
         fba_spec(model, spec_fp)
 
 
