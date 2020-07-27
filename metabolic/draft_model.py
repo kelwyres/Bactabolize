@@ -42,9 +42,8 @@ def run(assembly_fp, ref_genbank_fp, model, output_fp):
 
     # Assess model by observing whether the objective function for biomass optimises
     # We perform an FBA on minimal media (m9)
-    for reaction in model_draft.reactions:
-        if reaction.id.startswith('EX_'):
-            reaction.lower_bound = 0
+    for reaction in model_draft.exchanges:
+        reaction.lower_bound = 0
     for reaction_id, lower_bound in media_definitions.m9.items():
         try:
             reaction = model_draft.reactions.get_by_id(reaction_id)
