@@ -1,4 +1,3 @@
-import copy
 import pathlib
 import sys
 import tempfile
@@ -32,7 +31,7 @@ def run(assembly_fp, ref_genbank_fp, model, output_fp):
             continue
         missing_genes.append(model.genes.get_by_id(gene))
     # Mutate a copy of the model and rename genes
-    model_draft = copy.deepcopy(model)
+    model_draft = model.copy()
     model_draft.id = assembly_fp.stem
     cobra.manipulation.remove_genes(model_draft, missing_genes, remove_reactions=True)
     cobra.manipulation.modify.rename_genes(model_draft, isolate_orthologs)
