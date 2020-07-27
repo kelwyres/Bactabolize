@@ -46,14 +46,11 @@
         - collate information for debugging
         - exit
 * FBA for carbon sources
-    - iterate all metabolites that contain carbon
-        - need to convince myself on this one
+    - iterate all metabolites that contain carbon, sulfur, nitrogen, etc
+    - FBA on specific media set
 
 # Planned features
 * Faster alternative to BLASTp
     - e.g. diamond
     - will need to demonstrate consistency between results
     - must also ensure that reasonable speed up is obtained
-* Provide extensive information for draft genomes that fail to optimise
-    - determine essential genes from reference and have these output somewhere
-        - required only to be generated once (not per strain)
