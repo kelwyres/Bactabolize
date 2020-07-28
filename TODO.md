@@ -11,11 +11,11 @@
     - split channel into pass and into failed
         - add some custom resume function (intended to run after fixing draft issues)
             - e.g. search output directory, minimal FBA check, then proceed to full
-* In draft model creation, return all blast results for troubleshooting
-* More troubleshooting information
-    - for matches to ORFs that did not pass filtering:
-        - is it complete
-        - has it been reannotated
+* Add automated resume/repair command
+    - best approach would seem to allow user to specify what changes to make via a file
+        - this would be done after user has completed manual investigation and found a solution
+    - enable reproducible workflow - save file for rerunning pipeline, etc
+    - easy for user to set what needs to be fixed and easy to apply in code
 * Handle spontaneous genes better
 * Check required programs are in PATH and have correct versions
 * Getting 1182 orthologs on K\_quasi\_quasi\_01A030T, tut notes have 1186
