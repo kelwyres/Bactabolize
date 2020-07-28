@@ -188,19 +188,19 @@ def write_blast_results(data, output_fp):
 
 
 def identify(iso_fp, ref_fp, model_genes):
-    pickle_mode = 'read'
+    #pickle_mode = 'read'
     #pickle_mode = 'write'
-    #pickle_mode = 'noop'
+    pickle_mode = 'noop'
     # First we perform a standard best bi-directional hit analysis to identify orthologs
     # Extract protein sequences from both genomes but only keep model genes from the reference
     dh = tempfile.TemporaryDirectory()
-    #iso_protein_fp = util.write_genbank_coding_sequence(iso_fp, dh.name, seq_type='prot')
-    #ref_protein_fp = util.write_genbank_coding_sequence(ref_fp, dh.name, model_genes, seq_type='prot')
-    ## Run BLASTp bidirectionally (filtering with evalue <=1e-3, coverage >=25%, and pident >=80%)
-    #blastp_iso_all = alignment.run_blastp(iso_protein_fp, ref_protein_fp, dh.name)
-    #blastp_ref_all = alignment.run_blastp(ref_protein_fp, iso_protein_fp, dh.name)
-    #blastp_iso = alignment.filter_results(blastp_iso_all, min_coverage=25, min_pident=80)
-    #blastp_ref = alignment.filter_results(blastp_ref_all, min_coverage=25, min_pident=80)
+    iso_protein_fp = util.write_genbank_coding_sequence(iso_fp, dh.name, seq_type='prot')
+    ref_protein_fp = util.write_genbank_coding_sequence(ref_fp, dh.name, model_genes, seq_type='prot')
+    # Run BLASTp bidirectionally (filtering with evalue <=1e-3, coverage >=25%, and pident >=80%)
+    blastp_iso_all = alignment.run_blastp(iso_protein_fp, ref_protein_fp, dh.name)
+    blastp_ref_all = alignment.run_blastp(ref_protein_fp, iso_protein_fp, dh.name)
+    blastp_iso = alignment.filter_results(blastp_iso_all, min_coverage=25, min_pident=80)
+    blastp_ref = alignment.filter_results(blastp_ref_all, min_coverage=25, min_pident=80)
 
     # TEMP: store/load blastp results to/from disk so we dont have to recompute
     import pickle
