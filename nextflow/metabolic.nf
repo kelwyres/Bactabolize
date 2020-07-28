@@ -24,7 +24,6 @@ dP  dP  dP `88888P'   dP   `88888P8 88Y8888' `88888P' dP dP `88888P'
 """.stripIndent())
 log.info('--------------------------------------------------------------------')
 
-
 // Require some variables to be boolean
 // We must check and change values if needed. The global param variables are immutable so instead we declare new ones
 def check_boolean_option(option, name) {
@@ -84,7 +83,14 @@ workflow {
       assembly_ch = annotate(assembly_ch, prodigal_model_fp)
     }
     model_draft_ch = draft_model(assembly_ch, ref_genbank_fp, ref_model_fp)
+
+    // Split models into passing (single model output) and failing (multiple output files)
+    model_draft_ch = model_draft_ch.branch { isolate_id, output ->
+      pass: output instanceof Path
+      fail: output instanceof List
+    }
+
     if (run_fba) {
-      model_fba(model_draft_ch)
+      model_fba(model_draft_ch.pass)
     }
 }

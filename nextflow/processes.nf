@@ -14,23 +14,24 @@ process assembly_qc {
 }
 
 process annotate {
-  publishDir "${params.output_dir}/${isolate_id}/"
+  publishDir "${params.output_dir}/${isolate_id}/", saveAs: { "${isolate_id}.gbk" }
 
   input:
   tuple isolate_id, path(assembly_fp)
   path(prodigal_model_fp)
 
   output:
-  tuple val(isolate_id), path('*_reannotated.gbk')
+  tuple val(isolate_id), path('*_annotated.gbk')
 
   script:
   """
-  metabolic annotate --assembly_fp ${assembly_fp} --prodigal_model_fp ${prodigal_model_fp} --output_fp ${isolate_id}_reannotated.gbk
+  metabolic annotate --assembly_fp ${assembly_fp} --prodigal_model_fp ${prodigal_model_fp} --output_fp ${isolate_id}_annotated.gbk
   """
 }
 
 process draft_model {
   publishDir "${params.output_dir}/${isolate_id}/"
+  validExitStatus 0, 101
 
   input:
   tuple isolate_id, path(assembly_fp)
@@ -38,7 +39,7 @@ process draft_model {
   path(ref_model_fp)
 
   output:
-  tuple val(isolate_id), path('*_model.json') optional true
+  tuple val(isolate_id), path("${isolate_id}_model*")
 
   script:
   """
@@ -53,10 +54,12 @@ process model_fba {
   tuple isolate_id, path(model_fp)
 
   output:
-  path('*_fba.txt')
+  path('*_fba.tsv')
 
   script:
+  fba_spec_opt = (params.fba_spec_fp) ? "--fba_spec_fp ${params.fba_spec_fp}" : ''
+  fba_types_opt = (params.fba_types) ? "--fba_types ${params.fba_types}" : ''
   """
-  metabolic model_fba --model_fp ${model_fp} --fba_spec_fp /dev/null --output_fp /dev/null > ${isolate_id}_fba.txt
+  metabolic model_fba --model_fp ${model_fp} ${fba_spec_opt} ${fba_types_opt} --output_fp ${isolate_id}_fba.tsv
   """
 }
