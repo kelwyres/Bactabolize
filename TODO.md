@@ -4,6 +4,7 @@
     - specifically matching ORFs
 * Clean up code in general
 * Report failed draft models in nf somewhere
+* Test fba\_spec\_fp and fba\_types in nf
 * Add automated resume/repair command
     - best approach would seem to allow user to specify what changes to make via a file
         - this would be done after user has completed manual investigation and found a solution
