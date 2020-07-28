@@ -163,8 +163,9 @@ def run_fba(model, exchange_bounds, *, exchange_block=None):
 
 def get_formulas(queries):
     # Set filepaths
-    map_fp = pathlib.Path('data/compound_id_map.tsv')
-    formula_fp = pathlib.Path('data/formula.tsv.gz')
+    base_dir = pathlib.Path(__file__).parent / 'data'
+    map_fp = base_dir / 'compound_id_map.tsv'
+    formula_fp = base_dir / 'formula.tsv.gz'
 
     # Get updated identifiers
     id_map = parse_id_map(map_fp)
