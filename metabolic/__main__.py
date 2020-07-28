@@ -52,12 +52,7 @@ def run_complete_workflow(args):
         assembly_stats.run(assembly_fasta_fp, stats_fp)
 
     if not args.no_reannotation:
-        if assembly_filetype == 'genbank':
-            assembly_genbank_fp = args.output_dir / f'{args.assembly_fp.stem}_reannotated.gbk'
-        elif assembly_filetype == 'fasta':
-            assembly_genbank_fp = args.output_dir / f'{args.assembly_fp.stem}.gbk'
-        else:
-            assert False
+        assembly_genbank_fp = args.output_dir / f'{args.assembly_fp.stem}.gbk'
         annotate.run(assembly_fasta_fp, args.prodigal_model_fp, assembly_genbank_fp)
     else:
         assembly_genbank_fp = args.assembly_fp

@@ -63,7 +63,7 @@ def assess_model(model, model_draft, blast_results, output_fp):
                 'manual intervention is required to fix the draft model')
         print(msg, file=sys.stderr)
         create_troubleshooter(model, model_draft, blast_results, f'{output_fp}.troubleshoot')
-        sys.exit(1)
+        sys.exit(808)
     else:
         print('model produces biomass on minimal media')
 
