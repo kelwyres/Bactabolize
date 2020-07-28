@@ -1,11 +1,7 @@
 # TODO
-* For single-stage execution
-    - annotation
-        - convert genbank to FASTA, at least in nf
-        - add code for annotation matching and transfer
-    - model\_fba: create, consider if this is optional or not
-        - builtin test sufficient? idk
-        - using dummy in nf for now
+* Investigate lack of translations in CDS featuers for reannotated assemblies
+* Clean up file i/o in annotation
+    - specifically matching ORFs
 * Gracefully handle draft model failure in nf
     - allow specific exit code failure to be ignored in nf
     - split channel into pass and into failed
