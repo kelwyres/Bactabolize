@@ -22,11 +22,11 @@ def run(model_fp, fba_types, spec_fp, output_fp):
     # Run FBA
     results = dict()
     if not fba_types or 'individual' in fba_types:
-        results['individual'] = fba_individal_sources(model)
+        results['individual'] = fba_individal_sources(model.copy())
     if not fba_types or 'media' in fba_types:
-        results['media'] = fba_media(model)
+        results['media'] = fba_media(model.copy())
     if spec_fp and (not fba_types or 'spec' in fba_types):
-        results['spec'] = fba_spec(model, spec_fp)
+        results['spec'] = fba_spec(model.copy(), spec_fp)
     # Write results
     with output_fp.open('w') as fh:
         print('fba_type', 'name/reaction', 'categories', 'objective_value', sep='\t', file=fh)
@@ -48,12 +48,12 @@ def fba_individal_sources(model):
             metabolite_ids.append(mid)
     metabolite_formulas = get_formulas(metabolite_ids)
 
-    # Distinct reactions
-    # NOTE: these were defined from the described methods in the Shigella paper
-    reaction_sources_distinct = {
-        'EX_pi_e': 'inorganic phosphate',
-        'EX_so4_e': 'inorganic sulfate',
-        'EX_nh4_e': 'ammonia',
+    # Default sources
+    source_defaults = {
+        'carbon': 'EX_glc__D_e',
+        'phosphate': 'EX_pi_e',
+        'sulfur': 'EX_so4_e',
+        'nitrogen': 'EX_nh4_e'
     }
 
     # Set up regex for selecting source type
@@ -66,6 +66,7 @@ def fba_individal_sources(model):
 
     # Get reactions and categories for FBAs
     fba_data = list()
+    exchange_sources = set()
     for reaction in model.exchanges:
         # Copy model and get metabolite formulas
         mformulas = list()
@@ -75,32 +76,38 @@ def fba_individal_sources(model):
         # Get list of categories and additional reactions to enable
         categories = list()
         reaction_list = [reaction.id]
-        if reaction.id in reaction_sources_distinct:
-            categories.append(reaction_sources_distinct[reaction.id])
-            reaction_list.append('EX_glc__D_e')
-        else:
-            if any(carbon_re.match(formula) for formula in mformulas):
-                categories.append('carbon')
-            if any(phosphate_re.match(formula) for formula in mformulas):
-                categories.append('phosphate')
-            if any(nitrogen_re.match(formula) for formula in mformulas):
-                categories.append('nitrogen')
-            if any(sulfur_re.match(formula) for formula in mformulas):
-                categories.append('sulfur')
-            # Add the default carbon source if no other is present
-            if 'carbon' not in categories:
-                reaction_list.append('EX_glc__D_e')
-        # If no reaction is not relevant, ignore
+        if any(carbon_re.match(formula) for formula in mformulas):
+            categories.append('carbon')
+        if any(phosphate_re.match(formula) for formula in mformulas):
+            categories.append('phosphate')
+        if any(nitrogen_re.match(formula) for formula in mformulas):
+            categories.append('nitrogen')
+        if any(sulfur_re.match(formula) for formula in mformulas):
+            categories.append('sulfur')
+        # If no reaction is not relevant, ignore exchange
         if not categories:
             continue
-        fba_data.append((reaction_list, categories))
+        # Add the default sources if no alternative is present
+        source_missing = [s for s in source_defaults if s not in categories]
+        for source in source_missing:
+            reaction_list.append(source_defaults[source])
+        exchange_sources.add(reaction.id)
+        # Add both aerobic and anaerobic conditions
+        for atmo, reaction in (('anaerobic', 'EX_co2_e'), ('aerobic', 'EX_o2_e')):
+            categories_atmo = [*categories, atmo]
+            reaction_list_atmo = [*reaction_list, reaction]
+            fba_data.append((reaction_list_atmo, categories_atmo))
+
+    # Add CO2 and O2 exchanges to block list
+    exchange_sources.add('EX_co2_e')
+    exchange_sources.add('EX_o2_e')
 
     # Execute FBAs
     fba_results = dict()
     for reaction_list, categories in fba_data:
         # Set lower bounds for reactions
         reaction_bounds = {r: -1000 for r in reaction_list}
-        objective_value = run_fba(model, reaction_bounds)
+        objective_value = run_fba(model, reaction_bounds, exchange_block=exchange_sources)
         fba_key = (reaction_list[0], tuple(categories))
         assert fba_key not in fba_results
         fba_results[fba_key] = objective_value
@@ -128,11 +135,14 @@ def fba_spec(model, spec_fp):
     return fba_results
 
 
-def run_fba(model, reaction_bounds):
+def run_fba(model, exchange_bounds, *, exchange_block=None):
     # Set reaction lower bounds
-    for reaction in model.exchanges:
+    block_list = exchange_block if exchange_block else model.exchanges
+    for reaction in block_list:
+        if isinstance(reaction, str):
+            reaction = model.reactions.get_by_id(reaction)
         reaction.lower_bound = 0
-    for reaction_id, lower_bound in reaction_bounds.items():
+    for reaction_id, lower_bound in exchange_bounds.items():
         try:
             reaction = model.reactions.get_by_id(reaction_id)
         except KeyError:
