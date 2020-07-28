@@ -57,7 +57,7 @@ def fba_individal_sources(model):
     }
 
     # Set up regex for selecting source type
-    # NOTE: checking for single element characters insufficient
+    # NOTE: checking for elements with single characters is insufficient
     element_base_re = '^.*%s([0-9A-Z]+.*)?$'
     carbon_re = re.compile(element_base_re % 'C')
     phosphate_re = re.compile(element_base_re % 'P')
@@ -65,17 +65,17 @@ def fba_individal_sources(model):
     sulfur_re = re.compile(element_base_re % 'S')
 
     # Get reactions and categories for FBAs
+    # Additionally record list of exchanges to block during FBA
     fba_data = list()
     exchange_sources = set()
     for reaction in model.exchanges:
-        # Copy model and get metabolite formulas
+        # Get metabolite formulas
         mformulas = list()
         for m in reaction.metabolites:
             [mid] = m.annotation['metanetx.chemical']
             mformulas.extend(metabolite_formulas[mid])
-        # Get list of categories and additional reactions to enable
+        # Categories
         categories = list()
-        reaction_list = [reaction.id]
         if any(carbon_re.match(formula) for formula in mformulas):
             categories.append('carbon')
         if any(phosphate_re.match(formula) for formula in mformulas):
@@ -84,10 +84,11 @@ def fba_individal_sources(model):
             categories.append('nitrogen')
         if any(sulfur_re.match(formula) for formula in mformulas):
             categories.append('sulfur')
-        # If no reaction is not relevant, ignore exchange
+        # If exchange cannot possibly act as a source for one of the four elements, skip
         if not categories:
             continue
-        # Add the default sources if no alternative is present
+        # Reactions
+        reaction_list = [reaction.id]
         source_missing = [s for s in source_defaults if s not in categories]
         for source in source_missing:
             reaction_list.append(source_defaults[source])
@@ -105,7 +106,7 @@ def fba_individal_sources(model):
     # Execute FBAs
     fba_results = dict()
     for reaction_list, categories in fba_data:
-        # Set lower bounds for reactions
+        # Create dict with lower bounds for enabled exchanges
         reaction_bounds = {r: -1000 for r in reaction_list}
         objective_value = run_fba(model, reaction_bounds, exchange_block=exchange_sources)
         fba_key = (reaction_list[0], tuple(categories))
