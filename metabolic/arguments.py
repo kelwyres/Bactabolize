@@ -157,18 +157,18 @@ def help_text(command):
     elif command == 'assembly_qc':
         help_text = (f'Usage: {__program_name__} {command} [options]\n'
                       'Options:\n'
-                      '  --assembly_fp FILE          Isolate FASTA filepath\n'
+                      '  --assembly_fp FILE          Isolate assembly filepath (Genbank or FASTA format)\n'
                       '  --output_fp FILE            Output filepath\n')
     elif command == 'annotate':
         help_text = (f'Usage: {__program_name__} {command} [options]\n'
                       'Options:\n'
-                      '  --assembly_fp FILE          Isolate FASTA filepath\n'
+                      '  --assembly_fp FILE          Isolate assembly filepath (Genbank or FASTA format)\n'
                       '  --prodigal_model_fp FILE    Prodigal model to use\n'
                       '  --output_fp FILE            Output filepath\n')
     elif command == 'draft_model':
         help_text = (f'Usage: {__program_name__} {command} [options]\n'
                       'Options:\n'
-                      '  --assembly_fp FILE          Isolate assembly filepath (GenBank or FASTA format)\n'
+                      '  --assembly_fp FILE          Isolate assembly filepath (GenBank format)\n'
                       '  --ref_genbank_fp FILE       Reference genbank filepath\n'
                       '  --ref_model_fp FILE         Reference model filepath (JSON)\n'
                       '  --output_fp FILE            Output filepath\n')

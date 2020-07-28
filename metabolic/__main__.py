@@ -32,6 +32,7 @@ def entry():
 
 
 def run_complete_workflow(args):
+    # Get input assembly format and convert if needed
     dh = tempfile.TemporaryDirectory()
     assembly_filetype = util.determine_assembly_filetype(args.assembly_fp)
     if assembly_filetype == 'genbank':
@@ -51,17 +52,18 @@ def run_complete_workflow(args):
         assembly_stats.run(assembly_fasta_fp, stats_fp)
 
     if not args.no_reannotation:
-        assembly_genbank_fp = args.output_dir / f'{args.assembly_fp.stem}_reannotated.gbk'
+        if assembly_filetype == 'genbank':
+            assembly_genbank_fp = args.output_dir / f'{args.assembly_fp.stem}_reannotated.gbk'
+        elif assembly_filetype == 'fasta':
+            assembly_genbank_fp = args.output_dir / f'{args.assembly_fp.stem}.gbk'
+        else:
+            assert False
         annotate.run(assembly_fasta_fp, args.prodigal_model_fp, assembly_genbank_fp)
     else:
         assembly_genbank_fp = args.assembly_fp
 
     # Explicitly remove temporary directory
     dh.cleanup()
-
-    # Relate new annotations to existing ones, update reannotated genbank with existing information
-    if assembly_filetype and not args.no_reannotation:
-        annotate.match_existing_orfs_updated_annotations(assembly_genbank_fp, args.assembly_fp)
 
     # Create draft model
     draft_model_fp = args.output_dir / f'{args.assembly_fp.stem}_model.json'

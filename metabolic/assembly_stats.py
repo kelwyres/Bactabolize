@@ -1,14 +1,22 @@
 import math
 import statistics
+import tempfile
 
 
 from Bio.SeqIO.FastaIO import SimpleFastaParser
+
+
+from . import util
 
 
 def run(assembly_fp, output_fp):
     print('\n========================================')
     print('running assembly qc')
     print('========================================')
+    # Check assembly filetype and convert if needed
+    dh = tempfile.TemporaryDirectory()
+    if util.determine_assembly_filetype(assembly_fp) == 'genbank':
+        assembly_fp = util.write_genbank_to_fasta(assembly_fp, dh.name)
     # Get contig lengths
     stats = dict()
     with assembly_fp.open('r') as f:
@@ -39,6 +47,9 @@ def run(assembly_fp, output_fp):
     with output_fp.open('w') as fh:
         print('name', *stats.keys(), sep='\t', file=fh)
         print(assembly_fp.stem, *stats.values(), sep='\t', file=fh)
+
+    # Explicitly remove temporary directory
+    dh.cleanup()
 
 
 def calculate_quartiles(lengths):

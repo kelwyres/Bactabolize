@@ -1,4 +1,5 @@
 import re
+import tempfile
 
 
 import Bio.Seq
@@ -15,11 +16,20 @@ from . import util
 def run(assembly_fp, model_fp, output_fp):
     print('\n========================================')
     print('running annotation')
+    # Check assembly filetype and convert if needed
+    dh = tempfile.TemporaryDirectory()
+    assembly_filetype = util.determine_assembly_filetype(assembly_fp)
+    if assembly_filetype == 'genbank':
+        assembly_genbank_fp = assembly_fp
+        assembly_fasta_fp = util.write_genbank_to_fasta(assembly_fp, dh.name)
+    elif assembly_filetype == 'fasta':
+        assembly_genbank_fp = None
+        assembly_fasta_fp = assembly_fp
     print('========================================')
     #pickle_mode = 'read'
     #pickle_mode = 'write'
     pickle_mode = 'noop'
-    prodigal_data = run_prodigal(assembly_fp, model_fp)
+    prodigal_data = run_prodigal(assembly_fasta_fp, model_fp)
 
     # TEMP: store/load prodigal results
     import pickle
@@ -36,9 +46,16 @@ def run(assembly_fp, model_fp, output_fp):
 
     prodigal_orfs = parse_prodigal_output(prodigal_data)
     print(f'Found {len(prodigal_orfs)} open-reading frames')
-    genbank_records = create_genbank(prodigal_orfs, assembly_fp)
+    genbank_records = create_genbank(prodigal_orfs, assembly_fasta_fp)
     with output_fp.open('w') as fh:
         Bio.SeqIO.write(genbank_records, fh, 'genbank')
+
+    # Explicitly remove temporary directory
+    dh.cleanup()
+
+    # Match ORFs if we have an input genbank
+    if assembly_filetype == 'genbank':
+        match_existing_orfs_updated_annotations(output_fp, assembly_genbank_fp)
 
 
 def run_prodigal(assembly_fp, model_fp):
@@ -212,4 +229,3 @@ def update_genbank_annotations(filepath, features_updated):
     # Write
     with filepath.open('w') as fh:
         Bio.SeqIO.write(records.values(), fh, 'genbank')
-
