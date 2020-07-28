@@ -4,6 +4,7 @@ import tempfile
 
 
 import Bio.SeqIO
+import cobra.core.reaction
 import cobra.flux_analysis
 import cobra.io
 import cobra.manipulation
@@ -68,18 +69,14 @@ def assess_model(model, model_draft, blast_results, output_fp):
 
 
 def create_troubleshooter(model, model_draft, blast_results, prefix):
-    # Determine which genes are missing
-    gapfilled = cobra.flux_analysis.gapfill(model_draft, model, demand_reactions=False, iterations=5)
-    reaction_counts = dict()
-    for result in gapfilled:
-        for reaction in result:
-            if reaction not in reaction_counts:
-                reaction_counts[reaction] = 0
-            reaction_counts[reaction] += 1
+    # Determine what required products model cannot product and missing reactions/genes
+    reactions_missing = gapfill_model(model, model_draft)
+    metabolites_missing = check_biomass_metabolites(model_draft.copy())
+
     # Collect BLAST results
     blastp_hits = dict()
     blastn_hits = dict()
-    for reaction in reaction_counts:
+    for reaction in reactions_missing:
         for gene in reaction.genes:
             assert (reaction, gene) not in blastp_hits
             hitsp = blast_results['blastp_ref'].get(gene.id, list())
@@ -87,8 +84,52 @@ def create_troubleshooter(model, model_draft, blast_results, prefix):
             if len(hitsp) > 0:
                 continue
             blastn_hits[(reaction, gene)] = blast_results['blastn'].get(gene.id, list())
+    # Write summary info
+    output_fp = pathlib.Path(f'{prefix}_summary.txt')
+    write_troubleshoot_summary(model, metabolites_missing, reactions_missing, blastp_hits, blastn_hits, output_fp)
+    # Write BLAST results
+    write_blast_results(blastp_hits, pathlib.Path(f'{prefix}_blastp.tsv'))
+    write_blast_results(blastn_hits, pathlib.Path(f'{prefix}_blastn.tsv'))
+
+
+def check_biomass_metabolites(model):
+    metabolites_missing = list()
+    reaction_biomass = model.reactions.get_by_id('BIOMASS_')
+    for metabolite in reaction_biomass.metabolites:
+        # Create a drain reaction for the metabolite, add to model, and set as objective
+        reaction = cobra.core.reaction.Reaction(
+            id=f'{metabolite.id}_drain',
+            subsystem='Transport/Exchange',
+            lower_bound=0.,
+            upper_bound=1000.,
+        )
+        reaction.add_metabolites({metabolite: -1.})
+        model.add_reaction(reaction)
+        model.objective = reaction
+        # Optimise model to new objective and check for biomass production
+        solution = model.optimize()
+        if solution.objective_value < 0.0001:
+            metabolites_missing.append(metabolite)
+        # Remove reaction to reset model
+        model.remove_reactions([reaction])
+    return metabolites_missing
+
+
+def gapfill_model(model, model_draft):
+    gapfilled = cobra.flux_analysis.gapfill(model_draft, model, demand_reactions=False, iterations=5)
+    reactions_missing = dict()
+    for result in gapfilled:
+        for reaction in result:
+            if reaction not in reactions_missing:
+                reactions_missing[reaction] = 0
+            reactions_missing[reaction] += 1
+    return reactions_missing
+
+
+def write_troubleshoot_summary(model, metabolites_missing, reactions_missing, blastp_hits, blastn_hits, output_fp):
     # Set base URLs for reaction annotations
     reaction_external_urls = {
+        'bigg.metabolite': 'http://bigg.ucsd.edu/universal/metabolites/',
         'bigg.reaction': 'http://bigg.ucsd.edu/universal/reactions/',
         'biocyc': 'http://identifiers.org/biocyc/',
         'ec-code': 'http://identifiers.org/ec-code/',
@@ -97,34 +138,46 @@ def create_troubleshooter(model, model_draft, blast_results, prefix):
         'rhea': 'http://identifiers.org/rhea/',
         'seed.reaction': 'http://identifiers.org/seed.reaction/',
     }
-    # Write summary info
-    output_fp = pathlib.Path(f'{prefix}_summary.txt')
     with output_fp.open('w') as fh:
-        print('Gapfilling results (5 iterations)', sep='', file=fh)
-        for reaction, count in reaction_counts.items():
+        print('Missing metabolites required for biomass production:', end='', file=fh)
+        for metabolite in metabolites_missing:
+            reactions = model.reactions.query(lambda r: metabolite.id in {m.id for m in r.metabolites})
+            if 'BIOMASS_' in reactions:
+                reactions.remove('BIOMASS_')
+            print('\nid:', metabolite.id, file=fh)
+            print('name:', metabolite.name, file=fh)
+            print('reactions:', ', '.join(r.id for r in reactions), file=fh)
+            for url_type, url_ids in metabolite.annotation.items():
+                if url_type not in reaction_external_urls:
+                    continue
+                for url_id in url_ids:
+                    print('\t', reaction_external_urls[url_type] + url_id, sep='', file=fh)
+
+        print('\nMissing reactions required to fix model (5 gapfill iterations)', sep='', file=fh)
+        for reaction, count in reactions_missing.items():
             print(reaction.id, f'{count}/5', file=fh)
 
-        print('\n', 'BLASTp hits', sep='', file=fh)
-        for (reaction, gene), hits in blastp_hits.items():
-            print(reaction.id, gene.id, len(hits), file=fh)
-
-        print('\n', 'BLASTn hits (only done for ORFs with no BLASTp result)', sep='', file=fh)
-        for (reaction, gene), hits in blastn_hits.items():
-            print(reaction.id, gene.id, len(hits), file=fh)
-
-        print('\n', 'BiGG info', sep='', end='', file=fh)
-        for reaction in reaction_counts:
-            print('\nname: ', reaction.id, sep='', file=fh)
+        print('\n', 'Reaction info', sep='', end='', file=fh)
+        for reaction in reactions_missing:
+            print('\nid: ', reaction.id, sep='', file=fh)
+            print('name: ', reaction.name, sep='', file=fh)
+            print('subsystem: ', reaction.subsystem, sep='', file=fh)
             print('reaction:', reaction.reaction, file=fh)
+            print('genes:', ', '.join(gene.id for gene in reaction.genes), file=fh)
             print('urls:', file=fh)
             for url_type, url_ids in reaction.annotation.items():
                 if url_type not in reaction_external_urls:
                     continue
                 for url_id in url_ids:
                     print('\t', reaction_external_urls[url_type] + url_id, sep='', file=fh)
-    # Write BLAST results
-    write_blast_results(blastp_hits, pathlib.Path(f'{prefix}_blastp.tsv'))
-    write_blast_results(blastn_hits, pathlib.Path(f'{prefix}_blastn.tsv'))
+
+        print('\nBLASTp hits', file=fh)
+        for (reaction, gene), hits in blastp_hits.items():
+            print(reaction.id, gene.id, len(hits), file=fh)
+
+        print('\nBLASTn hits (only done for ORFs with no BLASTp result)', file=fh)
+        for (reaction, gene), hits in blastn_hits.items():
+            print(reaction.id, gene.id, len(hits), file=fh)
 
 
 def write_blast_results(data, output_fp):
