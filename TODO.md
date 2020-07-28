@@ -1,8 +1,4 @@
 # TODO
-* Output results FBA to file
-    - draft model assessment
-    - media FBA
-    - individual rx
 * For single-stage execution
     - annotation
         - convert genbank to FASTA, at least in nf
