@@ -36,10 +36,13 @@ def run(assembly_fp, ref_genbank_fp, model, output_fp):
     cobra.manipulation.remove_genes(model_draft, missing_genes, remove_reactions=True)
     cobra.manipulation.modify.rename_genes(model_draft, isolate_orthologs)
 
-    # Write model to disk
+    # Write model to disk and assess model
     with output_fp.open('w') as fh:
         cobra.io.save_json_model(model_draft, fh)
+    assess_model(model, model_draft, blast_results, output_fp)
 
+
+def assess_model(model, model_draft, blast_results, output_fp):
     # Assess model by observing whether the objective function for biomass optimises
     # We perform an FBA on minimal media (m9)
     for reaction in model_draft.exchanges:
@@ -48,29 +51,23 @@ def run(assembly_fp, ref_genbank_fp, model, output_fp):
         try:
             reaction = model_draft.reactions.get_by_id(reaction_id)
         except KeyError:
-            msg = f'warning: draft model {assembly_fp.stem} does not contain reaction {reaction_id}'
+            msg = f'warning: draft model does not contain reaction {reaction_id}'
             print(msg, file=sys.stderr)
         reaction.lower_bound = lower_bound
     solution = model_draft.optimize()
 
     # Somewhat arbitrary threshold for whether a model produces biomass
     if solution.objective_value < 1e-4:
-        msg = (f'error: model for {assembly_fp.stem} failed to produce biomass on minimal media, '
+        msg = (f'error: model failed to produce biomass on minimal media, '
                 'manual intervention is required to fix the draft model')
         print(msg, file=sys.stderr)
-        ts_fp = pathlib.Path(f'{output_fp}.troubleshoot.tsv')
-        create_troubleshooter(model, model_draft, blast_results, ts_fp)
+        create_troubleshooter(model, model_draft, blast_results, f'{output_fp}.troubleshoot')
         sys.exit(1)
     else:
-        # TODO: report in more meaningful way
-        import warnings
-        with warnings.catch_warnings():
-            warnings.simplefilter('ignore')
-            print()
-            print(model.summary())
+        print('model produces biomass on minimal media')
 
 
-def create_troubleshooter(model, model_draft, blast_results, output_fp):
+def create_troubleshooter(model, model_draft, blast_results, prefix):
     # Determine which genes are missing
     gapfilled = cobra.flux_analysis.gapfill(model_draft, model, demand_reactions=False, iterations=5)
     reaction_counts = dict()
@@ -79,6 +76,17 @@ def create_troubleshooter(model, model_draft, blast_results, output_fp):
             if reaction not in reaction_counts:
                 reaction_counts[reaction] = 0
             reaction_counts[reaction] += 1
+    # Collect BLAST results
+    blastp_hits = dict()
+    blastn_hits = dict()
+    for reaction in reaction_counts:
+        for gene in reaction.genes:
+            assert (reaction, gene) not in blastp_hits
+            hitsp = blast_results['blastp_ref'].get(gene.id, list())
+            blastp_hits[(reaction, gene)] = hitsp
+            if len(hitsp) > 0:
+                continue
+            blastn_hits[(reaction, gene)] = blast_results['blastn'].get(gene.id, list())
     # Set base URLs for reaction annotations
     reaction_external_urls = {
         'bigg.reaction': 'http://bigg.ucsd.edu/universal/reactions/',
@@ -89,63 +97,74 @@ def create_troubleshooter(model, model_draft, blast_results, output_fp):
         'rhea': 'http://identifiers.org/rhea/',
         'seed.reaction': 'http://identifiers.org/seed.reaction/',
     }
-    # Write some info
+    # Write summary info
+    output_fp = pathlib.Path(f'{prefix}_summary.txt')
     with output_fp.open('w') as fh:
         print('Gapfilling results (5 iterations)', sep='', file=fh)
         for reaction, count in reaction_counts.items():
             print(reaction.id, f'{count}/5', file=fh)
 
         print('\n', 'BLASTp hits', sep='', file=fh)
-        for reaction in reaction_counts:
-            for gene in reaction.genes:
-                hits = blast_results['blastp_ref'].get(gene.id, list())
-                print(reaction.id, gene.id, len(hits), file=fh)
+        for (reaction, gene), hits in blastp_hits.items():
+            print(reaction.id, gene.id, len(hits), file=fh)
 
-        print('\n', 'BLASTn hits', sep='', file=fh)
-        for reaction in reaction_counts:
-            for gene in reaction.genes:
-                hits = blast_results['blastn'].get(gene.id, list())
-                print(reaction.id, gene.id, len(hits), file=fh)
+        print('\n', 'BLASTn hits (only done for ORFs with no BLASTp result)', sep='', file=fh)
+        for (reaction, gene), hits in blastn_hits.items():
+            print(reaction.id, gene.id, len(hits), file=fh)
 
-        print('\n', 'BiGG info', sep='', file=fh)
+        print('\n', 'BiGG info', sep='', end='', file=fh)
         for reaction in reaction_counts:
-            print('name: ', reaction.id, sep='', file=fh)
+            print('\nname: ', reaction.id, sep='', file=fh)
             print('reaction:', reaction.reaction, file=fh)
             print('urls:', file=fh)
             for url_type, url_ids in reaction.annotation.items():
-                if url_type in {'sbo', 'sabiork'}:
+                if url_type not in reaction_external_urls:
                     continue
                 for url_id in url_ids:
                     print('\t', reaction_external_urls[url_type] + url_id, sep='', file=fh)
-            print(file=fh)
+    # Write BLAST results
+    write_blast_results(blastp_hits, pathlib.Path(f'{prefix}_blastp.tsv'))
+    write_blast_results(blastn_hits, pathlib.Path(f'{prefix}_blastn.tsv'))
 
-    # Other information about these genes
-    #       - is the gene ORF complete
-    #           - see genbank notes if reannotated
-    #           - check if at bounds
+
+def write_blast_results(data, output_fp):
+    with output_fp.open('w') as fh:
+        print(*alignment.BlastFormat, sep='\t', file=fh)
+        for hits in data.values():
+            print(*hits, sep='\n', file=fh)
 
 
 def identify(iso_fp, ref_fp, model_genes):
-    #pickle_mode = 'read'
+    pickle_mode = 'read'
     #pickle_mode = 'write'
-    pickle_mode = 'noop'
+    #pickle_mode = 'noop'
     # First we perform a standard best bi-directional hit analysis to identify orthologs
     # Extract protein sequences from both genomes but only keep model genes from the reference
     dh = tempfile.TemporaryDirectory()
-    iso_protein_fp = util.write_genbank_coding_sequence(iso_fp, dh.name, seq_type='prot')
-    ref_protein_fp = util.write_genbank_coding_sequence(ref_fp, dh.name, model_genes, seq_type='prot')
-    # Run BLASTp bidirectionally (filtering with evalue <=1e-3, coverage >=25%, and pident >=80%)
-    blastp_iso = alignment.run_blastp(iso_protein_fp, ref_protein_fp, dh.name)
-    blastp_ref = alignment.run_blastp(ref_protein_fp, iso_protein_fp, dh.name)
+    #iso_protein_fp = util.write_genbank_coding_sequence(iso_fp, dh.name, seq_type='prot')
+    #ref_protein_fp = util.write_genbank_coding_sequence(ref_fp, dh.name, model_genes, seq_type='prot')
+    ## Run BLASTp bidirectionally (filtering with evalue <=1e-3, coverage >=25%, and pident >=80%)
+    #blastp_iso_all = alignment.run_blastp(iso_protein_fp, ref_protein_fp, dh.name)
+    #blastp_ref_all = alignment.run_blastp(ref_protein_fp, iso_protein_fp, dh.name)
+    #blastp_iso = alignment.filter_results(blastp_iso_all, min_coverage=25, min_pident=80)
+    #blastp_ref = alignment.filter_results(blastp_ref_all, min_coverage=25, min_pident=80)
 
     # TEMP: store/load blastp results to/from disk so we dont have to recompute
     import pickle
     if pickle_mode == 'write':
+        with open(f'pickled/{iso_fp.stem}_blastp_iso_all.bin', 'wb') as fh:
+            pickle.dump(blastp_iso_all, fh)
+        with open(f'pickled/{iso_fp.stem}_blastp_ref_all.bin', 'wb') as fh:
+            pickle.dump(blastp_ref_all, fh)
         with open(f'pickled/{iso_fp.stem}_blastp_iso.bin', 'wb') as fh:
             pickle.dump(blastp_iso, fh)
         with open(f'pickled/{iso_fp.stem}_blastp_ref.bin', 'wb') as fh:
             pickle.dump(blastp_ref, fh)
     elif pickle_mode == 'read':
+        with open(f'pickled/{iso_fp.stem}_blastp_iso_all.bin', 'rb') as fh:
+            blastp_iso_all = pickle.load(fh)
+        with open(f'pickled/{iso_fp.stem}_blastp_ref_all.bin', 'rb') as fh:
+            blastp_ref_all = pickle.load(fh)
         with open(f'pickled/{iso_fp.stem}_blastp_iso.bin', 'rb') as fh:
             blastp_iso = pickle.load(fh)
         with open(f'pickled/{iso_fp.stem}_blastp_ref.bin', 'rb') as fh:
@@ -175,7 +194,8 @@ def identify(iso_fp, ref_fp, model_genes):
     ref_gene_fp = util.write_genbank_coding_sequence(ref_fp, dh.name, model_genes_no_orth, seq_type='nucl')
     iso_fasta_fp = util.write_genbank_to_fasta(iso_fp, dh.name)
     # Run BLASTn (filtering with evalue <=1e-3, coverage >=80%, and pident >=80%)
-    blastn_res = alignment.run_blastn(ref_gene_fp, iso_fasta_fp, dh.name)
+    blastn_res_all = alignment.run_blastn(ref_gene_fp, iso_fasta_fp, dh.name)
+    blastn_res = alignment.filter_results(blastn_res_all, min_coverage=80, min_pident=80)
 
     # Explicitly remove temporary directory
     dh.cleanup()
@@ -198,5 +218,5 @@ def identify(iso_fp, ref_fp, model_genes):
                 break
 
     # Return orthologs and BLAST results
-    blast_results = {'blastp_iso': blastp_iso, 'blastp_ref': blastp_ref, 'blastn': blastn_res}
+    blast_results = {'blastp_iso': blastp_iso_all, 'blastp_ref': blastp_ref_all, 'blastn': blastn_res_all}
     return model_orthologs, blast_results

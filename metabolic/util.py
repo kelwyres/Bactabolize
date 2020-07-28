@@ -29,11 +29,11 @@ def read_model_and_check(model_fp, genbank_fp):
     missing_genes = model_genes.difference(genbank_genes)
     if missing_genes:
         if len(missing_genes) > 10:
-            msg = f'warning: could not find {len(missing_genes)} model {plurality} in referece genbank'
+            msg = f'warning: could not find {len(missing_genes)} model {plurality} in reference genbank'
             print(msg, file=sys.stderr)
         else:
             plurality = 'gene' if len(missing_genes) == 1 else 'genes'
-            msg = f'warning: could not find {len(missing_genes)} model {plurality} in referece genbank:'
+            msg = f'warning: could not find {len(missing_genes)} model {plurality} in reference genbank:'
             print(msg, ', '.join(missing_genes), file=sys.stderr)
     return model
 

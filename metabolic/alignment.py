@@ -38,7 +38,7 @@ def run_blastp(query_fp, subject_fp, dirpath):
     command_opts = f'-evalue 0.001 -outfmt \'6 {" ".join(BlastFormat)}\''
     command_run = f'blastp -db {subject_fp} -query {query_fp} {command_opts}'
     result = util.execute_command(command_run)
-    return parse_and_filter_results(result.stdout, min_coverage=25, min_pident=80)
+    return parse_results(result.stdout)
 
 
 def run_blastn(query_fp, subject_fp, dirpath):
@@ -49,19 +49,29 @@ def run_blastn(query_fp, subject_fp, dirpath):
     command_opts = f'-evalue 0.001 -outfmt \'6 {" ".join(BlastFormat)}\''
     command_run = f'blastn -db {subject_fp} -query {query_fp} {command_opts}'
     result = util.execute_command(command_run)
-    return parse_and_filter_results(result.stdout, min_coverage=80, min_pident=80)
+    return parse_results(result.stdout)
 
 
-def parse_and_filter_results(results, *, min_coverage, min_pident):
+def filter_results(results, *, min_coverage, min_pident):
+    results_filtered = dict()
+    for qseqid, hits in results.items():
+        for hit in hits:
+            # Filter on coverage and pident
+            if hit.length / hit.qlen * 100 < min_coverage:
+                continue
+            if hit.pident < min_pident:
+                continue
+            if hit.qseqid not in results_filtered:
+                results_filtered[hit.qseqid] = list()
+            results_filtered[hit.qseqid].append(hit)
+    return results_filtered
+
+
+def parse_results(results):
     query_hits = dict()
     line_token_gen = (line.split() for line in results.rstrip().split('\n'))
     for line_tokens in line_token_gen:
         hit = BlastResult(*line_tokens)
-        # Filter on coverage and pident
-        if hit.length / hit.qlen * 100 < min_coverage:
-            continue
-        if hit.pident < min_pident:
-            continue
         if hit.qseqid not in query_hits:
             query_hits[hit.qseqid] = list()
         query_hits[hit.qseqid].append(hit)
