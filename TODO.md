@@ -1,4 +1,10 @@
 # TODO
+* For FBA, allow specification of minimal media
+    - behaviour may need to change for supplying default element sources
+        - e.g. if a sulfur source is in the media, use that?
+        - might be best to allow explicity specification of default element sources
+* Check for netmeta metanetx identifiers
+    - requried for exchange source assignment in FBA (processes compund forumla)
 * Investigate lack of translations in CDS featuers for reannotated assemblies
 * Clean up file i/o in annotation
     - specifically matching ORFs
