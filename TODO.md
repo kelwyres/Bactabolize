@@ -1,6 +1,4 @@
 # TODO
-* Complete script used to get compound forumals for BiGG models
-    - write a short README and add to repo for now
 * For FBA on individual metabolites, require minimal media
     - behaviour may need to change for supplying default element sources
         - e.g. if a sulfur source is in the media, use that?

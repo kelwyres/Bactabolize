@@ -21,5 +21,12 @@ conda activate $(pwd -P)/conda_env
 ./metabolic-runner.py
 ```
 
+## Requirements
+### Reference model
+To run individual FBA on extracellular metabolites, they must be annotated with the respective chemical formula in the model.
+If you have a model that contains `metanetx` identifiers for metabolites (i.e. a BiGG model), you can add metabolite formulas
+using the [`BiGG model compound annotator`](https://github.com/scwatts/bigg_model_compound_annotator).
+
+
 ## License
 [GNU General Public License v3.0](https://www.gnu.org/licenses/gpl-3.0.en.html)
