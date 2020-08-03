@@ -26,25 +26,9 @@ def run(assembly_fp, model_fp, output_fp):
         assembly_genbank_fp = None
         assembly_fasta_fp = assembly_fp
     print('========================================')
-    #pickle_mode = 'read'
-    #pickle_mode = 'write'
-    pickle_mode = 'noop'
     prodigal_data = run_prodigal(assembly_fasta_fp, model_fp)
-
-    # TEMP: store/load prodigal results
-    import pickle
-    if pickle_mode == 'write':
-        with open(f'pickled/prodigal_{assembly_fp.stem}.bin', 'wb') as fh:
-            pickle.dump(prodigal_data, fh)
-    elif pickle_mode == 'read':
-        with open(f'pickled/prodigal_{assembly_fp.stem}.bin', 'rb') as fh:
-            prodigal_data = pickle.load(fh)
-    elif pickle_mode == 'noop':
-        pass
-    else:
-        assert False
-
     prodigal_orfs = parse_prodigal_output(prodigal_data)
+
     print(f'Found {len(prodigal_orfs)} open-reading frames')
     genbank_records = create_genbank(prodigal_orfs, assembly_fasta_fp)
     with output_fp.open('w') as fh:
@@ -127,14 +111,12 @@ def match_existing_orfs_updated_annotations(new_fp, existing_fp, overlap_min=0.8
         # Find overlaps
         positions = contig_positions_new[contig] + contig_positions_existing[contig]
         features_matched = discover_overlaps(positions, overlap_min)
-
         # Discover those not matched
         features_matched_flat = set()
         for features in features_matched:
             features_matched_flat.update(features)
         new_unmatched = set(features_new[contig]).difference(features_matched_flat)
         existing_unmatched = set(features_existing[contig]).difference(features_matched_flat)
-
         # For each matched update bounds update locus tag, product, gene (if present) to match existing
         quals = ('locus_tag', 'product', 'gene')
         features_updated = list()
@@ -144,7 +126,6 @@ def match_existing_orfs_updated_annotations(new_fp, existing_fp, overlap_min=0.8
                     continue
                 feature_new.qualifiers[qual] = feature_existing.qualifiers[qual]
             features_updated.append(feature_new)
-
         # Add existing ORFs that had no match
         features_updated.extend(new_unmatched)
         features_updated.extend(existing_unmatched)
@@ -156,7 +137,6 @@ def match_existing_orfs_updated_annotations(new_fp, existing_fp, overlap_min=0.8
         print(f'\t{len(existing_unmatched)} existing features unmatched')
         print(f'\t{len(new_unmatched)} re-annotated features unmatched')
         print(f'\t{len(features_updated)} total features')
-
     # Update new genbank with new feature set
     update_genbank_annotations(new_fp, contig_features_updated)
 

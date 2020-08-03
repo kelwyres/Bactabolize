@@ -96,7 +96,7 @@ def check_arguments(args):
         'assembly_qc': ('assembly_fp', 'output_fp'),
         'annotate': ('assembly_fp', 'prodigal_model_fp', 'output_fp'),
         'draft_model': ('assembly_fp', 'ref_genbank_fp', 'ref_model_fp', 'output_fp'),
-        'model_fba': ('model_fp', ),
+        'model_fba': ('model_fp', 'output_fp'),
     }
     command = 'base' if not args.command else args.command
     assert command in required_args

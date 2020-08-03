@@ -17,6 +17,21 @@ def run(assembly_fp, output_fp):
     dh = tempfile.TemporaryDirectory()
     if util.determine_assembly_filetype(assembly_fp) == 'genbank':
         assembly_fp = util.write_genbank_to_fasta(assembly_fp, dh.name)
+    stats = get_assembly_stats(assembly_fp)
+    # TODO: apply some thresholds for QC
+    # Print to console
+    key_size = max(len(key) for key in stats)
+    for key, val in stats.items():
+        print(key, ':', ' '*(key_size+1-len(key)), val, sep='')
+    # Write to disk
+    with output_fp.open('w') as fh:
+        print('name', *stats.keys(), sep='\t', file=fh)
+        print(assembly_fp.stem, *stats.values(), sep='\t', file=fh)
+    # Explicitly remove temporary directory
+    dh.cleanup()
+
+
+def get_assembly_stats(assembly_fp):
     # Get contig lengths
     stats = dict()
     with assembly_fp.open('r') as f:
@@ -36,20 +51,7 @@ def run(assembly_fp, output_fp):
     stats['smallest'] = min(contig_lengths)
     stats['largest'] = max(contig_lengths)
     stats['length'] = sum(contig_lengths)
-
-    # TODO: apply some thresholds for QC
-    # Print
-    key_size = max(len(key) for key in stats)
-    for key, val in stats.items():
-        print(key, ':', ' '*(key_size+1-len(key)), val, sep='')
-
-    # Write
-    with output_fp.open('w') as fh:
-        print('name', *stats.keys(), sep='\t', file=fh)
-        print(assembly_fp.stem, *stats.values(), sep='\t', file=fh)
-
-    # Explicitly remove temporary directory
-    dh.cleanup()
+    return stats
 
 
 def calculate_quartiles(lengths):
@@ -81,4 +83,3 @@ def calculate_n50(lengths, median):
         csum += length
         # Set current to prev_length and then loop
         prev_length = length
-
