@@ -100,10 +100,10 @@ def check_biomass_metabolites(model):
         reaction = cobra.core.reaction.Reaction(
             id=f'{metabolite.id}_drain',
             subsystem='Transport/Exchange',
-            lower_bound=0.,
-            upper_bound=1000.,
+            lower_bound=0,
+            upper_bound=1000,
         )
-        reaction.add_metabolites({metabolite: -1.})
+        reaction.add_metabolites({metabolite: -1})
         model.add_reaction(reaction)
         model.objective = reaction
         # Optimise model to new objective and check for biomass production
