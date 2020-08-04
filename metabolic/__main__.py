@@ -25,7 +25,7 @@ def entry():
         model = util.read_model_and_check(args.ref_model_fp, args.ref_genbank_fp)
         draft_model.run(args.assembly_fp, args.ref_genbank_fp, model, args.output_fp)
     elif args.command == 'model_fba':
-        model_fba.run(args.model_fp, args.fba_types, args.fba_spec_fp, args.output_fp)
+        model_fba.run(args.model_fp, args.fba_spec_fp, args.output_fp)
     else:
         assert False
 
@@ -56,7 +56,7 @@ def run_complete_workflow(args):
     # Run FBA
     if not args.no_fba:
         fba_results_fp = args.output_dir / f'{args.assembly_fp.stem}_fba.tsv'
-        model_fba.run(draft_model_fp, args.fba_types, args.fba_spec_fp, fba_results_fp)
+        model_fba.run(draft_model_fp, args.fba_spec_fp, fba_results_fp)
 
 
 if __name__ == '__main__':
