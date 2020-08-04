@@ -1,6 +1,7 @@
 build/
 conda_env/
-data/
+nextflow/data
+misc/
 example_code/
 metabolic.egg-info/
 .nextflow*
