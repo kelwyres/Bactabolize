@@ -5,14 +5,6 @@ import warnings
 import sys
 
 
-# Default element sources
-source_defaults = {
-    'carbon': 'EX_glc__D_e',
-    'phosphate': 'EX_pi_e',
-    'sulfur': 'EX_so4_e',
-    'nitrogen': 'EX_nh4_e'
-}
-
 # Regex for selecting source type
 element_base_re = '^.*%s([0-9A-Z]+.*)?$'
 carbon_re = re.compile(element_base_re % 'C')
@@ -21,7 +13,27 @@ nitrogen_re = re.compile(element_base_re % 'N')
 sulfur_re = re.compile(element_base_re % 'S')
 
 
-def get_individual_data(model, metabolite_formulas):
+def prepare_element_source_data(model):
+    fba_data = dict()
+    for reaction in model.exchanges:
+        # Set categories for metabolite
+        assert len(reaction.metabolites) == 1
+        [metabolite] = reaction.metabolites
+        categories = list()
+        if carbon_re.match(metabolite.formula):
+            categories.append('carbon')
+        if phosphate_re.match(metabolite.formula):
+            categories.append('phosphate')
+        if nitrogen_re.match(metabolite.formula):
+            categories.append('nitrogen')
+        if sulfur_re.match(metabolite.formula):
+            categories.append('sulfur')
+        # Skip metabolites that are not potential element sources
+        if not categories:
+            continue
+        fba_data[reaction.id] = categories
+    return fba_data
+
     # Get reactions and categories for FBAs
     # Additionally record list of exchanges to block during FBA
     fba_data = list()
@@ -62,13 +74,8 @@ def get_individual_data(model, metabolite_formulas):
     return fba_data, exchange_sources
 
 
-def run_fba(model, exchange_bounds, *, exchange_block=None):
+def run_fba(model, exchange_bounds):
     # Set reaction lower bounds
-    block_list = exchange_block if exchange_block else model.exchanges
-    for reaction in block_list:
-        if isinstance(reaction, str):
-            reaction = model.reactions.get_by_id(reaction)
-        reaction.lower_bound = 0
     for reaction_id, lower_bound in exchange_bounds.items():
         try:
             reaction = model.reactions.get_by_id(reaction_id)
