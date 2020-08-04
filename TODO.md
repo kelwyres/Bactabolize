@@ -1,8 +1,5 @@
 # TODO
-* For FBA on individual metabolites, require minimal media
-    - behaviour may need to change for supplying default element sources
-        - e.g. if a sulfur source is in the media, use that?
-        - might be best to allow explicity specification of default element sources
+* Warn once when exchange is missing from model
 * Draft output
     - optimisiation value
     - command/code to collate all optimisation codes into single table
