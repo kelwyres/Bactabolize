@@ -7,6 +7,7 @@ from . import arguments
 from . import assembly_stats
 from . import model_fba
 from . import draft_model
+from . import patch_model
 from . import util
 
 
@@ -24,6 +25,8 @@ def entry():
     elif args.command == 'draft_model':
         model = util.read_model_and_check(args.ref_model_fp, args.ref_genbank_fp)
         draft_model.run(args.assembly_fp, args.ref_genbank_fp, model, args.output_fp)
+    elif args.command == 'patch_model':
+        patch_model.run(args.model_fp, args.patch_fp, args.output_fp)
     elif args.command == 'model_fba':
         model_fba.run(args.model_fp, args.fba_spec_fp, args.output_fp)
     else:

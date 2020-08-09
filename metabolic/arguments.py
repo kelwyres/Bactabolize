@@ -70,6 +70,12 @@ def parse():
     parser_draft.add_argument('--output_fp', type=pathlib.Path)
     parser_draft.add_argument('-h', '--help', action='store_true')
 
+    parser_patch = subparsers.add_parser('patch_model', add_help=False)
+    parser_patch.add_argument('--model_fp', type=pathlib.Path)
+    parser_patch.add_argument('--patch_fp', type=pathlib.Path)
+    parser_patch.add_argument('--output_fp', type=pathlib.Path)
+    parser_patch.add_argument('-h', '--help', action='store_true')
+
     parser_fba = subparsers.add_parser('model_fba', add_help=False)
     parser_fba.add_argument('--model_fp', type=pathlib.Path)
     parser_fba.add_argument('--fba_spec_fp', type=pathlib.Path)
@@ -94,6 +100,7 @@ def check_arguments(args):
         'assembly_qc': ('assembly_fp', 'output_fp'),
         'annotate': ('assembly_fp', 'prodigal_model_fp', 'output_fp'),
         'draft_model': ('assembly_fp', 'ref_genbank_fp', 'ref_model_fp', 'output_fp'),
+        'patch_model': ('model_fp', 'patch_fp', 'output_fp'),
         'model_fba': ('model_fp', 'fba_spec_fp', 'output_fp')
     }
     command = 'base' if not args.command else args.command
@@ -143,6 +150,7 @@ def help_text(command):
                       '  assembly_qc                 QC for input assembly\n'
                       '  annotate                    Annotate assembly ORFs\n'
                       '  draft_model                 Create a draft model\n'
+                      '  patch_model                 Patch a draft model\n'
                       '  model_fba                   Simulate growth on media with FBA\n\n'
                      f'For more information about single stage subcommands run: {__program_name__} <stage> --help\n')
     elif command == 'assembly_qc':
@@ -162,6 +170,12 @@ def help_text(command):
                       '  --assembly_fp FILE          Isolate assembly filepath (GenBank format)\n'
                       '  --ref_genbank_fp FILE       Reference genbank filepath\n'
                       '  --ref_model_fp FILE         Reference model filepath (JSON)\n'
+                      '  --output_fp FILE            Output filepath\n')
+    elif command == 'patch_model':
+        help_text = (f'Usage: {__program_name__} {command} [options]\n'
+                      'Options:\n'
+                      '  --model_fp FILE             Isolate model filepath\n'
+                      '  --patch_fp FILE             Patch file (JSON)\n'
                       '  --output_fp FILE            Output filepath\n')
     elif command == 'model_fba':
         help_text = (f'Usage: {__program_name__} {command} [options]\n'
