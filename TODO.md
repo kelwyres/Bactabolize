@@ -1,19 +1,13 @@
 # TODO
+* Implement parallelised processing
 * Warn once when exchange is missing from model
 * Draft output
     - optimisiation value
     - command/code to collate all optimisation codes into single table
         - pass/fail, optimisation value, media
-* Patch function
-    - flag that a model has failed somewhere
-    - for a failed model, require a patch file
-    - apply patch
-    - run minimal media assessment
-    - for now, do not continue to FBA
-* For pipeline
-    - two stages: drafting and then FBA
-        - for now run them separately
-        - in future, we could continue to second stage of FBA if none fail
+* Main workflow two stage (draft, fba):
+    - for now run them separately
+    - in future, we could continue to second stage of FBA if none fail
 * Investigate lack of translations in CDS featuers for reannotated assemblies
 * Clean up file i/o in annotation
     - specifically matching ORFs
