@@ -1,0 +1,10 @@
+{
+  "K_variicola_variicola_342": {
+    "reactions": {
+      "TDPDRE": "add",
+      "TDPDRR": "add"
+    },
+    "biomass_metabolites": {
+    }
+  }
+}
