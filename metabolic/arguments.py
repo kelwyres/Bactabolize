@@ -71,7 +71,8 @@ def parse():
     parser_draft.add_argument('-h', '--help', action='store_true')
 
     parser_patch = subparsers.add_parser('patch_model', add_help=False)
-    parser_patch.add_argument('--model_fp', type=pathlib.Path)
+    parser_patch.add_argument('--draft_model_fp', type=pathlib.Path)
+    parser_patch.add_argument('--ref_model_fp', type=pathlib.Path)
     parser_patch.add_argument('--patch_fp', type=pathlib.Path)
     parser_patch.add_argument('--output_fp', type=pathlib.Path)
     parser_patch.add_argument('-h', '--help', action='store_true')
@@ -100,7 +101,7 @@ def check_arguments(args):
         'assembly_qc': ('assembly_fp', 'output_fp'),
         'annotate': ('assembly_fp', 'prodigal_model_fp', 'output_fp'),
         'draft_model': ('assembly_fp', 'ref_genbank_fp', 'ref_model_fp', 'output_fp'),
-        'patch_model': ('model_fp', 'patch_fp', 'output_fp'),
+        'patch_model': ('draft_model_fp', 'ref_model_fp', 'patch_fp', 'output_fp'),
         'model_fba': ('model_fp', 'fba_spec_fp', 'output_fp')
     }
     command = 'base' if not args.command else args.command
@@ -180,7 +181,8 @@ def help_text(command):
     elif command == 'model_fba':
         help_text = (f'Usage: {__program_name__} {command} [options]\n'
                       'Options:\n'
-                      '  --model_fp FILE             Isolate model filepath\n'
+                      '  --draft_model_fp FILE       Isolate model filepath\n'
+                      '  --ref_model_fp FILE         Reference model filepath\n'
                       '  --fba_spec_fp FILE          FBA spec filepath (JSON format)\n'
                       '  --output_fp FILE            Output filepath\n')
     else:

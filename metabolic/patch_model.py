@@ -8,48 +8,55 @@ import cobra.io
 from . import media_definitions
 
 
-def run(model_fp, patch_fp, output_fp):
+def run(draft_model_fp, ref_model_fp, patch_fp, output_fp):
     print('\n========================================')
     print('Patching model')
     print('========================================')
-    # Read in model and patch file
-    with model_fp.open('r') as fh:
-        model = cobra.io.load_json_model(fh)
-    patch = parse_patch(patch_fp, model.id)
+    # Read in models and patch file
+    with draft_model_fp.open('r') as fh:
+        draft_model = cobra.io.load_json_model(fh)
+    with ref_model_fp.open('r') as fh:
+        ref_model = cobra.io.load_json_model(fh)
+    patch = parse_patch(patch_fp, draft_model.id)
     # Apply patch
     for reaction_id, op in patch['reactions'].items():
         if op == 'remove':
-            model.remove_reactions([reaction_id])
+            draft_model.remove_reactions([reaction_id])
         elif op == 'add':
-            # TODO: write code to create Reaction objects to be added
-            raise NotImplemented
+            reaction = ref_model.reactions.get_by_id(reaction_id)
+            draft_model.add_reaction(reaction)
         else:
             print(f'error: got bad operation {op} for {vid}', file=sys.stderr)
             sys.exit(1)
-    biomass_reaction = model.reactions.get_by_id('BIOMASS_')
+    biomass_reaction = draft_model.reactions.get_by_id('BIOMASS_')
     for metabolite_id, op in patch['biomass_metabolites'].items():
         if op == 'remove':
-            metabolite = model.metabolites.get_by_id(metabolite_id)
+            metabolite = draft_model.metabolites.get_by_id(metabolite_id)
             coefficient = biomass_reaction.metabolites[metabolite]
             biomass_reaction.subtract_metabolites({metabolite: coefficient})
         elif op == 'add':
-            # TODO: write code to create Metabolite objects to be added
+            # TODO: check if we'd ever need to add a biomass metabolite
             raise NotImplemented
         else:
             print(f'error: got bad operation {op} for {vid}', file=sys.stderr)
             sys.exit(1)
     # Check if model now optimises on m9
-    for reaction in model.exchanges:
+    for reaction in draft_model.exchanges:
         reaction.lower_bound = 0
     for reaction_id, lower_bound in media_definitions.m9.items():
         try:
-            reaction = model.reactions.get_by_id(reaction_id)
+            reaction = draft_model.reactions.get_by_id(reaction_id)
         except KeyError:
             msg = f'warning: draft model does not contain reaction {reaction_id}'
             print(msg, file=sys.stderr)
         reaction.lower_bound = lower_bound
-    solution = model.optimize()
-    print(solution)
+    solution = draft_model.optimize()
+    # Threshold for whether a model produces biomass
+    if solution.objective_value < 1e-4:
+        print('error: model failed to produce biomass on minimal media', file=sys.stderr)
+        sys.exit(101)
+    else:
+        print('model produces biomass on minimal media')
 
 
 def parse_patch(patch_fp, model_name):

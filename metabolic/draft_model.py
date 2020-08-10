@@ -57,9 +57,9 @@ def assess_model(model, model_draft, blast_results, output_fp):
         reaction.lower_bound = lower_bound
     solution = model_draft.optimize()
 
-    # Somewhat arbitrary threshold for whether a model produces biomass
+    # Threshold for whether a model produces biomass
     if solution.objective_value < 1e-4:
-        msg = (f'error: model failed to produce biomass on minimal media, '
+        msg = ('error: model failed to produce biomass on minimal media, '
                 'manual intervention is required to fix the draft model')
         print(msg, file=sys.stderr)
         create_troubleshooter(model, model_draft, blast_results, f'{output_fp}.troubleshoot')
@@ -72,7 +72,6 @@ def create_troubleshooter(model, model_draft, blast_results, prefix):
     # Determine what required products model cannot product and missing reactions/genes
     reactions_missing = gapfill_model(model, model_draft)
     metabolites_missing = check_biomass_metabolites(model_draft.copy())
-
     # Collect BLAST results
     blastp_hits = dict()
     blastn_hits = dict()
