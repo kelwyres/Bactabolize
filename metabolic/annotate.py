@@ -13,7 +13,7 @@ import Bio.Alphabet.IUPAC
 from . import util
 
 
-def run(assembly_fp, model_fp, output_fp):
+def run(assembly_fp, output_fp, *, model_fp=None):
     print('\n========================================')
     print('running annotation')
     # Check assembly filetype and convert if needed
@@ -43,7 +43,9 @@ def run(assembly_fp, model_fp, output_fp):
 
 
 def run_prodigal(assembly_fp, model_fp):
-    command = f'prodigal -f sco -i {assembly_fp} -m -t {model_fp} -o /dev/null -d /dev/stdout'
+    command = f'prodigal -f sco -i {assembly_fp} -m -o /dev/null -d /dev/stdout'
+    if model_fp:
+        command = f'{command} -t {model_fp}'
     result = util.execute_command(command)
     # Prodigal includes \r from FASTAs, causing problems with the output. Remove \r here
     return result.stdout.replace('\r', '')
