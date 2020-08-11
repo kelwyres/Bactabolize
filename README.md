@@ -38,15 +38,14 @@ mkdir -p output/kvt/
 
 ## FBA overview
 Flux balance analysis here has been designed around (1) simulating growth on various media, and (2) identifying extracellular
-metabolites as a source of four specific chemical elements (carbon, phosphate, nitrogen, and sulfur).  The identification of
-potential chemical element sources is generally performed on minimal media with all other extracellular metabolite exchanges
-blocked. For each extracellular metabolite that could act as a potential chemical element source (i.e. containing one or more
-atoms of the respective element), the corresponding exchange is enabled and FBA is performed. Additionally, when the
-metabolite does not contain one or more elements, the appropriate default exchanges for these are enabled. Where a metabolite
-is a potential source for multiple elements, all combinations are examined.
-
-The `fba_spec` JSON file defines the type of FBA to perform, the media that it is performed on, and the default element
-sources. Here is an example:
+metabolites as a source of carbon, phosphate, nitrogen, and/or sulfur. An extracellular metabolite is considered a potential
+source of an element if it is present in the metabolite chemical formular (e.g. a metabolite is a potential carbon source if
+it contains carbon). In order to test whether a metabolite can be utilised in a draft model as an element source, FBA is
+performed with only the media-defined exchanges and the target metabolite exchange enabled. Additionally, the exchange of
+any default element source is disable in the minimal media as required for testing (i.e. when testing a metabolite as a
+source of carbon, the default carbon source exchange is disabled). Where a metabolite contains more than one of the four
+elements, all combinations are tested. The `fba_spec` JSON file defines the type of FBA to perform, the media that it is
+performed on, and the default element sources. Here is an example:
 ```json
 {
   "m9": {
@@ -88,18 +87,17 @@ sources. Here is an example:
   }
 }
 ```
-This spec defines a single media setting, `m9`, to perform FBA. The `fba_type` sets the type of FBA to run; both simple media
-assessment and identification of potential element sources will be done here. The `exchanges` field specifies the media and
-`default_element_sources` specifies the default exchanges to use when assessing potential element sources.
+This spec defines a single media setting, `m9`, to perform FBA. The `fba_type` field sets the type of FBA to run; both simple
+media assessment and identification of potential element sources will be done here. The `exchanges` field specifies the media
+and `default_element_sources` specifies the default exchanges to use when assessing potential element sources.
 
 Information on FBA output can be found [here](#fba-results-file-format).
 
 
 
 ## Troubleshooting models
-During draft model creation, its ability to produce biomass on minimal media is assessed. In the case that the model fails to
-produce biomass troubleshooting information describing the metabolites, reactions, and genes missing from the draft model
-that are missing is written to disk.
+The ability of a draft model to produce biomass on minimal media is assessed during creation. When a model fails this test,
+troubleshooting information describing metabolites, reactions, and genes required to produce biomass is written to disk.
 
 In order to fix the model you must first determine what changes must be made to the model and then transcribe those changes
 into a 'patch' file. Here is an example patch file:
