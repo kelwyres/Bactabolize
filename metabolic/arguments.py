@@ -43,6 +43,8 @@ def parse():
     parser_draft = subparsers.add_parser('draft_model', add_help=False)
     parser_draft.add_argument('--assembly_fp', type=pathlib.Path)
     parser_draft.add_argument('--ref_genbank_fp', type=pathlib.Path)
+    parser_draft.add_argument('--ref_proteins_fp', type=pathlib.Path)
+    parser_draft.add_argument('--ref_genes_fp', type=pathlib.Path)
     parser_draft.add_argument('--ref_model_fp', type=pathlib.Path)
     parser_draft.add_argument('--output_fp', type=pathlib.Path)
     parser_draft.add_argument('-h', '--help', action='store_true')
@@ -77,9 +79,16 @@ def check_arguments(args):
         sys.exit(0)
     # Check we have required arguments, this is purposely decouped from argparse
     required_args = {
-        'draft_model': ('assembly_fp', 'ref_genbank_fp', 'ref_model_fp', 'output_fp'),
-        'patch_model': ('draft_model_fp', 'ref_model_fp', 'patch_fp', 'output_fp'),
-        'fba': ('model_fp', 'fba_spec_fp', 'output_fp')
+        'draft_model': {
+            'single': ('assembly_fp', 'ref_model_fp', 'output_fp'),
+            'exactly_one': (('ref_genbank_fp', 'ref_proteins_fp'), ),
+        },
+        'patch_model': {
+            'single': ('draft_model_fp', 'ref_model_fp', 'patch_fp', 'output_fp'),
+        },
+        'fba': {
+            'single': ('model_fp', 'fba_spec_fp', 'output_fp'),
+        }
     }
     if not args.command:
         msg = f'{__program_name__}: error: you must provide a command to execute'
@@ -88,17 +97,32 @@ def check_arguments(args):
         sys.exit(1)
     else:
         assert args.command in required_args
-    missing_args = list()
-    for required_arg in required_args[args.command]:
-        if args.__dict__[required_arg]:
-            continue
-        missing_args.append(required_arg)
-    if missing_args:
-        missing_args_str = ', '.join(f'--{arg}' for arg in missing_args)
-        plurality = 'argument is' if len(missing_args) == 1 else 'arguments are'
-        msg = f'{__program_name__}: error: the following {plurality} required {missing_args_str}'
+    args_error_msgs = list()
+    for req_type, required_set in required_args[args.command].items():
+        for required_item in required_set:
+            if req_type == 'single':
+                if not args.__dict__[required_item]:
+                    msg = f'--{required_item} is missing'
+                    args_error_msgs.append(msg)
+            elif req_type == 'exactly_one':
+                args_present = sum(args.__dict__[arg] != None for arg in required_item)
+                if args_present != 1:
+                    msg_part = ', '.join(f'--{arg}' for arg in required_item[:-1])
+                    msg_part = f'{msg_part} or --{required_item[-1]}'
+                    if args_present == 0:
+                        msg = f'{msg_part} is required'
+                    elif args_present > 1:
+                        msg = f'can only specify one of: {msg_part}'
+                    args_error_msgs.append(msg)
+            else:
+                print(f'error: argument requirement type: {req_type}')
+                sys.exit(1)
+    if args_error_msgs:
+        msg_initial = f'{__program_name__}: error: the following argument errors were found:'
         print(help_text(args.command), file=sys.stderr)
-        print(msg, file=sys.stderr)
+        print(msg_initial, file=sys.stderr)
+        for msg in args_error_msgs:
+            print('\t', msg, sep='', file=sys.stderr)
         sys.exit(1)
     # Check all input file objects exist
     for arg, value in args.__dict__.items():
@@ -122,11 +146,13 @@ def help_text(command):
     elif command == 'draft_model':
         help_text = (f'Usage: {__program_name__} {command} [options]\n'
                       'Options:\n'
-                      '  --assembly_fp FILE          Isolate assembly filepath (GenBank format)\n'
+                      '  --assembly_fp FILE          Isolate assembly filepath (GenBank)\n'
                       '  --ref_genbank_fp FILE       Reference genbank filepath\n'
+                      '  --ref_proteins_fp FILE      Reference proteins filepath (FASTA)\n'
                       '  --ref_model_fp FILE         Reference model filepath (JSON)\n'
                       '  --output_fp FILE            Output filepath\n'
                       '\nOther:\n'
+                      '  --ref_genes_fp FILE         Reference genes filepath (FASTA)\n'
                       '  --prodigal_model_fp FILE    Prodigal model to use\n'
                       '  --no_reannotation           Do not reannotate genbank file\n')
     elif command == 'patch_model':
@@ -140,7 +166,7 @@ def help_text(command):
         help_text = (f'Usage: {__program_name__} {command} [options]\n'
                       'Options:\n'
                       '  --model_fp FILE       Isolate model filepath\n'
-                      '  --fba_spec_fp FILE          FBA spec filepath (JSON format)\n'
+                      '  --fba_spec_fp FILE          FBA spec filepath (JSON)\n'
                       '  --output_fp FILE            Output filepath\n')
     else:
         assert False

@@ -16,14 +16,13 @@ from . import media_definitions
 from . import util
 
 
-def run(assembly_fp, ref_genbank_fp, model, output_fp):
+def run(assembly_fp, ref_gene_fp, ref_protein_fp, model, output_fp):
     print('\n========================================')
     print('running draft model creation')
     print('========================================')
     # Get orthologs of genes in model
     model_genes = {gene.id for gene in model.genes}
-    isolate_orthologs, blast_results = identify(assembly_fp, ref_genbank_fp, model_genes)
-
+    isolate_orthologs, blast_results = identify(assembly_fp, ref_gene_fp, ref_protein_fp, model_genes)
     # Remove genes from model that have no ortholog in the isolate
     missing_genes = list()
     for gene in model_genes - set(isolate_orthologs):
@@ -182,12 +181,11 @@ def write_blast_results(data, output_fp):
             print(*hits, sep='\n', file=fh)
 
 
-def identify(iso_fp, ref_fp, model_genes):
+def identify(iso_fp, ref_gene_fp, ref_protein_fp, model_genes):
     # First we perform a standard best bi-directional hit analysis to identify orthologs
     # Extract protein sequences from both genomes but only keep model genes from the reference
     dh = tempfile.TemporaryDirectory()
     iso_protein_fp = util.write_genbank_coding_sequence(iso_fp, dh.name, seq_type='prot')
-    ref_protein_fp = util.write_genbank_coding_sequence(ref_fp, dh.name, model_genes, seq_type='prot')
     # Run BLASTp bidirectionally (filtering with evalue <=1e-3, coverage >=25%, and pident >=80%)
     blastp_iso_all = alignment.run_blastp(iso_protein_fp, ref_protein_fp, dh.name)
     blastp_ref_all = alignment.run_blastp(ref_protein_fp, iso_protein_fp, dh.name)
@@ -198,9 +196,8 @@ def identify(iso_fp, ref_fp, model_genes):
     model_orthologs = discover_orthologs(blastp_ref, blastp_iso)
 
     # For reference genes without orthologs, we check for unannotated hits
+    # Write isolate sequence as fasta
     model_genes_no_orth = model_genes.difference(set(model_orthologs))
-    # Extract gene sequences from reference and write isolate sequence as fasta
-    ref_gene_fp = util.write_genbank_coding_sequence(ref_fp, dh.name, model_genes_no_orth, seq_type='nucl')
     iso_fasta_fp = util.write_genbank_to_fasta(iso_fp, dh.name)
     # Run BLASTn (filtering with evalue <=1e-3, coverage >=80%, and pident >=80%)
     blastn_res_all = alignment.run_blastn(ref_gene_fp, iso_fasta_fp, dh.name)

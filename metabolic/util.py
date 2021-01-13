@@ -6,36 +6,38 @@ import tempfile
 
 
 import Bio.SeqIO
+import Bio.SeqIO.FastaIO
 import cobra.io
 
 
-def read_model_and_check(model_fp, genbank_fp):
+def read_model_and_check(model_fp, genes_fp, proteins_fp):
     print('\n========================================')
-    print('reading reference model and genbank')
+    print('reading reference model data')
     print('========================================')
     with model_fp.open('r') as fh:
         model = cobra.io.load_json_model(fh)
-    # Get genbank genes
-    genbank_genes = set()
-    with genbank_fp.open('r') as fh:
-        for record in Bio.SeqIO.parse(fh, 'genbank'):
-            for feature in record.features:
-                if feature.type != 'CDS':
-                    continue
-                [locus_tag] = feature.qualifiers['locus_tag']
-                genbank_genes.add(locus_tag)
-    # Check all model genes are in genbank
+    # Collect genes/proteins
     model_genes = {gene.id for gene in model.genes}
-    missing_genes = model_genes.difference(genbank_genes)
-    if missing_genes:
-        if len(missing_genes) > 10:
-            msg = f'warning: could not find {len(missing_genes)} model {plurality} in reference genbank'
+    with genes_fp.open('r') as fh:
+        genes = {desc for desc, seq in Bio.SeqIO.FastaIO.SimpleFastaParser(fh)}
+    with proteins_fp.open('r') as fh:
+        proteins = {desc for desc, seq in Bio.SeqIO.FastaIO.SimpleFastaParser(fh)}
+    # Check gene counts
+    check_genes_proteins(model_genes, genes, 'genes')
+    check_genes_proteins(model_genes, proteins, 'proteins')
+    return model
+
+
+def check_genes_proteins(model_genes, other_genes, other_type):
+    missing = model_genes.difference(other_genes)
+    if missing:
+        plurality = 'entry' if len(missing) == 1 else 'entries'
+        if len(missing) > 10:
+            msg = f'warning: could not find model {len(missing)} {plurality} in reference {other_type}'
             print(msg, file=sys.stderr)
         else:
-            plurality = 'gene' if len(missing_genes) == 1 else 'genes'
-            msg = f'warning: could not find {len(missing_genes)} model {plurality} in reference genbank:'
-            print(msg, ', '.join(missing_genes), file=sys.stderr)
-    return model
+            msg = f'warning: could not find model {len(missing)} {plurality} in reference {other_type}:'
+            print(msg, ', '.join(missing), file=sys.stderr)
 
 
 def determine_assembly_filetype(filepath):
@@ -123,6 +125,13 @@ def write_genbank_to_fasta(filepath, dirpath):
             print(desc, file=fh_out)
             print(*seq_lines, sep='\n', file=fh_out)
     return pathlib.Path(fasta_fp)
+
+
+def write_dict_to_fasta(fasta_dict, output_fp):
+    with output_fp.open('w') as fh:
+        for desc, seq in fasta_dict.items():
+            print(f'>{desc}', file=fh)
+            print(seq, file=fh)
 
 
 def extract_nucleotides_from_ref(hit, fasta):
