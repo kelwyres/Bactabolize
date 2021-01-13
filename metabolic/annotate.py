@@ -7,7 +7,13 @@ import Bio.SeqFeature
 import Bio.SeqIO
 import Bio.SeqIO.FastaIO
 import Bio.SeqRecord
-import Bio.Alphabet.IUPAC
+
+
+# Backwards compatible Bio.Alphabet import
+try:
+    import Bio.Alphabet.IUPAC as bio_alphabet
+except ImportError:
+    bio_alphabet = None
 
 
 from . import util
@@ -69,8 +75,17 @@ def create_genbank(orfs, assembly_fp):
         for desc, seq in Bio.SeqIO.FastaIO.SimpleFastaParser(fh):
             contig_id = desc.split(' ', maxsplit=1)[0]
             assert contig_id not in genbank_records
-            sequence_record = Bio.Seq.Seq(''.join(seq), Bio.Alphabet.IUPAC.ambiguous_dna)
-            genbank_records[contig_id] = Bio.SeqRecord.SeqRecord(seq=sequence_record, id=contig_id, name=contig_id)
+            # Backwards compatiblity Seq init
+            if bio_alphabet:
+                sequence_record = Bio.Seq.Seq(''.join(seq), bio_alphabet)
+            else:
+                sequence_record = Bio.Seq.Seq(''.join(seq))
+            genbank_records[contig_id] = Bio.SeqRecord.SeqRecord(
+                seq=sequence_record,
+                id=contig_id,
+                name=contig_id,
+                annotations={'molecule_type': 'DNA'}
+            )
     # Annotate records with prodigal ORFs
     for contig, orf_n, posl_str, posr_str, strand_str, partial_str in orfs:
         if strand_str == '1':
