@@ -67,52 +67,36 @@ def determine_assembly_filetype(filepath):
     return filetype
 
 
-def write_genbank_coding_sequence(filepath, dirpath, retain=None, *, seq_type):
-    assert isinstance(retain, set) or retain is None
-    assert seq_type in {'prot', 'nucl'}
-    sequence_fp = str()
-    output_fp = pathlib.Path(dirpath, f'{filepath.stem}.fasta')
+def write_genbank_coding(filepath, output_fp, *, seq_type):
     with contextlib.ExitStack() as stack:
         fh_in = stack.enter_context(filepath.open('r'))
         fh_out = stack.enter_context(output_fp.open('w'))
-        sequence_fp = fh_out.name
         # Iterate coding features
         for record in Bio.SeqIO.parse(fh_in, 'genbank'):
-            for feature, nucleotide_seq in iterate_coding_features(record):
-                # Get appropriate output sequence type
+            for feature in iterate_coding_features(record):
+                nucl_seq = feature.extract(record.seq)
                 if seq_type == 'prot':
-                    # Append trailing N if we have a partial codon
-                    seq_n = (3 - len(nucleotide_seq)) % 3
-                    nucleotide_seq = nucleotide_seq + 'N' * seq_n
-                    seq = nucleotide_seq.translate()
+                    if 'translation' not in feature.qualifiers:
+                        # Append trailing N if we have a partial codon
+                        seq_n = (3 - len(nucl_seq)) % 3
+                        nucleotide_seq = nucl_seq + 'N' * seq_n
+                        seq = nucl_seq.translate(stop_symbol='')
+                    else:
+                        [seq] = feature.qualifiers['translation']
                 elif seq_type == 'nucl':
-                    seq = nucleotide_seq
+                    seq = nucl_seq
                 else:
                     assert False
-                [locus_tag] = feature.qualifiers['locus_tag']
-                # Skip if we do not intend to retain
-                if retain and locus_tag not in retain:
-                    continue
                 # Write to disk
+                [locus_tag] = feature.qualifiers['locus_tag']
                 desc = f'>{locus_tag}'
                 seq_lines = [seq[i:i+80] for i in range(0, len(seq), 80)]
                 print(desc, file=fh_out)
                 print(*seq_lines, sep='\n', file=fh_out)
-    return sequence_fp
+    return output_fp
 
 
-def iterate_coding_features(record, sequence=True):
-    for feature in record.features:
-        if feature.type != 'CDS':
-            continue
-        assert 'locus_tag' in feature.qualifiers
-        if sequence:
-            yield feature, feature.extract(record.seq)
-        else:
-            yield feature
-
-
-def write_genbank_to_fasta(filepath, dirpath):
+def write_genbank_seq(filepath, dirpath):
     fasta_fp = str()
     output_fp = pathlib.Path(dirpath,  f'{filepath.stem}.fasta')
     with contextlib.ExitStack() as stack:
@@ -127,11 +111,12 @@ def write_genbank_to_fasta(filepath, dirpath):
     return pathlib.Path(fasta_fp)
 
 
-def write_dict_to_fasta(fasta_dict, output_fp):
-    with output_fp.open('w') as fh:
-        for desc, seq in fasta_dict.items():
-            print(f'>{desc}', file=fh)
-            print(seq, file=fh)
+def iterate_coding_features(record):
+    for feature in record.features:
+        if feature.type != 'CDS':
+            continue
+        assert 'locus_tag' in feature.qualifiers
+        yield feature
 
 
 def extract_nucleotides_from_ref(hit, fasta):

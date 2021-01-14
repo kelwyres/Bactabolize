@@ -3,6 +3,7 @@ import sys
 import tempfile
 
 
+import Bio.Seq
 import Bio.SeqIO
 import cobra.core.reaction
 import cobra.flux_analysis
@@ -16,13 +17,13 @@ from . import media_definitions
 from . import util
 
 
-def run(assembly_fp, ref_gene_fp, ref_protein_fp, model, output_fp):
+def run(assembly_fp, ref_genes_fp, ref_proteins_fp, model, output_fp):
     print('\n========================================')
     print('running draft model creation')
     print('========================================')
     # Get orthologs of genes in model
     model_genes = {gene.id for gene in model.genes}
-    isolate_orthologs, blast_results = identify(assembly_fp, ref_gene_fp, ref_protein_fp, model_genes)
+    isolate_orthologs, blast_results = identify(assembly_fp, ref_genes_fp, ref_proteins_fp, model_genes)
     # Remove genes from model that have no ortholog in the isolate
     missing_genes = list()
     for gene in model_genes - set(isolate_orthologs):
@@ -181,14 +182,15 @@ def write_blast_results(data, output_fp):
             print(*hits, sep='\n', file=fh)
 
 
-def identify(iso_fp, ref_gene_fp, ref_protein_fp, model_genes):
+def identify(iso_fp, ref_genes_fp, ref_proteins_fp, model_genes):
     # First we perform a standard best bi-directional hit analysis to identify orthologs
     # Extract protein sequences from both genomes but only keep model genes from the reference
     dh = tempfile.TemporaryDirectory()
-    iso_protein_fp = util.write_genbank_coding_sequence(iso_fp, dh.name, seq_type='prot')
+    iso_proteins_fp = pathlib.Path(dh.name, 'isolate_proteins.fasta')
+    util.write_genbank_coding(iso_fp, iso_proteins_fp, seq_type='prot')
     # Run BLASTp bidirectionally (filtering with evalue <=1e-3, coverage >=25%, and pident >=80%)
-    blastp_iso_all = alignment.run_blastp(iso_protein_fp, ref_protein_fp, dh.name)
-    blastp_ref_all = alignment.run_blastp(ref_protein_fp, iso_protein_fp, dh.name)
+    blastp_iso_all = alignment.run_blastp(iso_proteins_fp, ref_proteins_fp)
+    blastp_ref_all = alignment.run_blastp(ref_proteins_fp, iso_proteins_fp)
     blastp_iso = alignment.filter_results(blastp_iso_all, min_coverage=25, min_pident=80)
     blastp_ref = alignment.filter_results(blastp_ref_all, min_coverage=25, min_pident=80)
 
@@ -198,12 +200,24 @@ def identify(iso_fp, ref_gene_fp, ref_protein_fp, model_genes):
     # For reference genes without orthologs, we check for unannotated hits
     # Write isolate sequence as fasta
     model_genes_no_orth = model_genes.difference(set(model_orthologs))
-    iso_fasta_fp = util.write_genbank_to_fasta(iso_fp, dh.name)
+    iso_fasta_fp = pathlib.Path(dh.name, 'isolate_genes.fasta')
+    util.write_genbank_coding(iso_fp, iso_fasta_fp, seq_type='nucl')
+    # Write reference gene sequences with no ortholog as fasta
+    ref_genes_noorth_fp = pathlib.Path(dh.name, 'ref_genes_noorth.fasta')
+    import contextlib
+    with contextlib.ExitStack() as stack:
+        fin = stack.enter_context(ref_genes_fp.open('r'))
+        fout = stack.enter_context(ref_genes_noorth_fp.open('w'))
+        for desc, seq in Bio.SeqIO.FastaIO.SimpleFastaParser(fin):
+            if desc not in model_genes_no_orth:
+                continue
+            print(f'>{desc}', file=fout)
+            print(*[seq[i:i+80] for i in range(0, len(seq), 80)], sep='\n', file=fout)
     # Run BLASTn (filtering with evalue <=1e-3, coverage >=80%, and pident >=80%)
-    blastn_res_all = alignment.run_blastn(ref_gene_fp, iso_fasta_fp, dh.name)
+    blastn_res_all = alignment.run_blastn(ref_genes_noorth_fp, iso_fasta_fp)
     blastn_res = alignment.filter_results(blastn_res_all, min_coverage=80, min_pident=80)
     # Discover unannotated model genes in isolate
-    model_orthologs = discover_unannotated_orthologs(blastn_res, iso_fp, model_orthologs)
+    model_orthologs = discover_unannotated_orthologs(blastn_res, iso_fasta_fp, model_orthologs)
 
     # Return orthologs and BLAST results, explicitly remove temp directory
     dh.cleanup()
@@ -226,9 +240,9 @@ def discover_orthologs(blastp_ref, blastp_iso):
     return model_orthologs
 
 
-def discover_unannotated_orthologs(blastn_res, iso_fp, model_orthologs):
-    with iso_fp.open('r') as fh:
-        iso_fasta = {record.name: record.seq for record in Bio.SeqIO.parse(iso_fp, 'genbank')}
+def discover_unannotated_orthologs(blastn_res, iso_fasta_fp, model_orthologs):
+    with iso_fasta_fp.open('r') as fh:
+        iso_fasta = {des: Bio.Seq.Seq(seq) for des, seq in Bio.SeqIO.FastaIO.SimpleFastaParser(fh)}
     for ref_gene_name, hits in blastn_res.items():
         assert ref_gene_name not in model_orthologs
         for hit in hits:

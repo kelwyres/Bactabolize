@@ -42,11 +42,10 @@ def run_draft_model(args):
         assembly_genbank_fp = args.assembly_fp
     # If model is provided as a genbank, convert to FASTA
     if args.ref_genbank_fp:
-        ref_genes, ref_proteins = create_fasta_from_genbank(args.ref_genbank_fp)
         ref_genes_fp = pathlib.Path(dh.name, 'ref_genes.fasta')
         ref_proteins_fp = pathlib.Path(dh.name, 'ref_proteins.fasta')
-        util.write_dict_to_fasta(ref_genes, ref_genes_fp)
-        util.write_dict_to_fasta(ref_proteins, ref_proteins_fp)
+        util.write_genbank_coding(args.ref_genbank_fp, ref_genes_fp, seq_type='nucl')
+        util.write_genbank_coding(args.ref_genbank_fp, ref_proteins_fp, seq_type='prot')
     else:
         ref_genes_fp = args.ref_genes_fp
         ref_proteins_fp = args.ref_proteins_fp
@@ -56,33 +55,6 @@ def run_draft_model(args):
     draft_model.run(assembly_genbank_fp, ref_genes_fp, ref_proteins_fp, model, output_fp)
     # Explicitly remove temporary directory
     dh.cleanup()
-
-
-import Bio.SeqIO
-
-def create_fasta_from_genbank(genbank_fp):
-    genes = dict()
-    proteins = dict()
-    locus_tag_dups = dict()
-    with genbank_fp.open('r') as fh:
-        for record in Bio.SeqIO.parse(fh, 'genbank'):
-            for feature in record.features:
-                if feature.type != 'CDS':
-                    continue
-                [locus_tag] = feature.qualifiers['locus_tag']
-                if locus_tag in genes:
-                    n = locus_tag_dups.get(locus_tag, 1)
-                    locus_tag_dups[locus_tag] = n + 1
-                    msg = f'warning: duplicate locus tag {locus_tag}, renaming to {locus_tag}_{n}'
-                    print(msg, file=sys.stderr)
-                    locus_tag = f'{locus_tag}_{n}'
-                genes[locus_tag] = feature.extract(record.seq)
-                if 'translation' not in feature.qualifiers:
-                    protein_seq = genes[locus_tag].translate(stop_symbol='')
-                else:
-                    [protein_seq] = feature.qualifiers['translation']
-                proteins[locus_tag] = protein_seq
-    return genes, proteins
 
 
 if __name__ == '__main__':

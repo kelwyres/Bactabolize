@@ -27,7 +27,7 @@ def run(assembly_fp, output_fp, *, model_fp=None):
     assembly_filetype = util.determine_assembly_filetype(assembly_fp)
     if assembly_filetype == 'genbank':
         assembly_genbank_fp = assembly_fp
-        assembly_fasta_fp = util.write_genbank_to_fasta(assembly_fp, dh.name)
+        assembly_fasta_fp = util.write_genbank_seq(assembly_fp, dh.name)
     elif assembly_filetype == 'fasta':
         assembly_genbank_fp = None
         assembly_fasta_fp = assembly_fp
@@ -162,7 +162,7 @@ def collect_all_features(fp):
     features = dict()
     with fp.open('r') as fh:
         for record in Bio.SeqIO.parse(fh, 'genbank'):
-            features[record.name] = list(util.iterate_coding_features(record, sequence=False))
+            features[record.name] = list(util.iterate_coding_features(record))
     return features
 
 

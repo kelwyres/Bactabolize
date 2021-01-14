@@ -30,7 +30,7 @@ class BlastResult:
         return '\t'.join(str(data) for data in data_gen)
 
 
-def run_blastp(query_fp, subject_fp, dirpath):
+def run_blastp(query_fp, subject_fp):
     # Create database
     command_db = f'makeblastdb -in {subject_fp} -out {subject_fp} -dbtype prot'
     util.execute_command(command_db)
@@ -41,7 +41,7 @@ def run_blastp(query_fp, subject_fp, dirpath):
     return parse_results(result.stdout)
 
 
-def run_blastn(query_fp, subject_fp, dirpath):
+def run_blastn(query_fp, subject_fp):
     # Create database
     command_db = f'makeblastdb -in {subject_fp} -out {subject_fp} -dbtype nucl'
     util.execute_command(command_db)
