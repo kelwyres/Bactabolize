@@ -132,6 +132,10 @@ def check_arguments(args):
             if not value.exists():
                 print(f'{__program_name__}: error: input {value} does not exist', file=sys.stderr)
                 sys.exit(1)
+    # Check that output directory in output filepath exists
+    if not args.output_fp.parent.exists():
+        print(f'Output directory {args.output_fp.parent} for --output_fp does not exist', file=sys.stderr)
+        sys.exit(1)
 
 
 def help_text(command):
