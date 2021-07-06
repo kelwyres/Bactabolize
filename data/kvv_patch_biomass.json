@@ -1,0 +1,9 @@
+{
+  "K_variicola_variicola_342": {
+    "reactions": {
+    },
+    "biomass_metabolites": {
+      "dtdprmn_c": "remove"
+    }
+  }
+}

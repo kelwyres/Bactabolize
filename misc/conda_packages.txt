@@ -1,0 +1,2 @@
+biopython=1.76
+cobra=0.17.1
