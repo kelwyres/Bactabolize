@@ -15,11 +15,12 @@ A high-throughput metabolic model construction pipeline.
 ## Quickstart
 ```bash
 # Clone the repository
-git clone https://github.com/scwatts/metabolic_pipeline.git && cd metabolic_pipeline/
+git clone https://github.com/scwatts/metabolic_pipeline.git && cd metabolic_modelling/
 
 # Install dependencies and activate conda environment
 conda create -c bioconda -c conda-forge -p $(pwd -P)/conda_env --yes --file misc/conda_packages.txt
 conda activate $(pwd -P)/conda_env
+pip install memote==0.13.0
 
 # Create draft model
 mkdir -p output/kvt/
