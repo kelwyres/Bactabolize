@@ -1,0 +1,19 @@
+name: metabolic
+
+channels:
+  - bioconda
+  - conda-forge
+  - defaults
+
+dependencies:
+  # Base
+  - python ==3.9
+  - black
+  - bump2version
+  - flake8
+  - pip
+  - pre-commit
+  - pylint >=2.5
+  # Dependencies
+  - biopython ==1.79
+  - cobra ==0.21.0

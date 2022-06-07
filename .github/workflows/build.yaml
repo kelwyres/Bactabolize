@@ -1,0 +1,98 @@
+name: build_and_publish
+on:
+  push:
+    branches:
+      - stable
+      - main
+
+jobs:
+  get_version:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        shell: bash -l {0}
+    steps:
+      - name: Checkout code
+        id: git_checkout
+        uses: actions/checkout@v3
+      - name: Get version
+        id: get_version
+        run: |
+          CURRENT_VERSION=$(sed -n '/^current_version/{ s/^.\+ = //; p; }' .bumpversion.cfg)
+          if [[ "${GITHUB_REF}" == 'refs/heads/stable' ]]; then
+            echo "::set-output name=version::${CURRENT_VERSION}"
+          elif [[ "${GITHUB_REF}" == 'refs/heads/main' ]]; then
+            DEV_VERSION="${CURRENT_VERSION}"+dev$(echo "${GITHUB_SHA}" | cut -c-7)
+            echo "::set-output name=version::${DEV_VERSION}"
+          else
+            echo "got bad gh ref: ${GITHUB_REF}" 1>&2
+            exit 1
+          fi
+    outputs:
+      version: ${{ steps.get_version.outputs.version }}
+
+  build_and_publish_on_conda:
+    runs-on: ubuntu-latest
+    needs: get_version
+    defaults:
+      run:
+        shell: bash -l {0}
+    env:
+      VERSION: ${{ needs.get_version.outputs.version }}
+    steps:
+      - name: Checkout code
+        id: git_checkout
+        uses: actions/checkout@v3
+      - name: Setup conda
+        id: setup_conda
+        uses: conda-incubator/setup-miniconda@v2
+        with:
+          python-version: 3.9
+          mamba-version: "*"
+          channels: umccr,bioconda,conda-forge,defaults
+          channel-priority: true
+      - name: Prepare env
+        id: prepare_env
+        run: |
+          mamba install boa anaconda-client bump2version
+      - name: Set version
+        run: |
+          bump2version patch \
+            --new-version "${VERSION}" \
+            --allow-dirty \
+            --no-commit
+      - name: build_and_upload_conda_package
+        run: |
+          conda mambabuild \
+            --token "${{ secrets.ANACONDA_TOKEN }}" \
+            conda/metabolic/
+
+  build_and_publish_on_dockerhub:
+    runs-on: ubuntu-latest
+    needs:
+      - get_version
+      - build_and_publish_on_conda
+    # Only push on push to stable, which implicitly should be only version bumps
+    if: github.ref == 'refs/heads/stable'
+    defaults:
+      run:
+        shell: bash -l {0}
+    env:
+      DOCKERHUB_REPO: "docker.io/scwatts/metabolic_pipeline"
+      VERSION: ${{ needs.get_version.outputs.version }}
+    steps:
+      - name: build_docker_image
+        run: |
+          docker build \
+            --tag "${DOCKERHUB_REPO}:${VERSION}" \
+            --file docker/Dockerfile \
+            ./
+      - name: dockerhub_auth
+        run: |
+          echo "${{ secrets.DOCKERHUB_TOKEN }}" | \
+            docker login \
+              --username "${{ secrets.DOCKERHUB_USERNAME }}" \
+              --password-stdin
+      - name: upload_docker_image
+        run: |
+          docker push "${DOCKERHUB_REPO}:${VERSION}"

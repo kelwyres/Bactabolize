@@ -1,0 +1,5 @@
+[MESSAGE CONTROL]
+disable=logging-fstring-interpolation,duplicate-code,missing-module-docstring,use-dict-literal,use-list-literal,invalid-name,too-many-locals,too-few-public-methods,unspecified-encoding
+
+[FORMAT]
+max-line-length=120
