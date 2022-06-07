@@ -166,5 +166,26 @@ using the [`BiGG model compound annotator`](https://github.com/scwatts/bigg_mode
 | `objective value` | Biomass objective value                                                       |
 
 
+## Development
+
+Set up development environment and install pre-commit hooks
+
+```bash
+conda env create -p $(pwd -P)/conda_env/ -f requirements-dev.yaml -y
+conda activate ./conda_env/
+pre-commit install
+```
+
+Install as editable python package
+
+```bash
+# Install
+pip install -e .
+
+# Check
+which -a metabolic
+metabolic --version
+```
+
 ## License
 [GNU General Public License v3.0](https://www.gnu.org/licenses/gpl-3.0.en.html)
