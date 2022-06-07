@@ -10,6 +10,7 @@ from . import fba
 
 
 def run(model_fp, fba_open_value, spec_fp, output_fp):
+    # pylint: disable=too-many-branches
     print('\n========================================')
     print('running FBA')
     print('========================================')
@@ -45,13 +46,14 @@ def run(model_fp, fba_open_value, spec_fp, output_fp):
 
 
 def fba_potential_sources(model, fba_open_value, spec):
+    # pylint: disable=too-many-branches
     # For each potential source, run FBA
     fba_results = list()
     fba_data = fba.prepare_element_source_data(model)
     for reaction_name, categories in fba_data.items():
         # Run FBA for all category combinations
         for i in range(len(categories)):
-            for fba_categories in itertools.combinations(categories, i+1):
+            for fba_categories in itertools.combinations(categories, i + 1):
                 # Close all exchanges then open media-defined exchanges
                 reaction_bounds = {r.id: 0 for r in model.exchanges}
                 for reaction_id, lower_bound in spec['exchanges'].items():
@@ -70,12 +72,7 @@ def fba_potential_sources(model, fba_open_value, spec):
                         reaction_bounds['EX_o2_e'] = 0
                     # Run FBA
                     objective_value = fba.run_fba(model, reaction_bounds)
-                    data = (
-                        reaction_name,
-                        ','.join(fba_categories),
-                        atmosphere,
-                        objective_value
-                    )
+                    data = (reaction_name, ','.join(fba_categories), atmosphere, objective_value)
                     fba_results.append(data)
     return fba_results
 
@@ -94,10 +91,7 @@ def fba_media(model, spec):
             reaction_bounds['EX_o2_e'] = 0
         # Run FBA
         objective_value = fba.run_fba(model, reaction_bounds)
-        data = (
-            atmosphere,
-            objective_value
-        )
+        data = (atmosphere, objective_value)
         fba_results.append(data)
     return fba_results
 
@@ -105,25 +99,26 @@ def fba_media(model, spec):
 def parse_spec(spec_fp):
     with spec_fp.open('r') as fh:
         spec = json.load(fh)
-    for fba_name, fba_spec in spec.items():
+    for fba_spec in spec.values():
         validate_spec(fba_spec)
     return spec
 
 
 def validate_spec(fba_spec):
+    # pylint: disable=too-many-branches,too-many-statements
     # Is a dict and has required data
     if not isinstance(fba_spec, dict):
         print('error: fba spec is not a dictionary', file=sys.stderr)
         sys.exit(1)
     # Fields
     if 'fba_type' not in fba_spec:
-        print(f'error: no fba_types defined', file=sys.stderr)
+        print('error: no fba_types defined', file=sys.stderr)
         sys.exit(1)
     if 'exchanges' not in fba_spec:
-        print(f'error: no exchanges defined', file=sys.stderr)
+        print('error: no exchanges defined', file=sys.stderr)
         sys.exit(1)
     if 'default_element_sources' not in fba_spec:
-        print(f'error: no default_element_sources defined', file=sys.stderr)
+        print('error: no default_element_sources defined', file=sys.stderr)
         sys.exit(1)
     # Field types
     if not isinstance(fba_spec['fba_type'], list):
@@ -171,8 +166,8 @@ def validate_spec(fba_spec):
         sys.exit(1)
     # O2 and CO2 should not be in media
     if 'EX_o2_e' in fba_spec['exchanges']:
-        print(f'error: O2 present in exchange list', file=sys.stderr)
+        print('error: O2 present in exchange list', file=sys.stderr)
         sys.exit(1)
     if 'EX_co2_e' in fba_spec['exchanges']:
-        print(f'error: CO2 present in exchange list', file=sys.stderr)
+        print('error: CO2 present in exchange list', file=sys.stderr)
         sys.exit(1)

@@ -20,6 +20,7 @@ from . import util
 
 
 def run(assembly_fp, output_fp):
+    # pylint: disable=consider-using-with
     print('\n========================================')
     print('running annotation')
     # Check assembly filetype and convert if needed
@@ -67,6 +68,7 @@ def parse_prodigal_output(prodigal_data):
 
 
 def create_genbank(orfs, assembly_fp):
+    # pylint: disable=too-many-branches
     # Create unannotated gebnank records
     genbank_records = dict()
     with assembly_fp.open('r') as fh:
@@ -79,10 +81,7 @@ def create_genbank(orfs, assembly_fp):
             else:
                 sequence_record = Bio.Seq.Seq(''.join(seq))
             genbank_records[contig_id] = Bio.SeqRecord.SeqRecord(
-                seq=sequence_record,
-                id=contig_id,
-                name=contig_id,
-                annotations={'molecule_type': 'DNA'}
+                seq=sequence_record, id=contig_id, name=contig_id, annotations={'molecule_type': 'DNA'}
             )
     # Annotate records with prodigal ORFs
     for contig, orf_n, posl_str, posr_str, strand_str, partial_str in orfs:
@@ -93,10 +92,10 @@ def create_genbank(orfs, assembly_fp):
         else:
             assert False
         quals = {'gene': orf_n, 'locus_tag': orf_n, 'note': get_qual_note(partial_str)}
-        feature_loc = Bio.SeqFeature.FeatureLocation(start=int(posl_str)-1, end=int(posr_str), strand=strand)
+        feature_loc = Bio.SeqFeature.FeatureLocation(start=int(posl_str) - 1, end=int(posr_str), strand=strand)
         feature = Bio.SeqFeature.SeqFeature(location=feature_loc, type='CDS', qualifiers=quals)
         genbank_records[contig].features.append(feature)
-    return [record for record in genbank_records.values()]
+    return list(genbank_records.values())
 
 
 def get_qual_note(partial_str):
@@ -176,6 +175,7 @@ def create_positions(contig_features, source):
 
 
 def discover_overlaps(positions, overlap_min):
+    # pylint: disable=too-many-branches
     in_new = list()
     in_existing = list()
     features_matched = set()

@@ -1,8 +1,9 @@
 # metabolic
+
 A high-throughput metabolic model construction pipeline.
 
-
 ## Table of contents
+
 * [Table of contents](#table-of-contents)
 * [Quickstart](#quickstart)
 * [FBA overview](#fba-overview)
@@ -11,8 +12,8 @@ A high-throughput metabolic model construction pipeline.
 * [Outputs](#outputs)
 * [License](#license)
 
-
 ## Quickstart
+
 ```bash
 # Clone the repository
 git clone https://github.com/scwatts/metabolic_pipeline.git && cd metabolic_pipeline/
@@ -37,15 +38,17 @@ mkdir -p output/kvt/
 ```
 
 ## FBA overview
+
 Flux balance analysis here has been designed around (1) simulating growth on various media, and (2) identifying extracellular
 metabolites as a source of carbon, phosphate, nitrogen, and/or sulfur. An extracellular metabolite is considered a potential
-source of an element if it is present in the metabolite chemical formular (e.g. a metabolite is a potential carbon source if
-it contains carbon). In order to test whether a metabolite can be utilised in a draft model as an element source, FBA is
-performed with only the media-defined exchanges and the target metabolite exchange enabled. Additionally, the exchange of
-any default element source is disable in the minimal media as required for testing (i.e. when testing a metabolite as a
-source of carbon, the default carbon source exchange is disabled). Where a metabolite contains more than one of the four
-elements, all combinations are tested. The `fba_spec` JSON file defines the type of FBA to perform, the media that it is
-performed on, and the default element sources. Here is an example:
+source of an element if it is present in the metabolite chemical formular (e.g. a metabolite is a potential carbon
+source if it contains carbon). In order to test whether a metabolite can be utilised in a draft model as an element
+source, FBA is performed with only the media-defined exchanges and the target metabolite exchange enabled. Additionally,
+the exchange of any default element source is disable in the minimal media as required for testing (i.e. when testing a
+metabolite as a source of carbon, the default carbon source exchange is disabled). Where a metabolite contains more than
+one of the four elements, all combinations are tested. The `fba_spec` JSON file defines the type of FBA to perform, the
+media that it is performed on, and the default element sources. Here is an example:
+
 ```json
 {
   "m9": {
@@ -87,20 +90,21 @@ performed on, and the default element sources. Here is an example:
   }
 }
 ```
+
 This spec defines a single media setting, `m9`, to perform FBA. The `fba_type` field sets the type of FBA to run; both simple
 media assessment and identification of potential element sources will be done here. The `exchanges` field specifies the media
 and `default_element_sources` specifies the default exchanges to use when assessing potential element sources.
 
 Information on FBA output can be found [here](#fba-results-file-format).
 
-
-
 ## Troubleshooting models
+
 The ability of a draft model to produce biomass on minimal media is assessed during creation. When a model fails this test,
 troubleshooting information describing metabolites, reactions, and genes required to produce biomass is written to disk.
 
 In order to fix the model you must first determine what changes must be made to the model and then transcribe those changes
 into a 'patch' file. Here is an example patch file:
+
 ```json
 {
   "K_variicola_variicola_342": {
@@ -113,8 +117,10 @@ into a 'patch' file. Here is an example patch file:
   }
 }
 ```
+
 This patch file specifies that the `K_variicola_variicola_342` model requires two reactions to be added. The `patch` command
 is used to apply these changes. A brief example is shown below:
+
 ```bash
 # Generate a draft model
 mkdir -p output/kvv/
@@ -141,21 +147,23 @@ mkdir -p output/kvv/
 ```
 
 ## Requirements
+
 ### Reference model
+
 To run individual FBA on extracellular metabolites, they must be annotated with the respective chemical formula in the model.
 If you have a model that contains `metanetx` identifiers for metabolites (i.e. a BiGG model), you can add metabolite formulas
 using the [`BiGG model compound annotator`](https://github.com/scwatts/bigg_model_compound_annotator).
 
-
 ## Outputs
+
 | Filename                      | Description                           |
 | ---------                     |---------                              |
 | `assembly_id`.gbk             | Prodigal annotation of input assembly |
 | `assembly_id`\_model.json     | Metabolic model                       |
 | `assembly_id`\_fba.tsv        | Results of FBA                        |
 
-
 ### FBA results file format
+
 | Column name       | Description                                                                   |
 | ---------         |---------                                                                      |
 | `fba_type`        | Name of the FBA run (defined exchanges only, or all potential element sources |
@@ -164,7 +172,6 @@ using the [`BiGG model compound annotator`](https://github.com/scwatts/bigg_mode
 | `exchange`        | Name of exchange assessed                                                     |
 | `categories`      | Elements for which the exchange was assessed as being a potential source      |
 | `objective value` | Biomass objective value                                                       |
-
 
 ## Development
 
@@ -188,4 +195,5 @@ metabolic --version
 ```
 
 ## License
+
 [GNU General Public License v3.0](https://www.gnu.org/licenses/gpl-3.0.en.html)

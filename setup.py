@@ -1,6 +1,5 @@
 #!/usr/bin/env python3
 import setuptools
-import sys
 
 
 import metabolic
@@ -16,5 +15,5 @@ setuptools.setup(
     packages=setuptools.find_packages(),
     entry_points={
         'console_scripts': ['metabolic=metabolic.__main__:entry'],
-    }
+    },
 )

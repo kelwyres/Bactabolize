@@ -27,13 +27,14 @@ def entry():
 
 
 def run_draft_model(args):
+    # pylint: disable=consider-using-with
     # Get input assembly format and convert if needed
     dh = tempfile.TemporaryDirectory()
     assembly_filetype = util.determine_assembly_filetype(args.assembly_fp)
     # If we have a FASTA input, require that we annotate
     if assembly_filetype == 'fasta' and args.no_reannotation:
         print('error: cannot specify --no_reannotation with a FASTA input assembly', file=sys.stderr)
-        exit(1)
+        sys.exit(1)
     # Run annotation if requested
     if not args.no_reannotation:
         assembly_genbank_fp = args.output_fp.parent / f'{args.output_fp.stem}.gbk'
@@ -57,14 +58,7 @@ def run_draft_model(args):
         'min_pident': args.min_pident,
         'min_ppos': args.min_ppos,
     }
-    draft_model.run(
-        assembly_genbank_fp,
-        ref_genes_fp,
-        ref_proteins_fp,
-        model,
-        alignment_thresholds,
-        output_fp
-    )
+    draft_model.run(assembly_genbank_fp, ref_genes_fp, ref_proteins_fp, model, alignment_thresholds, output_fp)
     # Explicitly remove temporary directory
     dh.cleanup()
 
