@@ -90,7 +90,7 @@ def check_arguments(args):
             'single': ('draft_model_fp', 'ref_model_fp', 'patch_fp', 'output_fp'),
         },
         'fba': {
-            'single': ('model_fp', 'fba_open_value', 'fba_spec_fp', 'output_fp'),
+            'single': ('model_fp', 'fba_spec_fp', 'output_fp'),
         }
     }
     if not args.command:
