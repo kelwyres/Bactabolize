@@ -60,6 +60,7 @@ def parse():
 
     parser_fba = subparsers.add_parser('fba', add_help=False)
     parser_fba.add_argument('--model_fp', type=pathlib.Path)
+    parser_fba.add_argument('--fba_open_value', type=float)
     parser_fba.add_argument('--fba_spec_fp', type=pathlib.Path)
     parser_fba.add_argument('--output_fp', type=pathlib.Path)
     parser_fba.add_argument('-h', '--help', action='store_true')
@@ -86,7 +87,7 @@ def check_arguments(args):
             'single': ('draft_model_fp', 'ref_model_fp', 'patch_fp', 'output_fp'),
         },
         'fba': {
-            'single': ('model_fp', 'fba_spec_fp', 'output_fp'),
+            'single': ('model_fp', 'fba_open_value', 'fba_spec_fp', 'output_fp'),
         }
     }
     if not args.command:
@@ -168,6 +169,7 @@ def help_text(command):
         help_text = (f'Usage: {__program_name__} {command} [options]\n'
                       'Options:\n'
                       '  --model_fp FILE       Isolate model filepath\n'
+                      '  --fba_open_value FLOAT      Open reaction value to use in FBA\n'
                       '  --fba_spec_fp FILE          FBA spec filepath (JSON)\n'
                       '  --output_fp FILE            Output filepath\n')
     else:
