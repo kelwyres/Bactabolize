@@ -15,12 +15,8 @@ A high-throughput metabolic model construction pipeline.
 ## Quickstart
 
 ```bash
-# Clone the repository
-git clone https://github.com/scwatts/metabolic_pipeline.git && cd metabolic_pipeline/
-
-# Install dependencies and activate conda environment
-conda create -c bioconda -c conda-forge -p $(pwd -P)/conda_env --yes --file misc/conda_packages.txt
-conda activate $(pwd -P)/conda_env
+# Install
+conda install -y -c scwatts -c bioconda -c conda-forge metabolic
 
 # Create draft model
 mkdir -p output/kvt/
