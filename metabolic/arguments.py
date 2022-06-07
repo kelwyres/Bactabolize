@@ -49,7 +49,6 @@ def parse():
     parser_draft.add_argument('--output_fp', type=pathlib.Path)
     parser_draft.add_argument('-h', '--help', action='store_true')
 
-    parser_draft.add_argument('--prodigal_model_fp', type=pathlib.Path)
     parser_draft.add_argument('--no_reannotation', action='store_true')
 
     parser_patch = subparsers.add_parser('patch_model', add_help=False)
@@ -157,7 +156,6 @@ def help_text(command):
                       '  --output_fp FILE            Output filepath\n'
                       '\nOther:\n'
                       '  --ref_genes_fp FILE         Reference genes filepath (FASTA)\n'
-                      '  --prodigal_model_fp FILE    Prodigal model to use\n'
                       '  --no_reannotation           Do not reannotate genbank file\n')
     elif command == 'patch_model':
         help_text = (f'Usage: {__program_name__} {command} [options]\n'

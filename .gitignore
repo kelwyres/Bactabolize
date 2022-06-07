@@ -8,7 +8,6 @@ metabolic.egg-info/
 nextflow/work/
 output/
 pickled/
-!prodigal_models/output/
 __pycache__/
 temp/
 tests/

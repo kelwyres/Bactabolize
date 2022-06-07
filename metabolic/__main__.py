@@ -37,7 +37,7 @@ def run_draft_model(args):
     # Run annotation if requested
     if not args.no_reannotation:
         assembly_genbank_fp = args.output_fp.parent / f'{args.output_fp.stem}.gbk'
-        annotate.run(args.assembly_fp, assembly_genbank_fp, model_fp=args.prodigal_model_fp)
+        annotate.run(args.assembly_fp, assembly_genbank_fp)
     else:
         assembly_genbank_fp = args.assembly_fp
     # If model is provided as a genbank, convert to FASTA

@@ -50,10 +50,8 @@ def check_file_exists(filepath, name) {
 }
 ref_genbank_fp = file(params.ref_genbank_fp)
 ref_model_fp = file(params.ref_model_fp)
-prodigal_model_fp = file(params.prodigal_model_fp)
 check_file_exists(ref_genbank_fp, 'ref_genbank_fp')
 check_file_exists(ref_model_fp, 'ref_model_fp')
-check_file_exists(prodigal_model_fp, 'prodigal_model_fp')
 
 // Check output directory is empty
 output_dir_files = []
@@ -80,7 +78,7 @@ workflow {
       assembly_qc(assembly_ch)
     }
     if (run_annotation) {
-      assembly_ch = annotate(assembly_ch, prodigal_model_fp)
+      assembly_ch = annotate(assembly_ch)
     }
     model_draft_ch = draft_model(assembly_ch, ref_genbank_fp, ref_model_fp)
 
