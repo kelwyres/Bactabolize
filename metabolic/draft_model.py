@@ -1,3 +1,4 @@
+import contextlib
 import pathlib
 import sys
 import tempfile
@@ -204,7 +205,6 @@ def identify(iso_fp, ref_genes_fp, ref_proteins_fp, model_genes):
     util.write_genbank_coding(iso_fp, iso_fasta_fp, seq_type='nucl')
     # Write reference gene sequences with no ortholog as fasta
     ref_genes_noorth_fp = pathlib.Path(dh.name, 'ref_genes_noorth.fasta')
-    import contextlib
     with contextlib.ExitStack() as stack:
         fin = stack.enter_context(ref_genes_fp.open('r'))
         fout = stack.enter_context(ref_genes_noorth_fp.open('w'))
