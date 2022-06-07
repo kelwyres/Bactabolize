@@ -168,7 +168,7 @@ def help_text(command):
     elif command == 'fba':
         help_text = (f'Usage: {__program_name__} {command} [options]\n'
                       'Options:\n'
-                      '  --model_fp FILE       Isolate model filepath\n'
+                      '  --model_fp FILE             Isolate model filepath\n'
                       '  --fba_open_value FLOAT      Open reaction value to use in FBA\n'
                       '  --fba_spec_fp FILE          FBA spec filepath (JSON)\n'
                       '  --output_fp FILE            Output filepath\n')
