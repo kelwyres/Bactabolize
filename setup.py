@@ -11,6 +11,7 @@ setuptools.setup(
     description='metabolic python package',
     author='Stephen Watts',
     license='GPLv3',
+    url='https://github.com/scwatts/metabolic_pipeline',
     test_suite='tests',
     packages=setuptools.find_packages(),
     entry_points={
