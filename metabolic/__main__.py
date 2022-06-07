@@ -52,7 +52,19 @@ def run_draft_model(args):
     # Create draft model
     output_fp = args.output_fp.parent / f'{args.output_fp.stem}_model.json'
     model = util.read_model_and_check(args.ref_model_fp, ref_genes_fp, ref_proteins_fp)
-    draft_model.run(assembly_genbank_fp, ref_genes_fp, ref_proteins_fp, model, output_fp)
+    alignment_thresholds = {
+        'min_coverage': args.min_coverage,
+        'min_pident': args.min_pident,
+        'min_ppos': args.min_ppos,
+    }
+    draft_model.run(
+        assembly_genbank_fp,
+        ref_genes_fp,
+        ref_proteins_fp,
+        model,
+        alignment_thresholds,
+        output_fp
+    )
     # Explicitly remove temporary directory
     dh.cleanup()
 

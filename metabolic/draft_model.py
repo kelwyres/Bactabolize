@@ -18,13 +18,19 @@ from . import media_definitions
 from . import util
 
 
-def run(assembly_fp, ref_genes_fp, ref_proteins_fp, model, output_fp):
+def run(assembly_fp, ref_genes_fp, ref_proteins_fp, model, alignment_thresholds, output_fp):
     print('\n========================================')
     print('running draft model creation')
     print('========================================')
     # Get orthologs of genes in model
     model_genes = {gene.id for gene in model.genes}
-    isolate_orthologs, blast_results = identify(assembly_fp, ref_genes_fp, ref_proteins_fp, model_genes)
+    isolate_orthologs, blast_results = identify(
+        assembly_fp,
+        ref_genes_fp,
+        ref_proteins_fp,
+        model_genes,
+        alignment_thresholds
+    )
     # Remove genes from model that have no ortholog in the isolate
     missing_genes = list()
     for gene in model_genes - set(isolate_orthologs):
@@ -183,17 +189,17 @@ def write_blast_results(data, output_fp):
             print(*hits, sep='\n', file=fh)
 
 
-def identify(iso_fp, ref_genes_fp, ref_proteins_fp, model_genes):
+def identify(iso_fp, ref_genes_fp, ref_proteins_fp, model_genes, alignment_thresholds):
     # First we perform a standard best bi-directional hit analysis to identify orthologs
     # Extract protein sequences from both genomes but only keep model genes from the reference
     dh = tempfile.TemporaryDirectory()
     iso_proteins_fp = pathlib.Path(dh.name, 'isolate_proteins.fasta')
     util.write_genbank_coding(iso_fp, iso_proteins_fp, seq_type='prot')
-    # Run BLASTp bidirectionally (filtering with evalue <=1e-3, coverage >=25%, and pident >=80%)
+    # Run BLASTp bidirectionally (filtering with evalue <=1e-3, and user defined coverage, pident, ppos)
     blastp_iso_all = alignment.run_blastp(iso_proteins_fp, ref_proteins_fp)
     blastp_ref_all = alignment.run_blastp(ref_proteins_fp, iso_proteins_fp)
-    blastp_iso = alignment.filter_results(blastp_iso_all, min_coverage=25, min_pident=80)
-    blastp_ref = alignment.filter_results(blastp_ref_all, min_coverage=25, min_pident=80)
+    blastp_iso = alignment.filter_results(blastp_iso_all, **alignment_thresholds)
+    blastp_ref = alignment.filter_results(blastp_ref_all, **alignment_thresholds)
 
     # Find orthologs from BLASTp results
     model_orthologs = discover_orthologs(blastp_ref, blastp_iso)

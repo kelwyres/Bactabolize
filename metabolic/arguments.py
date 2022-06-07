@@ -46,6 +46,9 @@ def parse():
     parser_draft.add_argument('--ref_proteins_fp', type=pathlib.Path)
     parser_draft.add_argument('--ref_genes_fp', type=pathlib.Path)
     parser_draft.add_argument('--ref_model_fp', type=pathlib.Path)
+    parser_draft.add_argument('--min_coverage', type=float, default=25)
+    parser_draft.add_argument('--min_pident', type=float, default=80)
+    parser_draft.add_argument('--min_ppos', type=float)
     parser_draft.add_argument('--output_fp', type=pathlib.Path)
     parser_draft.add_argument('-h', '--help', action='store_true')
 
@@ -154,6 +157,9 @@ def help_text(command):
                       '  --ref_genbank_fp FILE       Reference genbank filepath\n'
                       '  --ref_proteins_fp FILE      Reference proteins filepath (FASTA)\n'
                       '  --ref_model_fp FILE         Reference model filepath (JSON)\n'
+                      '  --min_coverage FLOAT        Alignment minimum coverage\n'
+                      '  --min_pident FLOAT          Alignment minimum percentage identity\n'
+                      '  --min_ppos FLOAT            Alignment minimum percentage positive matches\n'
                       '  --output_fp FILE            Output filepath\n'
                       '\nOther:\n'
                       '  --ref_genes_fp FILE         Reference genes filepath (FASTA)\n'

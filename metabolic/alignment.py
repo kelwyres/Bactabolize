@@ -15,6 +15,7 @@ BlastFormat = {'qseqid': str,
                'bitscore': float,
                'pident': float,
                'nident': int,
+               'ppos': float,
                'mismatch': int,
                'gaps': int}
 
@@ -52,14 +53,15 @@ def run_blastn(query_fp, subject_fp):
     return parse_results(result.stdout)
 
 
-def filter_results(results, *, min_coverage, min_pident):
+def filter_results(results, *, min_coverage=None, min_pident=None, min_ppos=None):
     results_filtered = dict()
     for qseqid, hits in results.items():
         for hit in hits:
-            # Filter on coverage and pident
-            if hit.length / hit.qlen * 100 < min_coverage:
+            if min_coverage and hit.length / hit.qlen * 100 < min_coverage:
                 continue
-            if hit.pident < min_pident:
+            if min_pident and hit.pident < min_pident:
+                continue
+            if min_ppos and hit.ppos < min_ppos:
                 continue
             if hit.qseqid not in results_filtered:
                 results_filtered[hit.qseqid] = list()
