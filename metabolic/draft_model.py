@@ -43,6 +43,7 @@ def run(assembly_fp, ref_genes_fp, ref_proteins_fp, model, alignment_thresholds,
     # Write model to disk and assess model
     with output_fp.open('w') as fh:
         cobra.io.save_json_model(model_draft, fh)
+        cobra.io.write_sbml_model(model_draft, str(output_fp).rsplit('.', 1)[0] + '.xml') # .xml output
     assess_model(model, model_draft, blast_results, output_fp)
 
 
