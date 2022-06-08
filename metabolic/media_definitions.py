@@ -19,8 +19,8 @@ m9 = {
     'EX_ni2_e': -1000,
     'EX_o2_e': -20,
     'EX_pi_e': -1000,
-    'EX_sel_e': -1000,
-    'EX_slnt_e': -1000,
+    # 'EX_sel_e': -1000, # removed as current models don't support selenate reactions - non-essential for growth! 
+    # 'EX_slnt_e': -1000, # removed as current models don't support selenite reactions - non-essential for growth! 
     'EX_so4_e': -1000,
     'EX_tungs_e': -1000,
     'EX_zn2_e': -1000,
