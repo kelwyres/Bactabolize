@@ -15,6 +15,14 @@ A high-throughput metabolic model construction pipeline.
 ## Quickstart
 
 ```bash
+### Installation
+
+# Create environment
+conda create -n -y metabolic_v_0.0.1
+
+# Activate environment
+conda activate metabolic_v_0.0.1
+
 # Install
 conda install -y -c scwatts -c bioconda -c conda-forge metabolic
 
@@ -71,8 +79,6 @@ media that it is performed on, and the default element sources. Here is an examp
       "EX_nh4_e":      -1000,
       "EX_ni2_e":      -1000,
       "EX_pi_e":       -1000,
-      "EX_sel_e":      -1000,
-      "EX_slnt_e":     -1000,
       "EX_so4_e":      -1000,
       "EX_tungs_e":    -1000,
       "EX_zn2_e":      -1000
@@ -86,6 +92,7 @@ media that it is performed on, and the default element sources. Here is an examp
   }
 }
 ```
+Note that EX_sel_e" and "EX_slnt_e" are excluded
 
 This spec defines a single media setting, `m9`, to perform FBA. The `fba_type` field sets the type of FBA to run; both simple
 media assessment and identification of potential element sources will be done here. The `exchanges` field specifies the media
