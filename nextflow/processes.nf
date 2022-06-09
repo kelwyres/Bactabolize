@@ -18,14 +18,13 @@ process annotate {
 
   input:
   tuple isolate_id, path(assembly_fp)
-  path(prodigal_model_fp)
 
   output:
   tuple val(isolate_id), path('*_annotated.gbk')
 
   script:
   """
-  metabolic annotate --assembly_fp ${assembly_fp} --prodigal_model_fp ${prodigal_model_fp} --output_fp ${isolate_id}_annotated.gbk
+  metabolic annotate --assembly_fp ${assembly_fp} --output_fp ${isolate_id}_annotated.gbk
   """
 }
 

@@ -1,3 +1,4 @@
+import contextlib
 import pathlib
 import sys
 import tempfile
@@ -17,17 +18,19 @@ from . import media_definitions
 from . import util
 
 
-def run(assembly_fp, ref_genes_fp, ref_proteins_fp, model, output_fp):
+def run(assembly_fp, ref_genes_fp, ref_proteins_fp, model, alignment_thresholds, output_fp):
     print('\n========================================')
     print('running draft model creation')
     print('========================================')
     # Get orthologs of genes in model
     model_genes = {gene.id for gene in model.genes}
-    isolate_orthologs, blast_results = identify(assembly_fp, ref_genes_fp, ref_proteins_fp, model_genes)
+    isolate_orthologs, blast_results = identify(
+        assembly_fp, ref_genes_fp, ref_proteins_fp, model_genes, alignment_thresholds
+    )
     # Remove genes from model that have no ortholog in the isolate
     missing_genes = list()
     for gene in model_genes - set(isolate_orthologs):
-        # TODO: handle artificial genes better
+        # NOTE: must handle artificial genes better
         if gene == 'KPN_SPONT':
             continue
         missing_genes.append(model.genes.get_by_id(gene))
@@ -40,6 +43,7 @@ def run(assembly_fp, ref_genes_fp, ref_proteins_fp, model, output_fp):
     # Write model to disk and assess model
     with output_fp.open('w') as fh:
         cobra.io.save_json_model(model_draft, fh)
+        cobra.io.write_sbml_model(model_draft, str(output_fp).rsplit('.', 1)[0] + '.xml') # .xml output
     assess_model(model, model_draft, blast_results, output_fp)
 
 
@@ -59,8 +63,10 @@ def assess_model(model, model_draft, blast_results, output_fp):
 
     # Threshold for whether a model produces biomass
     if solution.objective_value < 1e-4:
-        msg = ('error: model failed to produce biomass on minimal media, '
-                'manual intervention is required to fix the draft model')
+        msg = (
+            'error: model failed to produce biomass on minimal media, '
+            'manual intervention is required to fix the draft model'
+        )
         print(msg, file=sys.stderr)
         create_troubleshooter(model, model_draft, blast_results, f'{output_fp}.troubleshoot')
         sys.exit(101)
@@ -126,6 +132,7 @@ def gapfill_model(model, model_draft):
 
 
 def write_troubleshoot_summary(model, metabolites_missing, reactions_missing, blastp_hits, blastn_hits, output_fp):
+    # pylint: disable=cell-var-from-loop,consider-using-with,too-many-branches
     # Set base URLs for reaction annotations
     reaction_external_urls = {
         'bigg.metabolite': 'http://bigg.ucsd.edu/universal/metabolites/',
@@ -182,17 +189,18 @@ def write_blast_results(data, output_fp):
             print(*hits, sep='\n', file=fh)
 
 
-def identify(iso_fp, ref_genes_fp, ref_proteins_fp, model_genes):
+def identify(iso_fp, ref_genes_fp, ref_proteins_fp, model_genes, alignment_thresholds):
+    # pylint: disable=consider-using-with
     # First we perform a standard best bi-directional hit analysis to identify orthologs
     # Extract protein sequences from both genomes but only keep model genes from the reference
     dh = tempfile.TemporaryDirectory()
     iso_proteins_fp = pathlib.Path(dh.name, 'isolate_proteins.fasta')
     util.write_genbank_coding(iso_fp, iso_proteins_fp, seq_type='prot')
-    # Run BLASTp bidirectionally (filtering with evalue <=1e-3, coverage >=25%, and pident >=80%)
+    # Run BLASTp bidirectionally (filtering with evalue <=1e-3, and user defined coverage, pident, ppos)
     blastp_iso_all = alignment.run_blastp(iso_proteins_fp, ref_proteins_fp)
     blastp_ref_all = alignment.run_blastp(ref_proteins_fp, iso_proteins_fp)
-    blastp_iso = alignment.filter_results(blastp_iso_all, min_coverage=25, min_pident=80)
-    blastp_ref = alignment.filter_results(blastp_ref_all, min_coverage=25, min_pident=80)
+    blastp_iso = alignment.filter_results(blastp_iso_all, **alignment_thresholds)
+    blastp_ref = alignment.filter_results(blastp_ref_all, **alignment_thresholds)
 
     # Find orthologs from BLASTp results
     model_orthologs = discover_orthologs(blastp_ref, blastp_iso)
@@ -204,7 +212,6 @@ def identify(iso_fp, ref_genes_fp, ref_proteins_fp, model_genes):
     util.write_genbank_coding(iso_fp, iso_fasta_fp, seq_type='nucl')
     # Write reference gene sequences with no ortholog as fasta
     ref_genes_noorth_fp = pathlib.Path(dh.name, 'ref_genes_noorth.fasta')
-    import contextlib
     with contextlib.ExitStack() as stack:
         fin = stack.enter_context(ref_genes_fp.open('r'))
         fout = stack.enter_context(ref_genes_noorth_fp.open('w'))
@@ -212,7 +219,7 @@ def identify(iso_fp, ref_genes_fp, ref_proteins_fp, model_genes):
             if desc not in model_genes_no_orth:
                 continue
             print(f'>{desc}', file=fout)
-            print(*[seq[i:i+80] for i in range(0, len(seq), 80)], sep='\n', file=fout)
+            print(*[seq[i : i + 80] for i in range(0, len(seq), 80)], sep='\n', file=fout)
     # Run BLASTn (filtering with evalue <=1e-3, coverage >=80%, and pident >=80%)
     blastn_res_all = alignment.run_blastn(ref_genes_noorth_fp, iso_fasta_fp)
     blastn_res = alignment.filter_results(blastn_res_all, min_coverage=80, min_pident=80)
@@ -241,6 +248,7 @@ def discover_orthologs(blastp_ref, blastp_iso):
 
 
 def discover_unannotated_orthologs(blastn_res, iso_fasta_fp, model_orthologs):
+    # pylint: disable=no-else-continue
     with iso_fasta_fp.open('r') as fh:
         iso_fasta = {des: Bio.Seq.Seq(seq) for des, seq in Bio.SeqIO.FastaIO.SimpleFastaParser(fh)}
     for ref_gene_name, hits in blastn_res.items():

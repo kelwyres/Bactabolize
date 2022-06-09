@@ -1,26 +1,27 @@
 from . import util
 
 
-
-BlastFormat = {'qseqid': str,
-               'sseqid': str,
-               'qlen': int,
-               'slen': int,
-               'qstart': int,
-               'qend': int,
-               'sstart': int,
-               'send': int,
-               'length': int,
-               'evalue': float,
-               'bitscore': float,
-               'pident': float,
-               'nident': int,
-               'mismatch': int,
-               'gaps': int}
+BlastFormat = {
+    'qseqid': str,
+    'sseqid': str,
+    'qlen': int,
+    'slen': int,
+    'qstart': int,
+    'qend': int,
+    'sstart': int,
+    'send': int,
+    'length': int,
+    'evalue': float,
+    'bitscore': float,
+    'pident': float,
+    'nident': int,
+    'ppos': float,
+    'mismatch': int,
+    'gaps': int,
+}
 
 
 class BlastResult:
-
     def __init__(self, *values):
         for (attr, attr_type), value in zip(BlastFormat.items(), values):
             setattr(self, attr, attr_type(value))
@@ -52,14 +53,15 @@ def run_blastn(query_fp, subject_fp):
     return parse_results(result.stdout)
 
 
-def filter_results(results, *, min_coverage, min_pident):
+def filter_results(results, *, min_coverage=None, min_pident=None, min_ppos=None):
     results_filtered = dict()
-    for qseqid, hits in results.items():
+    for hits in results.values():
         for hit in hits:
-            # Filter on coverage and pident
-            if hit.length / hit.qlen * 100 < min_coverage:
+            if min_coverage and hit.length / hit.qlen * 100 < min_coverage:
                 continue
-            if hit.pident < min_pident:
+            if min_pident and hit.pident < min_pident:
+                continue
+            if min_ppos and hit.ppos < min_ppos:
                 continue
             if hit.qseqid not in results_filtered:
                 results_filtered[hit.qseqid] = list()
@@ -68,6 +70,7 @@ def filter_results(results, *, min_coverage, min_pident):
 
 
 def parse_results(results):
+    # pylint: disable=no-member
     query_hits = dict()
     line_token_gen = (line.split() for line in results.rstrip().split('\n'))
     for line_tokens in line_token_gen:

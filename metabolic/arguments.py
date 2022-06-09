@@ -8,7 +8,6 @@ from . import __version__
 
 
 class ArgumentParserCustomHelp(argparse.ArgumentParser):
-
     def parse_args(self, args=None, namespace=None):
         args, argv = self.parse_known_args(args, namespace)
         if argv:
@@ -19,7 +18,6 @@ class ArgumentParserCustomHelp(argparse.ArgumentParser):
             sys.exit(1)
         return args
 
-
     def _check_value(self, action, value):
         if action.choices is not None and value not in action.choices:
             if action.dest == 'command':
@@ -27,8 +25,7 @@ class ArgumentParserCustomHelp(argparse.ArgumentParser):
                 print(f'\n{__program_name__}: error: unrecognized stage: {value}', file=sys.stderr)
                 sys.exit(1)
             else:
-                args = {'value': value,
-                        'choices': ', '.join(map(repr, action.choices))}
+                args = {'value': value, 'choices': ', '.join(map(repr, action.choices))}
                 msg = 'invalid choice: %(value)r (choose from %(choices)s)'
                 raise argparse.ArgumentError(action, msg % args)
 
@@ -46,10 +43,12 @@ def parse():
     parser_draft.add_argument('--ref_proteins_fp', type=pathlib.Path)
     parser_draft.add_argument('--ref_genes_fp', type=pathlib.Path)
     parser_draft.add_argument('--ref_model_fp', type=pathlib.Path)
+    parser_draft.add_argument('--min_coverage', type=float, default=25)
+    parser_draft.add_argument('--min_pident', type=float, default=80)
+    parser_draft.add_argument('--min_ppos', type=float)
     parser_draft.add_argument('--output_fp', type=pathlib.Path)
     parser_draft.add_argument('-h', '--help', action='store_true')
 
-    parser_draft.add_argument('--prodigal_model_fp', type=pathlib.Path)
     parser_draft.add_argument('--no_reannotation', action='store_true')
 
     parser_patch = subparsers.add_parser('patch_model', add_help=False)
@@ -61,6 +60,7 @@ def parse():
 
     parser_fba = subparsers.add_parser('fba', add_help=False)
     parser_fba.add_argument('--model_fp', type=pathlib.Path)
+    parser_fba.add_argument('--fba_open_value', type=float)
     parser_fba.add_argument('--fba_spec_fp', type=pathlib.Path)
     parser_fba.add_argument('--output_fp', type=pathlib.Path)
     parser_fba.add_argument('-h', '--help', action='store_true')
@@ -71,6 +71,7 @@ def parse():
 
 
 def check_arguments(args):
+    # pylint: disable=no-else-continue,too-many-branches
     if args.help:
         print(help_text(args.command), file=sys.stdout)
         sys.exit(0)
@@ -81,14 +82,14 @@ def check_arguments(args):
     required_args = {
         'draft_model': {
             'single': ('assembly_fp', 'ref_model_fp', 'output_fp'),
-            'exactly_one': (('ref_genbank_fp', 'ref_proteins_fp'), ),
+            'exactly_one': (('ref_genbank_fp', 'ref_proteins_fp'),),
         },
         'patch_model': {
             'single': ('draft_model_fp', 'ref_model_fp', 'patch_fp', 'output_fp'),
         },
         'fba': {
             'single': ('model_fp', 'fba_spec_fp', 'output_fp'),
-        }
+        },
     }
     if not args.command:
         msg = f'{__program_name__}: error: you must provide a command to execute'
@@ -105,7 +106,7 @@ def check_arguments(args):
                     msg = f'--{required_item} is missing'
                     args_error_msgs.append(msg)
             elif req_type == 'exactly_one':
-                args_present = sum(args.__dict__[arg] != None for arg in required_item)
+                args_present = sum(args.__dict__[arg] is not None for arg in required_item)
                 if args_present != 1:
                     msg_part = ', '.join(f'--{arg}' for arg in required_item[:-1])
                     msg_part = f'{msg_part} or --{required_item[-1]}'
@@ -141,37 +142,48 @@ def check_arguments(args):
 def help_text(command):
     info_text = f'\nProgram: {__program_name__}\nVersion: {__version__}\n'
     if not command:
-        help_text = (f'Usage: {__program_name__} <command> [options]\n\n'
-                      'Commands:\n'
-                      '  draft_model                 Create a draft model\n'
-                      '  patch_model                 Patch a draft model\n'
-                      '  fba                         Simulate growth on media with FBA\n\n'
-                     f'For more information about commands, run: {__program_name__} <command> --help\n')
+        help_text_str = (
+            f'Usage: {__program_name__} <command> [options]\n\n'
+            'Commands:\n'
+            '  draft_model                 Create a draft model\n'
+            '  patch_model                 Patch a draft model\n'
+            '  fba                         Simulate growth on media with FBA\n\n'
+            f'For more information about commands, run: {__program_name__} <command> --help\n'
+        )
     elif command == 'draft_model':
-        help_text = (f'Usage: {__program_name__} {command} [options]\n'
-                      'Options:\n'
-                      '  --assembly_fp FILE          Isolate assembly filepath (GenBank)\n'
-                      '  --ref_genbank_fp FILE       Reference genbank filepath\n'
-                      '  --ref_proteins_fp FILE      Reference proteins filepath (FASTA)\n'
-                      '  --ref_model_fp FILE         Reference model filepath (JSON)\n'
-                      '  --output_fp FILE            Output filepath\n'
-                      '\nOther:\n'
-                      '  --ref_genes_fp FILE         Reference genes filepath (FASTA)\n'
-                      '  --prodigal_model_fp FILE    Prodigal model to use\n'
-                      '  --no_reannotation           Do not reannotate genbank file\n')
+        help_text_str = (
+            f'Usage: {__program_name__} {command} [options]\n'
+            'Options:\n'
+            '  --assembly_fp FILE          Isolate assembly filepath (GenBank)\n'
+            '  --ref_genbank_fp FILE       Reference genbank filepath\n'
+            '  --ref_proteins_fp FILE      Reference proteins filepath (FASTA)\n'
+            '  --ref_model_fp FILE         Reference model filepath (JSON)\n'
+            '  --min_coverage FLOAT        Alignment minimum coverage\n'
+            '  --min_pident FLOAT          Alignment minimum percentage identity\n'
+            '  --min_ppos FLOAT            Alignment minimum percentage positive matches\n'
+            '  --output_fp FILE            Output filepath\n'
+            '\nOther:\n'
+            '  --ref_genes_fp FILE         Reference genes filepath (FASTA)\n'
+            '  --no_reannotation           Do not reannotate genbank file\n'
+        )
     elif command == 'patch_model':
-        help_text = (f'Usage: {__program_name__} {command} [options]\n'
-                      'Options:\n'
-                      '  --draft_model_fp FILE       Isolate model filepath\n'
-                      '  --ref_model_fp FILE         Reference model filepath\n'
-                      '  --patch_fp FILE             Patch file (JSON)\n'
-                      '  --output_fp FILE            Output filepath\n')
+        help_text_str = (
+            f'Usage: {__program_name__} {command} [options]\n'
+            'Options:\n'
+            '  --draft_model_fp FILE       Isolate model filepath\n'
+            '  --ref_model_fp FILE         Reference model filepath\n'
+            '  --patch_fp FILE             Patch file (JSON)\n'
+            '  --output_fp FILE            Output filepath\n'
+        )
     elif command == 'fba':
-        help_text = (f'Usage: {__program_name__} {command} [options]\n'
-                      'Options:\n'
-                      '  --model_fp FILE       Isolate model filepath\n'
-                      '  --fba_spec_fp FILE          FBA spec filepath (JSON)\n'
-                      '  --output_fp FILE            Output filepath\n')
+        help_text_str = (
+            f'Usage: {__program_name__} {command} [options]\n'
+            'Options:\n'
+            '  --model_fp FILE             Isolate model filepath\n'
+            '  --fba_open_value FLOAT      Open reaction value to use in FBA\n'
+            '  --fba_spec_fp FILE          FBA spec filepath (JSON)\n'
+            '  --output_fp FILE            Output filepath\n'
+        )
     else:
         assert False
-    return f'{info_text}\n{help_text}'
+    return f'{info_text}\n{help_text_str}'

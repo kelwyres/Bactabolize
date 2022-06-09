@@ -9,6 +9,7 @@ from . import media_definitions
 
 
 def run(draft_model_fp, ref_model_fp, patch_fp, output_fp):
+    # pylint: disable=too-many-branches
     print('\n========================================')
     print('Patching model')
     print('========================================')
@@ -26,7 +27,7 @@ def run(draft_model_fp, ref_model_fp, patch_fp, output_fp):
             reaction = model_ref.reactions.get_by_id(reaction_id)
             model_draft.add_reaction(reaction)
         else:
-            print(f'error: got bad operation {op} for {vid}', file=sys.stderr)
+            print(f'error: got bad operation {op} for {reaction_id}', file=sys.stderr)
             sys.exit(1)
     biomass_reaction = model_draft.reactions.get_by_id('BIOMASS_')
     for metabolite_id, op in patch['biomass_metabolites'].items():
@@ -35,10 +36,10 @@ def run(draft_model_fp, ref_model_fp, patch_fp, output_fp):
             coefficient = biomass_reaction.metabolites[metabolite]
             biomass_reaction.subtract_metabolites({metabolite: coefficient})
         elif op == 'add':
-            # TODO: check if we'd ever need to add a biomass metabolite
-            raise NotImplemented
+            # NOTE: need to check if we'd ever need to add a biomass metabolite
+            raise NotImplementedError
         else:
-            print(f'error: got bad operation {op} for {vid}', file=sys.stderr)
+            print(f'error: got bad operation {op} for {metabolite_id}', file=sys.stderr)
             sys.exit(1)
     # Write model to disk
     with output_fp.open('w') as fh:

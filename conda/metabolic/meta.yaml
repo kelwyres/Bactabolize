@@ -1,0 +1,29 @@
+{% set data = load_setup_py_data() %}
+
+package:
+  name: metabolic
+  version: {{ data.version }}
+
+source:
+  path: ../../
+
+build:
+  noarch: python
+  number: 0
+  script: {{ PYTHON }} -m pip install . -vv
+
+requirements:
+  host:
+    - python ==3.9
+  run:
+    - biopython ==1.79
+    - cobra ==0.21.0
+
+test:
+  commands:
+    - metabolic --version
+
+about:
+  home: {{ data.url }}
+  license: {{ data.license }}
+  summary: {{ data.description }}

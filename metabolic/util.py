@@ -2,7 +2,6 @@ import contextlib
 import pathlib
 import subprocess
 import sys
-import tempfile
 
 
 import Bio.SeqIO
@@ -68,29 +67,30 @@ def determine_assembly_filetype(filepath):
 
 
 def write_genbank_coding(filepath, output_fp, *, seq_type):
+    # pylint: disable=too-many-branches
     with contextlib.ExitStack() as stack:
         fh_in = stack.enter_context(filepath.open('r'))
         fh_out = stack.enter_context(output_fp.open('w'))
         # Iterate coding features
         for record in Bio.SeqIO.parse(fh_in, 'genbank'):
             for feature in iterate_coding_features(record):
-                nucl_seq = feature.extract(record.seq)
+                nucleotide_seq = feature.extract(record.seq)
                 if seq_type == 'prot':
                     if 'translation' not in feature.qualifiers:
                         # Append trailing N if we have a partial codon
-                        seq_n = (3 - len(nucl_seq)) % 3
-                        nucleotide_seq = nucl_seq + 'N' * seq_n
-                        seq = nucl_seq.translate(stop_symbol='')
+                        seq_n = (3 - len(nucleotide_seq)) % 3
+                        nucleotide_seq = nucleotide_seq + 'N' * seq_n
+                        seq = nucleotide_seq.translate(stop_symbol='')
                     else:
                         [seq] = feature.qualifiers['translation']
                 elif seq_type == 'nucl':
-                    seq = nucl_seq
+                    seq = nucleotide_seq
                 else:
                     assert False
                 # Write to disk
                 [locus_tag] = feature.qualifiers['locus_tag']
                 desc = f'>{locus_tag}'
-                seq_lines = [seq[i:i+80] for i in range(0, len(seq), 80)]
+                seq_lines = [seq[i : i + 80] for i in range(0, len(seq), 80)]
                 print(desc, file=fh_out)
                 print(*seq_lines, sep='\n', file=fh_out)
     return output_fp
@@ -98,14 +98,14 @@ def write_genbank_coding(filepath, output_fp, *, seq_type):
 
 def write_genbank_seq(filepath, dirpath):
     fasta_fp = str()
-    output_fp = pathlib.Path(dirpath,  f'{filepath.stem}.fasta')
+    output_fp = pathlib.Path(dirpath, f'{filepath.stem}.fasta')
     with contextlib.ExitStack() as stack:
         fh_in = stack.enter_context(filepath.open('r'))
         fh_out = stack.enter_context(output_fp.open('w'))
         fasta_fp = fh_out.name
         for record in Bio.SeqIO.parse(fh_in, 'genbank'):
             desc = f'>{record.name}'
-            seq_lines = [record.seq[i:i+80] for i in range(0, len(record.seq), 80)]
+            seq_lines = [record.seq[i : i + 80] for i in range(0, len(record.seq), 80)]
             print(desc, file=fh_out)
             print(*seq_lines, sep='\n', file=fh_out)
     return pathlib.Path(fasta_fp)
@@ -121,9 +121,9 @@ def iterate_coding_features(record):
 
 def extract_nucleotides_from_ref(hit, fasta):
     if hit.sstart > hit.send:
-        seq = fasta[hit.sseqid][hit.send-1:hit.sstart].reverse_complement()
+        seq = fasta[hit.sseqid][hit.send - 1 : hit.sstart].reverse_complement()
     else:
-        seq = fasta[hit.sseqid][hit.sstart-1:hit.send]
+        seq = fasta[hit.sseqid][hit.sstart - 1 : hit.send]
     return seq
 
 
