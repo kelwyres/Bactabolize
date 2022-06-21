@@ -4,6 +4,7 @@ import sys
 
 
 import cobra.io
+from cobra.io import read_sbml_model
 
 
 from . import fba
@@ -16,7 +17,10 @@ def run(model_fp, fba_open_value, spec_fp, output_fp):
     print('========================================')
     # Read in model and spec
     with model_fp.open('r') as fh:
-        model = cobra.io.load_json_model(fh)
+        if model_fp.suffix == '.json':
+            model = cobra.io.load_json_model(fh)
+        elif model_fp.suffix == '.xml':
+            model = read_sbml_model(fh)
     spec = parse_spec(spec_fp)
     # Run FBA
     results = dict()
