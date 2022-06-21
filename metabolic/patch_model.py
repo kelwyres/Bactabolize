@@ -3,6 +3,7 @@ import sys
 
 
 import cobra.io
+from cobra.io import read_sbml_model
 
 
 from . import media_definitions
