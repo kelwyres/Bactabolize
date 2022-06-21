@@ -15,9 +15,17 @@ def run(draft_model_fp, ref_model_fp, patch_fp, output_fp):
     print('========================================')
     # Read in models and patch file
     with draft_model_fp.open('r') as fh:
-        model_draft = cobra.io.load_json_model(fh)
+        if draft_model_fp.suffix == '.json':
+            model_draft = cobra.io.load_json_model(fh)
+        elif draft_model_fp.suffix == '.xml':
+            model_draft = read_sbml_model(fh)
+            
     with ref_model_fp.open('r') as fh:
-        model_ref = cobra.io.load_json_model(fh)
+        if ref_model_fp.suffix == '.json':
+            model_ref = cobra.io.load_json_model(fh)
+        elif ref_model_fp.suffix == '.xml':
+            model_ref = read_sbml_model(fh)
+            
     patch = parse_patch(patch_fp, model_draft.id)
     # Apply patch
     for reaction_id, op in patch['reactions'].items():
