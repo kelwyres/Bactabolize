@@ -18,7 +18,7 @@ A high-throughput metabolic model construction pipeline.
 ### Installation
 
 # Create environment
-conda create -n -y metabolic_v_0.0.1
+conda create -n -y metabolic_v_0.0.1 python=3.9
 
 # Activate environment
 conda activate metabolic_v_0.0.1
