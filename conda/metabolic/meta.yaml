@@ -18,6 +18,8 @@ requirements:
   run:
     - biopython ==1.79
     - cobra ==0.21.0
+    - blast ==2.12.0
+    - prodigal ==2.6.3
 
 test:
   commands:
