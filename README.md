@@ -115,7 +115,7 @@ metabolic draft_model \
 Once a model has been generated, you can then test its growth profiles across a range of nutrient sources. This is performed using Flux Balance Analysis (FBA) and will test each nutrient source under aerobic and anaerobic conditions.
 
 FBA here has been designed around (1) simulating growth on various media, and (2) identifying extracellular
-metabolites as a source of carbon, phosphate, nitrogen, and/or sulfur. An extracellular metabolite is considered a potential
+metabolites as a source of carbon, phosphorus, nitrogen, and/or sulfur. An extracellular metabolite is considered a potential
 source of an element if it is present in the metabolite chemical formula (e.g. a metabolite is a potential carbon
 source if it contains carbon). In order to test whether a metabolite can be utilised in a draft model as an element
 source, FBA is performed with only the media-defined exchanges and the target metabolite exchange enabled. Additionally,
@@ -201,7 +201,7 @@ media that it is performed on, and the default element sources. Here is an examp
     },
     "default_element_sources": {
       "carbon": "EX_glc__D_e",
-      "phosphate": "EX_pi_e",
+      "phosphorus": "EX_pi_e",
       "nitrogen": "EX_nh4_e",
       "sulfur": "EX_so4_e"
     }
