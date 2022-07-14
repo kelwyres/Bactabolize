@@ -146,7 +146,7 @@ def validate_spec(fba_spec):
             print(f'error: found non-numeric exchange LB: {exchange_value}', file=sys.stderr)
             sys.exit(1)
     # All defaults are defined
-    sources_valid = {'carbon', 'phosphate', 'nitrogen', 'sulfur'}
+    sources_valid = {'carbon', 'phosphorus', 'nitrogen', 'sulfur'}
     sources_present = set(fba_spec['default_element_sources'])
     missing = sources_valid.difference(sources_present)
     undefined = sources_present.difference(sources_valid)
