@@ -53,6 +53,7 @@ def run(draft_model_fp, ref_model_fp, patch_fp, output_fp):
     # Write model to disk
     with output_fp.open('w') as fh:
         cobra.io.save_json_model(model_draft, fh)
+        cobra.io.write_sbml_model(model_draft, str(output_fp).rsplit('.', 1)[0] + '.xml') # .xml output
     # Check if model now optimises on m9
     for reaction in model_draft.exchanges:
         reaction.lower_bound = 0
