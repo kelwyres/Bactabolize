@@ -6,7 +6,7 @@ import sys
 # Regex for selecting source type
 element_base_re = '^.*%s([0-9A-Z]+.*)?$'
 carbon_re = re.compile(element_base_re % 'C')
-phosphate_re = re.compile(element_base_re % 'P')
+phosphorus_re = re.compile(element_base_re % 'P')
 nitrogen_re = re.compile(element_base_re % 'N')
 sulfur_re = re.compile(element_base_re % 'S')
 
@@ -20,8 +20,8 @@ def prepare_element_source_data(model):
         categories = list()
         if carbon_re.match(metabolite.formula):
             categories.append('carbon')
-        if phosphate_re.match(metabolite.formula):
-            categories.append('phosphate')
+        if phosphorus_re.match(metabolite.formula):
+            categories.append('phosphorus')
         if nitrogen_re.match(metabolite.formula):
             categories.append('nitrogen')
         if sulfur_re.match(metabolite.formula):
