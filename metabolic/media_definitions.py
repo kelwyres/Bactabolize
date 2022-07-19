@@ -19,8 +19,9 @@ M9 = {
     'EX_pi_e':        -1000,
     'EX_so4_e':       -1000,
     'EX_tungs_e':     -1000,
-    'EX_zn2_e':       -1000
-},
+    'EX_zn2_e':       -1000,
+}
+
 LB = {
     'EX_13BDglcn_e':  -1000,
     'EX_ala__L_e':    -1000,
@@ -86,8 +87,9 @@ LB = {
     'EX_ura_e':       -1000,
     'EX_uri_e':       -1000,
     'EX_val__L_e':    -1000,
-    'EX_zn2_e':       -1000      
-},
+    'EX_zn2_e':       -1000,
+}
+
 BG11 = {
     'EX_ca2_e':       -1000,
     'EX_cit_e':       -1000,
@@ -103,9 +105,10 @@ BG11 = {
     'EX_nh4_e':       -1000,
     'EX_no3_e':       -1000,
     'EX_pi_e':        -1000,
-    'EX_so4_e':       -1000
-},
-LB_CarveMe = {
+    'EX_so4_e':       -1000,
+}
+
+LB_CARVEME = {
     'EX_adn_e':       -1000,
     'EX_ala__L_e':    -1000,
     'EX_amp_e':       -1000,
@@ -169,9 +172,10 @@ LB_CarveMe = {
     'EX_ura_e':       -1000,
     'EX_uri_e':       -1000,
     'EX_val__L_e':    -1000,
-    'EX_zn2_e':       -1000
-},
-nutrient_media = {
+    'EX_zn2_e':       -1000,
+}
+
+NUTRIENT_MEDIA = {
     'EX_13BDglcn_e':  -1000,
     'EX_ala__L_e':    -1000,
     'EX_amp_e':       -1000,
@@ -238,8 +242,9 @@ nutrient_media = {
     'EX_ura_e':       -1000,
     'EX_uri_e':       -1000,
     'EX_val__L_e':    -1000,
-    'EX_zn2_e':       -1000
-},
+    'EX_zn2_e':       -1000,
+}
+
 TSA = {
     'EX_14glucan_e':  -1000,
     'EX_1Dgali_e':    -1000,
@@ -282,9 +287,10 @@ TSA = {
     'EX_val__L_e':    -1000,
     'EX_val__L_e':    -1000,
     'EX_vrbsc_e':     -1000,
-    'EX_xyl__D_e':    -1000
-},
-TSA_sheep_blood = {
+    'EX_xyl__D_e':    -1000,
+}
+
+TSA_SHEEP_BLOOD = {
     'EX_14glucan_e':  -1000,
     'EX_1Dgali_e':    -1000,
     'EX_ala__L_e':    -1000,
@@ -327,5 +333,5 @@ TSA_sheep_blood = {
     'EX_val__L_e':    -1000,
     'EX_val__L_e':    -1000,
     'EX_vrbsc_e':     -1000,
-    'EX_xyl__D_e':    -1000
+    'EX_xyl__D_e':    -1000,
 }
