@@ -157,7 +157,7 @@ def help_text(command):
             '  --assembly_fp FILE          Isolate assembly filepath (GenBank)\n'
             '  --ref_genbank_fp FILE       Reference genbank filepath\n'
             '  --ref_proteins_fp FILE      Reference proteins filepath (FASTA)\n'
-            '  --ref_model_fp FILE         Reference model filepath (JSON)\n'
+            '  --ref_model_fp FILE         Reference model filepath (JSON, XML [SMBL v3.1])\n'
             '  --min_coverage FLOAT        Alignment minimum coverage\n'
             '  --min_pident FLOAT          Alignment minimum percentage identity\n'
             '  --min_ppos FLOAT            Alignment minimum percentage positive matches\n'
@@ -172,7 +172,7 @@ def help_text(command):
             'Options:\n'
             '  --draft_model_fp FILE       Isolate model filepath\n'
             '  --ref_model_fp FILE         Reference model filepath\n'
-            '  --patch_fp FILE             Patch file (JSON)\n'
+            '  --patch_fp FILE             Patch file (JSON, XML [SMBL v3.1])\n'
             '  --output_fp FILE            Output filepath\n'
         )
     elif command == 'fba':
@@ -181,7 +181,7 @@ def help_text(command):
             'Options:\n'
             '  --model_fp FILE             Isolate model filepath\n'
             '  --fba_open_value FLOAT      Open reaction value to use in FBA\n'
-            '  --fba_spec_fp FILE          FBA spec filepath (JSON)\n'
+            '  --fba_spec_fp FILE          FBA spec filepath (JSON, XML [SMBL v3.1])\n'
             '  --output_fp FILE            Output filepath\n'
         )
     else:

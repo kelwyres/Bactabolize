@@ -3,6 +3,7 @@ import sys
 
 
 import cobra.io
+from cobra.io import read_sbml_model
 
 
 from . import media_definitions
@@ -15,9 +16,17 @@ def run(draft_model_fp, ref_model_fp, patch_fp, output_fp):
     print('========================================')
     # Read in models and patch file
     with draft_model_fp.open('r') as fh:
-        model_draft = cobra.io.load_json_model(fh)
+        if draft_model_fp.suffix == '.json':
+            model_draft = cobra.io.load_json_model(fh)
+        elif draft_model_fp.suffix == '.xml':
+            model_draft = read_sbml_model(fh)
+            
     with ref_model_fp.open('r') as fh:
-        model_ref = cobra.io.load_json_model(fh)
+        if ref_model_fp.suffix == '.json':
+            model_ref = cobra.io.load_json_model(fh)
+        elif ref_model_fp.suffix == '.xml':
+            model_ref = read_sbml_model(fh)
+            
     patch = parse_patch(patch_fp, model_draft.id)
     # Apply patch
     for reaction_id, op in patch['reactions'].items():
@@ -44,6 +53,7 @@ def run(draft_model_fp, ref_model_fp, patch_fp, output_fp):
     # Write model to disk
     with output_fp.open('w') as fh:
         cobra.io.save_json_model(model_draft, fh)
+        cobra.io.write_sbml_model(model_draft, str(output_fp).rsplit('.', 1)[0] + '.xml') # .xml output
     # Check if model now optimises on m9
     for reaction in model_draft.exchanges:
         reaction.lower_bound = 0

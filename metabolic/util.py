@@ -7,6 +7,7 @@ import sys
 import Bio.SeqIO
 import Bio.SeqIO.FastaIO
 import cobra.io
+from cobra.io import read_sbml_model
 
 
 def read_model_and_check(model_fp, genes_fp, proteins_fp):
@@ -14,7 +15,10 @@ def read_model_and_check(model_fp, genes_fp, proteins_fp):
     print('reading reference model data')
     print('========================================')
     with model_fp.open('r') as fh:
-        model = cobra.io.load_json_model(fh)
+        if model_fp.suffix == '.json':
+            model = cobra.io.load_json_model(fh)
+        elif model_fp.suffix == '.xml':
+            model = read_sbml_model(fh)
     # Collect genes/proteins
     model_genes = {gene.id for gene in model.genes}
     with genes_fp.open('r') as fh:

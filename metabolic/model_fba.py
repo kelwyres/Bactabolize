@@ -4,6 +4,7 @@ import sys
 
 
 import cobra.io
+from cobra.io import read_sbml_model
 
 
 from . import fba
@@ -16,7 +17,10 @@ def run(model_fp, fba_open_value, spec_fp, output_fp):
     print('========================================')
     # Read in model and spec
     with model_fp.open('r') as fh:
-        model = cobra.io.load_json_model(fh)
+        if model_fp.suffix == '.json':
+            model = cobra.io.load_json_model(fh)
+        elif model_fp.suffix == '.xml':
+            model = read_sbml_model(fh)
     spec = parse_spec(spec_fp)
     # Run FBA
     results = dict()
@@ -142,7 +146,7 @@ def validate_spec(fba_spec):
             print(f'error: found non-numeric exchange LB: {exchange_value}', file=sys.stderr)
             sys.exit(1)
     # All defaults are defined
-    sources_valid = {'carbon', 'phosphate', 'nitrogen', 'sulfur'}
+    sources_valid = {'carbon', 'phosphorus', 'nitrogen', 'sulfur'}
     sources_present = set(fba_spec['default_element_sources'])
     missing = sources_valid.difference(sources_present)
     undefined = sources_present.difference(sources_valid)
