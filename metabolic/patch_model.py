@@ -7,10 +7,11 @@ from cobra.io import read_sbml_model
 
 
 from . import media_definitions
+from . import util
 
 
-def run(draft_model_fp, ref_model_fp, patch_fp, output_fp):
-    # pylint: disable=too-many-branches
+def run(draft_model_fp, ref_model_fp, patch_fp, memote_fp, output_fp):
+    # pylint: disable=too-many-branches,too-many-statements
     print('\n========================================')
     print('Patching model')
     print('========================================')
@@ -71,6 +72,10 @@ def run(draft_model_fp, ref_model_fp, patch_fp, output_fp):
         sys.exit(101)
     else:
         print('model produces biomass on minimal media')
+
+    # Generate MEMOTE report file if requested
+    if memote_fp:
+        util.generate_memote_report(model_draft, memote_fp)
 
 
 def parse_patch(patch_fp, model_name):

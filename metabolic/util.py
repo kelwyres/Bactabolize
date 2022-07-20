@@ -8,6 +8,7 @@ import Bio.SeqIO
 import Bio.SeqIO.FastaIO
 import cobra.io
 from cobra.io import read_sbml_model
+import memote
 
 
 def read_model_and_check(model_fp, genes_fp, proteins_fp):
@@ -139,3 +140,11 @@ def execute_command(command):
         print('stderr:', result.stderr, file=sys.stderr)
         sys.exit(1)
     return result
+
+
+def generate_memote_report(model, output_fp):
+    print('Running MEMOTE')
+    result = memote.test_model(model, results=True)
+    report = memote.snapshot_report(result[1], config=None, html=True)
+    with output_fp.open('w') as fh:
+        fh.write(report)

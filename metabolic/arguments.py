@@ -47,6 +47,7 @@ def parse():
     parser_draft.add_argument('--min_pident', type=float, default=80)
     parser_draft.add_argument('--min_ppos', type=float)
     parser_draft.add_argument('--output_fp', type=pathlib.Path)
+    parser_draft.add_argument('--memote_report_fp', type=pathlib.Path)
     parser_draft.add_argument('-h', '--help', action='store_true')
 
     parser_draft.add_argument('--no_reannotation', action='store_true')
@@ -56,6 +57,7 @@ def parse():
     parser_patch.add_argument('--ref_model_fp', type=pathlib.Path)
     parser_patch.add_argument('--patch_fp', type=pathlib.Path)
     parser_patch.add_argument('--output_fp', type=pathlib.Path)
+    parser_patch.add_argument('--memote_report_fp', type=pathlib.Path)
     parser_patch.add_argument('-h', '--help', action='store_true')
 
     parser_fba = subparsers.add_parser('fba', add_help=False)
@@ -127,7 +129,7 @@ def check_arguments(args):
         sys.exit(1)
     # Check all input file objects exist
     for arg, value in args.__dict__.items():
-        if not value or arg == 'output_fp':
+        if not value or arg in {'output_fp', 'memote_report_fp'}:
             continue
         elif isinstance(value, pathlib.Path):
             if not value.exists():
@@ -161,6 +163,7 @@ def help_text(command):
             '  --min_coverage FLOAT        Alignment minimum coverage\n'
             '  --min_pident FLOAT          Alignment minimum percentage identity\n'
             '  --min_ppos FLOAT            Alignment minimum percentage positive matches\n'
+            '  --memote_report_fp FILE     MEMOTE report output filepath\n'
             '  --output_fp FILE            Output filepath\n'
             '\nOther:\n'
             '  --ref_genes_fp FILE         Reference genes filepath (FASTA)\n'
@@ -173,6 +176,7 @@ def help_text(command):
             '  --draft_model_fp FILE       Isolate model filepath\n'
             '  --ref_model_fp FILE         Reference model filepath\n'
             '  --patch_fp FILE             Patch file (JSON, XML [SMBL v3.1])\n'
+            '  --memote_report_fp FILE     MEMOTE report output filepath\n'
             '  --output_fp FILE            Output filepath\n'
         )
     elif command == 'fba':

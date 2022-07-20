@@ -17,3 +17,6 @@ dependencies:
   # Dependencies
   - biopython ==1.79
   - cobra ==0.21.0
+  - depinfo ==1.7.0  # required by MEMOTE
+  - pip:
+    - memote ==0.13.0
