@@ -144,7 +144,7 @@ def execute_command(command):
 
 def generate_memote_report(model, output_fp):
     print('Running MEMOTE')
-    result = memote.test_model(model, results=True)
+    result = memote.test_model(model, results=True, pytest_args=['-qq'])
     report = memote.snapshot_report(result[1], config=None, html=True)
     with output_fp.open('w') as fh:
         fh.write(report)
