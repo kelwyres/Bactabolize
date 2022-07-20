@@ -285,7 +285,6 @@ TSA = {
     'EX_trp__L_e': -1000,
     'EX_tyr__L_e': -1000,
     'EX_val__L_e': -1000,
-    'EX_val__L_e': -1000,
     'EX_vrbsc_e': -1000,
     'EX_xyl__D_e': -1000,
 }
@@ -330,7 +329,6 @@ TSA_SHEEP_BLOOD = {
     'EX_thr__L_e': -1000,
     'EX_trp__L_e': -1000,
     'EX_tyr__L_e': -1000,
-    'EX_val__L_e': -1000,
     'EX_val__L_e': -1000,
     'EX_vrbsc_e': -1000,
     'EX_xyl__D_e': -1000,
