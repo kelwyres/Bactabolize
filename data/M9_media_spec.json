@@ -1,5 +1,5 @@
 {
-  "m9": {
+  "M9": {
     "fba_type": [
         "defined_exchanges_only",
         "potential_element_sources"
@@ -29,7 +29,7 @@
     },
     "default_element_sources": {
       "carbon": "EX_glc__D_e",
-      "phosphorus": "EX_pi_e",
+      "phosphate": "EX_pi_e",
       "nitrogen": "EX_nh4_e",
       "sulfur": "EX_so4_e"
     }

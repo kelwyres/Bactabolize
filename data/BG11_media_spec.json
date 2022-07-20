@@ -1,35 +1,29 @@
 {
-  "m9": {
+  "BG11": {
     "fba_type": [
         "defined_exchanges_only",
         "potential_element_sources"
     ],
     "exchanges": {
       "EX_ca2_e":      -1000,
-      "EX_cbl1_e":     -0.01,
+      "EX_cit_e":      -1000,
       "EX_cl_e":       -1000,
-      "EX_cobalt2_e":  -1000,
-      "EX_cu2_e":      -1000,
       "EX_fe2_e":      -1000,
-      "EX_fe3_e":      -1000,
-      "EX_glc__D_e":   -20,
-      "EX_h2o_e":      -1000,
       "EX_h_e":        -1000,
+      "EX_h2co3_e":    -1000,
+      "EX_h2o_e":      -1000,
+      "EX_hco3_e":     -1000,
       "EX_k_e":        -1000,
       "EX_mg2_e":      -1000,
-      "EX_mn2_e":      -1000,
-      "EX_mobd_e":     -1000,
       "EX_na1_e":      -1000,
       "EX_nh4_e":      -1000,
-      "EX_ni2_e":      -1000,
+      "EX_no3_e":      -1000,
       "EX_pi_e":       -1000,
-      "EX_so4_e":      -1000,
-      "EX_tungs_e":    -1000,
-      "EX_zn2_e":      -1000
-    },
+      "EX_so4_e":      -1000
+	},
     "default_element_sources": {
-      "carbon": "EX_glc__D_e",
-      "phosphorus": "EX_pi_e",
+      "carbon": "EX_cit_e",
+      "phosphate": "EX_pi_e",
       "nitrogen": "EX_nh4_e",
       "sulfur": "EX_so4_e"
     }
