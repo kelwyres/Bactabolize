@@ -14,6 +14,7 @@ setuptools.setup(
     url='https://github.com/scwatts/metabolic_pipeline',
     test_suite='tests',
     packages=setuptools.find_packages(),
+    package_data={'metabolic': ['data/*.json']},
     entry_points={
         'console_scripts': ['metabolic=metabolic.__main__:entry'],
     },
