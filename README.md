@@ -1,6 +1,9 @@
 # metabolic
 
-A high-throughput genome-scale metabolic model construction pipeline. metabolic allows you to provide an input genome (annotated or unannotated) and construct a strain-specific metabolic model using a reference model. Growth experience such as Flux Balance Analysis (FBA) can then be performed on the models under a variety of growth conditions and mediums.
+A high-throughput genome-scale metabolic model construction pipeline. metabolic allows you to provide an input genome
+(annotated or unannotated) and construct a strain-specific metabolic model using a reference model. Growth experience
+such as Flux Balance Analysis (FBA) can then be performed on the models under a variety of growth conditions and
+mediums.
 
 ## Table of contents
 
@@ -48,39 +51,52 @@ metabolic fba \
 
 ## Model construction
 
-Metabolic model construction is run using the `metabolic draft_model` command. Once a model is constructed, metabolic then tests the model for growth on M9 minimal media with glucose. If the model does not grow under these conditions, `metabolic patch_model` should be run to add additional reactions.
+Metabolic model construction is run using the `metabolic draft_model` command. Once a model is constructed, metabolic
+then tests the model for growth on M9 minimal media with glucose. If the model does not grow under these conditions,
+`metabolic patch_model` should be run to add additional reactions.
 
 ### Options
 
-`--assembly_fp` - (REQUIRED) Input assembly for which a metabolic model will be generated. This can be either an unannotated **fasta** file or an annotated **genbank** file. metabolic will honour the genbank annotations. Useful if you already have an annotation you want to generate a model from. 
+`--assembly_fp` - (REQUIRED) Input assembly for which a metabolic model will be generated. This can be either an
+unannotated **fasta** file or an annotated **genbank** file. metabolic will honour the genbank annotations. Useful if
+you already have an annotation you want to generate a model from.
 
 `--output_fp` - (REQUIRED) Output filename
 
 `--ref_model_fp` - (REQUIRED) Reference of metabolic model in .json format.
 
-#### The reference genome data used to generate the input assembly model can be provided as nucleotide (.ffn) AND protein multifasta (.faa) files. Useful if reference is a pan-model or multi-strain model and does not exist in a traditional genbank format.
+The reference genome data used to generate the input assembly model can be provided as nucleotide (.ffn) AND protein
+multifasta (.faa) files. Useful if reference is a pan-model or multi-strain model and does not exist in a traditional
+genbank format.
 
-`--ref_genes_fp` - (REQUIRED) Reference genes in nucleotide sequence (fasta). Corresponds to `--ref_proteins_fp` and `--ref_model_fp`
+`--ref_genes_fp` - (REQUIRED) Reference genes in nucleotide sequence (fasta). Corresponds to `--ref_proteins_fp` and
+`--ref_model_fp`
 
-`--ref_proteins_fp` - (REQUIRED) Reference protein in amino acid sequence (fasta). Corresponds to `--ref_genes_fp` and `--ref_model_fp` 
+`--ref_proteins_fp` - (REQUIRED) Reference protein in amino acid sequence (fasta). Corresponds to `--ref_genes_fp` and
+`--ref_model_fp`
 
+Alternatively, reference genome data can be provided by a genbank file. Useful if reference is a single-strain model.
 
-#### Alternatively, reference genome data can be provided by a genbank file. Useful if reference is a single-strain model.
-
-`ref_genbank_fp` - (REQUIRED) Reference genome (genbank). Corresponds to `--ref_model_fp` 
+`ref_genbank_fp` - (REQUIRED) Reference genome (genbank). Corresponds to `--ref_model_fp`
 
 #### Other options
-`--min_coverage` - (OPTIONAL) Set minimum query coverage percentage for bi-directional best hit for ortholog identification. DEFAULT: 25
 
-`--min_pident` (OPTIONAL) Set minimum identity percentage for bi-directional best hit for ortholog identification. DEFAULT: 80
+`--min_coverage` - (OPTIONAL) Set minimum query coverage percentage for bi-directional best hit for ortholog
+identification. DEFAULT: 25
 
-`--min_ppos` (OPTIONAL) Set minimum protein similarity (positives) percentage for bi-directional best hit for ortholog identification. DEFAULT: OFF. Can be used instead of `--min_pident` to allow for greater tolerance of similarly-functional but different residues.
+`--min_pident` (OPTIONAL) Set minimum identity percentage for bi-directional best hit for ortholog identification.
+DEFAULT: 80
+
+`--min_ppos` (OPTIONAL) Set minimum protein similarity (positives) percentage for bi-directional best hit for ortholog
+identification. DEFAULT: OFF. Can be used instead of `--min_pident` to allow for greater tolerance of
+similarly-functional but different residues.
 
 `--no_reannotation` - (OPTIONAL) Will prevent the re-annotation of the input genbank file with prodigal. DEFAULT: Off.
 
 ### Examples
-```
-# Create draft model for genbank input assembly using genbank reference, at 25% query coverage and 80% protein similarity 
+
+```bash
+# Create draft model for genbank input assembly using genbank reference, at 25% query coverage and 80% protein similarity
 metabolic draft_model \
     --assembly_fp input_assembly.gbk \
     --ref_genbank_fp reference.gbk \
@@ -88,8 +104,8 @@ metabolic draft_model \
     --output_fp input_assembly_model_qc_25_sim_85 \
     --min_coverage 25 \
     --min_ppos 80
-    
-# Create draft model for fasta input assembly using multifasta reference, at 25% query coverage and 75% protein identity 
+
+# Create draft model for fasta input assembly using multifasta reference, at 25% query coverage and 75% protein identity
 metabolic draft_model \
     --assembly_fp input_assembly.fasta \
     --ref_genes_fp reference_model_genes.ffn \
@@ -109,10 +125,10 @@ metabolic draft_model \
 | `assembly_id`\_model.xml      | Metabolic model in .xml ([SMBL Level 3 Version 1)](https://co.mbine.org/specifications/sbml.level-3.version-1.core.release-1) |
 | `assembly_id`\_model.html     | [MEMOTE](https://github.com/opencobra/memote) model report                             |
 
-
 ## Growth profiles and Flux Balance Analysis
 
-Once a model has been generated, you can then test its growth profiles across a range of nutrient sources. This is performed using Flux Balance Analysis (FBA) and will test each nutrient source under aerobic and anaerobic conditions.
+Once a model has been generated, you can then test its growth profiles across a range of nutrient sources. This is
+performed using Flux Balance Analysis (FBA) and will test each nutrient source under aerobic and anaerobic conditions.
 
 FBA here has been designed around (1) simulating growth on various media, and (2) identifying extracellular
 metabolites as a source of carbon, phosphorus, nitrogen, and/or sulfur. An extracellular metabolite is considered a potential
@@ -123,7 +139,6 @@ the exchange of any default element source is disable in the minimal media as re
 metabolite as a source of carbon, the default carbon source exchange is disabled). Where a metabolite contains more than
 one of the four elements, all combinations are tested.
 
-
 ### Options
 
 `--model_fp` - (REQUIRED) Input model (.json) to perform FBA on
@@ -132,27 +147,29 @@ one of the four elements, all combinations are tested.
 
 `--output_fp` - (REQUIRED) Output filename for [FBA results](#fba-output-file-format) (tab-delimited)
 
-`--fba_open_value` - (OPTIONAL) Set objective value for nutrient sources tested during FBA. Should be a negative value between -1 and -1000. -10 or -20 is probably most reasonable. DEFAULT: -1000
+`--fba_open_value` - (OPTIONAL) Set objective value for nutrient sources tested during FBA. Should be a negative value
+between -1 and -1000. -10 or -20 is probably most reasonable. DEFAULT: -1000
 
 ### Examples
 
-```
+```bash
 # Produce FBA on input on M9 minimal media with an objective value of -20
 metabolic fba \
     --model_fp input_assembly_model.json \
     --fba_spec_fp FBA_spec_files/M9_media_spec.json \
     --output_fp input_assembly_model_FBA.tsv \
     --fba_open_value -20
-    
+
 # Produce FBA on input on TSA media with an objective value of -10
 metabolic fba \
     --model_fp input_assembly_model.json \
     --fba_spec_fp FBA_spec_files/TSA_media_spec.json \
     --output_fp input_assembly_model_FBA.tsv \
-    --fba_open_value -10 
+    --fba_open_value -10
 ```
 
 ### FBA output file format
+
 A `assembly_id`\_fba.tsv tab-delimited file will be produced:
 
 | Column name       | Description                                                                   |
@@ -164,8 +181,8 @@ A `assembly_id`\_fba.tsv tab-delimited file will be produced:
 | `categories`      | Elements for which the exchange was assessed as being a potential source      |
 | `objective value` | Biomass objective value                                                       |
 
-
 ### FBA spec file
+
 The `*_spec.json` file defines the type of FBA to perform, the
 media that it is performed on, and the default element sources. Here is an example:
 
@@ -208,9 +225,11 @@ media that it is performed on, and the default element sources. Here is an examp
   }
 }
 ```
+
 This spec defines a single media setting, `M9`, to perform FBA. The `fba_type` field sets the type of FBA to run; both simple
 media assessment and identification of potential element sources will be done here. The `exchanges` field specifies the media
-and `default_element_sources` specifies the default exchanges to use when assessing potential element sources. 7 common bacterial medias (including TSA, LB, nutrient media, BG11 etc) have been included in the `FBA_spec_files` directory.
+and `default_element_sources` specifies the default exchanges to use when assessing potential element sources. 7 common
+bacterial medias (including TSA, LB, nutrient media, BG11 etc) have been included in the `FBA_spec_files` directory.
 
 ## Troubleshooting models
 
@@ -218,8 +237,8 @@ The ability of a draft model to produce biomass on minimal media is assessed dur
 troubleshooting information describing metabolites, reactions, and genes required to produce biomass is written to disk.
 
 In order to fix the model you must first determine what changes must be made to the model and then transcribe those changes
-into a 'patch' file. Then the `metabolic patch_model` command can be run, which will perform targeted gap-filling to repair the model. 
-Example `patch.json` file:
+into a 'patch' file. Then the `metabolic patch_model` command can be run, which will perform targeted gap-filling to
+repair the model. Example `patch.json` file:
 
 ```json
 {
@@ -269,7 +288,6 @@ metabolic fba \
 To run individual FBA on extracellular metabolites, they must be annotated with the respective chemical formula in the model.
 If you have a model that contains `metanetx` identifiers for metabolites (i.e. a BiGG model), you can add metabolite formulas
 using the [`BiGG model compound annotator`](https://github.com/scwatts/bigg_model_compound_annotator).
-
 
 ## Requirements
 

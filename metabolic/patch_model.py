@@ -20,13 +20,13 @@ def run(draft_model_fp, ref_model_fp, patch_fp, output_fp):
             model_draft = cobra.io.load_json_model(fh)
         elif draft_model_fp.suffix == '.xml':
             model_draft = read_sbml_model(fh)
-            
+
     with ref_model_fp.open('r') as fh:
         if ref_model_fp.suffix == '.json':
             model_ref = cobra.io.load_json_model(fh)
         elif ref_model_fp.suffix == '.xml':
             model_ref = read_sbml_model(fh)
-            
+
     patch = parse_patch(patch_fp, model_draft.id)
     # Apply patch
     for reaction_id, op in patch['reactions'].items():
@@ -53,11 +53,11 @@ def run(draft_model_fp, ref_model_fp, patch_fp, output_fp):
     # Write model to disk
     with output_fp.open('w') as fh:
         cobra.io.save_json_model(model_draft, fh)
-        cobra.io.write_sbml_model(model_draft, str(output_fp).rsplit('.', 1)[0] + '.xml') # .xml output
+        cobra.io.write_sbml_model(model_draft, str(output_fp).rsplit('.', 1)[0] + '.xml')  # .xml output
     # Check if model now optimises on m9
     for reaction in model_draft.exchanges:
         reaction.lower_bound = 0
-    for reaction_id, lower_bound in media_definitions.m9.items():
+    for reaction_id, lower_bound in media_definitions.M9.items():
         try:
             reaction = model_draft.reactions.get_by_id(reaction_id)
         except KeyError:

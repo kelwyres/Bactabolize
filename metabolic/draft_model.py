@@ -43,7 +43,7 @@ def run(assembly_fp, ref_genes_fp, ref_proteins_fp, model, alignment_thresholds,
     # Write model to disk and assess model
     with output_fp.open('w') as fh:
         cobra.io.save_json_model(model_draft, fh)
-        cobra.io.write_sbml_model(model_draft, str(output_fp).rsplit('.', 1)[0] + '.xml') # .xml output
+        cobra.io.write_sbml_model(model_draft, str(output_fp).rsplit('.', 1)[0] + '.xml')  # .xml output
     assess_model(model, model_draft, blast_results, output_fp)
 
 
@@ -52,7 +52,7 @@ def assess_model(model, model_draft, blast_results, output_fp):
     # We perform an FBA on minimal media (m9)
     for reaction in model_draft.exchanges:
         reaction.lower_bound = 0
-    for reaction_id, lower_bound in media_definitions.m9.items():
+    for reaction_id, lower_bound in media_definitions.M9.items():
         try:
             reaction = model_draft.reactions.get_by_id(reaction_id)
         except KeyError:
