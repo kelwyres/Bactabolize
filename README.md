@@ -1,9 +1,8 @@
-# metabolic
+# Bactabolize
 
-A high-throughput genome-scale metabolic model construction pipeline. metabolic allows you to provide an input genome
+A high-throughput genome-scale metabolic model construction pipeline. Bactabolize allows you to provide an input genome
 (annotated or unannotated) and construct a strain-specific metabolic model using a reference model. Growth experience
-such as Flux Balance Analysis (FBA) can then be performed on the models under a variety of growth conditions and
-mediums.
+such as Flux Balance Analysis (FBA) and single gene knockout analysis can then be performed on the models under a variety of growth conditions and mediums.
 
 ## Table of contents
 
@@ -21,10 +20,10 @@ mediums.
 ### Installation
 
 # Create environment
-conda create -n -y metabolic_v_0.0.1 python=3.9
+conda create -n -y Bactabolize_v_0.0.1 python=3.9
 
 # Activate environment
-conda activate metabolic_v_0.0.1
+conda activate Bactabolize_v_0.0.1
 
 # Install
 conda install -y -c scwatts -c bioconda -c conda-forge metabolic
@@ -57,41 +56,45 @@ then tests the model for growth on M9 minimal media with glucose. If the model d
 
 ### Options
 
-`--assembly_fp` - (REQUIRED) Input assembly for which a metabolic model will be generated. This can be either an
+#### Required
+
+`--assembly_fp` - Input assembly for which a metabolic model will be generated. This can be either an
 unannotated **fasta** file or an annotated **genbank** file. metabolic will honour the genbank annotations. Useful if
 you already have an annotation you want to generate a model from.
 
-`--output_fp` - (REQUIRED) Output filename
+`--output_fp` - Output filename
 
-`--ref_model_fp` - (REQUIRED) Reference of metabolic model in .json format.
+`--ref_model_fp` - Reference of metabolic model in .json format.
 
 The reference genome data used to generate the input assembly model can be provided as nucleotide (.ffn) AND protein
 multifasta (.faa) files. Useful if reference is a pan-model or multi-strain model and does not exist in a traditional
 genbank format.
 
-`--ref_genes_fp` - (REQUIRED) Reference genes in nucleotide sequence (fasta). Corresponds to `--ref_proteins_fp` and
+`--ref_genes_fp` - Reference genes in nucleotide sequence (fasta). Corresponds to `--ref_proteins_fp` and
 `--ref_model_fp`
 
-`--ref_proteins_fp` - (REQUIRED) Reference protein in amino acid sequence (fasta). Corresponds to `--ref_genes_fp` and
+`--ref_proteins_fp` - Reference protein in amino acid sequence (fasta). Corresponds to `--ref_genes_fp` and
 `--ref_model_fp`
 
 Alternatively, reference genome data can be provided by a genbank file. Useful if reference is a single-strain model.
 
-`ref_genbank_fp` - (REQUIRED) Reference genome (genbank). Corresponds to `--ref_model_fp`
+`ref_genbank_fp` - Reference genome (genbank). Corresponds to `--ref_model_fp`
 
-#### Other options
+#### Optional
 
-`--min_coverage` - (OPTIONAL) Set minimum query coverage percentage for bi-directional best hit for ortholog
+`--min_coverage` - Set minimum query coverage percentage for bi-directional best hit for ortholog
 identification. DEFAULT: 25
 
-`--min_pident` (OPTIONAL) Set minimum identity percentage for bi-directional best hit for ortholog identification.
+`--min_pident` - Set minimum identity percentage for bi-directional best hit for ortholog identification.
 DEFAULT: 80
 
-`--min_ppos` (OPTIONAL) Set minimum protein similarity (positives) percentage for bi-directional best hit for ortholog
+`--min_ppos` - Set minimum protein similarity (positives) percentage for bi-directional best hit for ortholog
 identification. DEFAULT: OFF. Can be used instead of `--min_pident` to allow for greater tolerance of
 similarly-functional but different residues.
 
-`--no_reannotation` - (OPTIONAL) Will prevent the re-annotation of the input genbank file with prodigal. DEFAULT: Off.
+`--memote_report_fp` - MEMOTE model quality report output filepath. Note that this will add >5 minutes of compute time PER assembly
+
+`--no_reannotation` - Will prevent the re-annotation of the input genbank file with prodigal. DEFAULT: Off.
 
 ### Examples
 
@@ -105,7 +108,7 @@ metabolic draft_model \
     --min_coverage 25 \
     --min_ppos 80
 
-# Create draft model for fasta input assembly using multifasta reference, at 25% query coverage and 75% protein identity
+# Create draft model for fasta input assembly using multifasta reference, at 25% query coverage and 75% protein identity. Produce MEMOTE report
 metabolic draft_model \
     --assembly_fp input_assembly.fasta \
     --ref_genes_fp reference_model_genes.ffn \
@@ -113,7 +116,8 @@ metabolic draft_model \
     --ref_model_fp reference_model.json \
     --output_fp input_assembly_model_qc_25_sim_85 \
     --min_coverage 25 \
-    --min_pident 75
+    --min_pident 75 \
+    --memote_report_fp input_report
 ```
 
 ### Draft model outputs
@@ -141,14 +145,20 @@ one of the four elements, all combinations are tested.
 
 ### Options
 
-`--model_fp` - (REQUIRED) Input model (.json) to perform FBA on
+#### Required
 
-`--fba_spec_fp` - (REQUIRED) FBA spec file. Example and explanation [here](#fba-spec-file).
+`--model_fp` - Input model (.json) to perform FBA on
 
-`--output_fp` - (REQUIRED) Output filename for [FBA results](#fba-output-file-format) (tab-delimited)
+`--fba_spec_fp` - FBA spec file. Example and explanation [here](#fba-spec-file).
 
-`--fba_open_value` - (OPTIONAL) Set objective value for nutrient sources tested during FBA. Should be a negative value
+`--output_fp` - Output filename for [FBA results](#fba-output-file-format) (tab-delimited)
+
+#### Optional
+
+`--fba_open_value` - Set objective value for nutrient sources tested during FBA. Should be a negative value
 between -1 and -1000. -10 or -20 is probably most reasonable. DEFAULT: -1000
+
+`--memote_report_fp` - MEMOTE model quality report output filepath. Note that this will add >5 minutes of compute time PER assembly
 
 ### Examples
 
@@ -236,9 +246,7 @@ bacterial medias (including TSA, LB, nutrient media, BG11 etc) have been include
 The ability of a draft model to produce biomass on minimal media is assessed during creation. When a model fails this test,
 troubleshooting information describing metabolites, reactions, and genes required to produce biomass is written to disk.
 
-In order to fix the model you must first determine what changes must be made to the model and then transcribe those changes
-into a 'patch' file. Then the `metabolic patch_model` command can be run, which will perform targeted gap-filling to
-repair the model. Example `patch.json` file:
+In order to fix the model you must then add these missing reactions into a 'patch' file. Only the reactions are required, their metabolites and associated genes (if any) will be added automatically. Then the `metabolic patch_model` command can be run, which will perform targeted gap-filling to repair the model. Example `patch.json` file:
 
 ```json
 {
@@ -254,6 +262,13 @@ repair the model. Example `patch.json` file:
 ```
 
 This patch file specifies that the `K_variicola_variicola_342` model requires two reactions to be added.
+
+#### Requirements
+
+- Add missing `reactions` to patch file
+- Make sure the model name, in this case, `K_variicola_variicola_342`, matches the
+`"id":"K_variicola_variicola_342"`, found just above the `"compartments":{` line in the .json file
+
 
 ```bash
 # K_variicola_variicola_342.json fails to produce biomass as it lacks lacks DTDP-4-dehydrorhamnose 3,5-epimerase and
@@ -275,13 +290,15 @@ metabolic fba \
 
 ### Options
 
-`--draft_model_fp` - (REQUIRED) Input draft model which requires gap-filling (.json)
+#### Required
 
-`--ref_model_fp` - (REQUIRED) Reference model to gap-fill the draft model (.json)
+`--draft_model_fp` - Input draft model which requires gap-filling (.json)
 
-`--patch_fp` - (REQUIRED) Missing reactions to add to input draft model (.json)
+`--ref_model_fp` - Reference model to gap-fill the draft model (.json)
 
-`--output_fp` - (REQUIRED) Output filename
+`--patch_fp` - Missing reactions to add to input draft model (.json)
+
+`--output_fp` - Output filename
 
 ### Reference models
 
