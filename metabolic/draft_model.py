@@ -2,6 +2,7 @@ import contextlib
 import pathlib
 import sys
 import tempfile
+import os
 
 
 import Bio.Seq
