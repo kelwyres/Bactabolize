@@ -12,6 +12,7 @@ such as Flux Balance Analysis (FBA) and single gene knockout analysis can then b
 * [Growth profiles and Flux Balance Analysis](#growth-profiles-and-flux-balance-analysis)
 * [Troubleshooting models](#troubleshooting-models)
 * [Requirements](#requirements)
+* [Citation](#citation)
 * [License](#license)
 
 ## Quickstart
@@ -263,7 +264,7 @@ In order to fix the model you must then add these missing reactions into a 'patc
 
 This patch file specifies that the `K_variicola_variicola_342` model requires two reactions to be added.
 
-#### Requirements
+#### patch_model requirements
 
 - Add missing `reactions` to patch file
 - Make sure the model name, in this case, `K_variicola_variicola_342`, matches the
@@ -307,6 +308,13 @@ If you have a model that contains `metanetx` identifiers for metabolites (i.e. a
 using the [`BiGG model compound annotator`](https://github.com/scwatts/bigg_model_compound_annotator).
 
 ## Requirements
+
+## Citation
+
+Please cite the Bactabolize and COBRApy papers if you make use of Bactabolize
+- bioRxiv and later, published paper here
+- Ebrahim, A., Lerman, J.A., Palsson, B.O. et al. COBRApy: COnstraints-Based Reconstruction and Analysis for Python. BMC Syst Biol 7, 74 (2013). https://doi.org/10.1186/1752-0509-7-74
+
 
 ## Development
 
