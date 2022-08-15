@@ -1,6 +1,6 @@
 import json
 import sys
-
+import os
 
 import cobra.io
 from cobra.io import read_sbml_model
@@ -13,7 +13,7 @@ from . import util
 def run(draft_model_fp, ref_model_fp, patch_fp, memote_fp, output_fp):
     # pylint: disable=too-many-branches,too-many-statements
     print('\n========================================')
-    print('Patching model')
+    print('Patching model ' + os.path.splitext(os.path.basename(draft_model_fp))[0])
     print('========================================')
     # Read in models and patch file
     with draft_model_fp.open('r') as fh:
@@ -68,10 +68,14 @@ def run(draft_model_fp, ref_model_fp, patch_fp, memote_fp, output_fp):
     solution = model_draft.optimize()
     # Threshold for whether a model produces biomass
     if solution.objective_value < 1e-4:
-        print('error: model failed to produce biomass on minimal media', file=sys.stderr)
+        print('error: ' + str(model_draft) + ' model failed to produce biomass on minimal media', file=sys.stderr)
         sys.exit(101)
     else:
-        print('model produces biomass on minimal media')
+        print(str(model_draft) +''' model produces biomass on minimal media.
+Please cite:
+- bioRxiv and later, published paper here
+- Ebrahim, A., Lerman, J.A., Palsson, B.O. et al. COBRApy: COnstraints-Based Reconstruction and Analysis for Python. BMC Syst Biol 7, 74 (2013). https://doi.org/10.1186/1752-0509-7-74
+        ''')
 
     # Generate MEMOTE report file if requested
     if memote_fp:
