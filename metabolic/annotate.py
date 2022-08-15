@@ -1,5 +1,6 @@
 import re
 import tempfile
+import os
 
 
 import Bio.Seq
@@ -22,7 +23,7 @@ from . import util
 def run(assembly_fp, output_fp):
     # pylint: disable=consider-using-with
     print('\n========================================')
-    print('running annotation')
+    print('running annotation on ' + os.path.splitext(os.path.basename(assembly_fp))[0])
     # Check assembly filetype and convert if needed
     dh = tempfile.TemporaryDirectory()
     assembly_filetype = util.determine_assembly_filetype(assembly_fp)
