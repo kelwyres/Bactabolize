@@ -75,7 +75,7 @@
     },
     "default_element_sources": {
       "carbon": "EX_glc__D_e",
-      "phosphate": "EX_pi_e",
+      "phosphorus": "EX_pi_e",
       "nitrogen": "EX_nh4_e",
       "sulfur": "EX_so4_e"
     }
