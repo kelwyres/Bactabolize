@@ -1,6 +1,7 @@
 import itertools
 import json
 import sys
+import os
 
 
 import cobra.io
@@ -13,7 +14,7 @@ from . import fba
 def run(model_fp, fba_open_value, spec_fp, output_fp):
     # pylint: disable=too-many-branches
     print('\n========================================')
-    print('running FBA')
+    print('running FBA on ' + os.path.splitext(os.path.basename(model_fp))[0])
     print('========================================')
     # Read in model and spec
     with model_fp.open('r') as fh:
