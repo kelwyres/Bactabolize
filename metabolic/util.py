@@ -2,6 +2,7 @@ import contextlib
 import pathlib
 import subprocess
 import sys
+import os
 
 
 import Bio.SeqIO
@@ -13,8 +14,9 @@ import memote
 
 def read_model_and_check(model_fp, genes_fp, proteins_fp):
     print('\n========================================')
-    print('reading reference model data')
+    print('reading reference ' + os.path.splitext(os.path.basename(model_fp))[0] + ' model')
     print('========================================')
+    print('Ignore KPN_SPONT messages :)')
     with model_fp.open('r') as fh:
         if model_fp.suffix == '.json':
             model = cobra.io.load_json_model(fh)
