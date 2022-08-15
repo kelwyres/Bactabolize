@@ -20,7 +20,7 @@ from . import util
 
 def run(assembly_fp, ref_genes_fp, ref_proteins_fp, model, alignment_thresholds, memote_fp, output_fp):
     print('\n========================================')
-    print('running draft model creation')
+    print('running draft model creation of ' + os.path.splitext(os.path.basename(assembly_fp))[0])
     print('========================================')
     # Get orthologs of genes in model
     model_genes = {gene.id for gene in model.genes}
@@ -68,15 +68,19 @@ def assess_model(model, model_draft, blast_results, output_fp):
     # Threshold for whether a model produces biomass
     if solution.objective_value < 1e-4:
         msg = (
-            'error: model failed to produce biomass on minimal media, '
-            'manual intervention is required to fix the draft model'
+            'error: ' + str(model_draft) + ' model failed to produce biomass on minimal media, '
+            'Construct patch.json manually using ' + str(model_draft) + '_model.json.troubleshoot_summary.txt and fix draft ' + str(model_draft) + ' model via patch_model command'
         )
         print(msg, file=sys.stderr)
         create_troubleshooter(model, model_draft, blast_results, f'{output_fp}.troubleshoot')
         sys.exit(101)
     else:
-        print('model produces biomass on minimal media')
+        print(str(model_draft) +''' model produces biomass on minimal media.
 
+Please cite:
+- bioRxiv and later, published paper here
+- Ebrahim, A., Lerman, J.A., Palsson, B.O. et al. COBRApy: COnstraints-Based Reconstruction and Analysis for Python. BMC Syst Biol 7, 74 (2013). https://doi.org/10.1186/1752-0509-7-74
+        ''')
 
 def create_troubleshooter(model, model_draft, blast_results, prefix):
     # Determine what required products model cannot product and missing reactions/genes
