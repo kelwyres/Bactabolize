@@ -60,8 +60,7 @@ then tests the model for growth on M9 minimal media with glucose. If the model d
 #### Required
 
 `--assembly_fp` - Input assembly for which a metabolic model will be generated. This can be either an
-unannotated **fasta** file or an annotated **genbank** file. metabolic will honour the genbank annotations. Useful if
-you already have an annotation you want to generate a model from.
+unannotated **fasta** file or an annotated **genbank** file. Bactabolize will honour the genbank annotations. **IMPORTANT:** Recommended minimum assembly quality: ≤200 assembly graph dead ends (calculate from .gfa or fastg). If only contigs are available, ≤130 contigs.
 
 `--output_fp` - Output filename
 
