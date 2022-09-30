@@ -10,16 +10,29 @@ source:
 build:
   noarch: python
   number: 0
-  script: {{ PYTHON }} -m pip install . -vv
 
 requirements:
   host:
     - python ==3.9
   run:
     - biopython ==1.79
-    - cobra ==0.21.0
     - blast ==2.12.0
+    - cobra ==0.21.0
     - prodigal ==2.6.3
+    # Additional requirements for MEMOTE (pip installed without dependencies in build.sh)
+    - click-config-file
+    - click-log
+    - cookiecutter
+    - depinfo ==1.7.0
+    - gitpython
+    - goodtables ~=2.0
+    - importlib_resources
+    - jinja2
+    - numpydoc
+    - pylru
+    - pytest >=4.0
+    - requests
+    - sqlalchemy
 
 test:
   commands:
