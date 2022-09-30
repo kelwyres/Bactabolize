@@ -84,7 +84,13 @@ def check_arguments(args):
     required_args = {
         'draft_model': {
             'single': ('assembly_fp', 'ref_model_fp', 'output_fp'),
-            'exactly_one': (('ref_genbank_fp', 'ref_proteins_fp'),),
+            'exactly_one': (
+                ('ref_genbank_fp', 'ref_proteins_fp'),
+                ('ref_genbank_fp', 'ref_genes_fp'),
+            ),
+            'all': (
+                ('ref_proteins_fp', 'ref_genes_fp'),
+            ),
         },
         'patch_model': {
             'single': ('draft_model_fp', 'ref_model_fp', 'patch_fp', 'output_fp'),
@@ -117,6 +123,18 @@ def check_arguments(args):
                     elif args_present > 1:
                         msg = f'can only specify one of: {msg_part}'
                     args_error_msgs.append(msg)
+            elif req_type == 'all':
+                args_present = list()
+                args_missing = list()
+                for arg in required_item:
+                    if args.__dict__[arg] is None:
+                        args_missing.append(arg)
+                    else:
+                        args_present.append(arg)
+                if args_present and args_missing:
+                    args_missing_str = ', '.join(f'--{arg}' for arg in args_missing)
+                    args_present_str = ', '.join(f'--{arg}' for arg in args_present)
+                    args_error_msgs.append(f'the use of {args_present_str} also requires {args_missing_str}')
             else:
                 print(f'error: argument requirement type: {req_type}')
                 sys.exit(1)
@@ -159,6 +177,7 @@ def help_text(command):
             '  --assembly_fp FILE          Isolate assembly filepath (GenBank)\n'
             '  --ref_genbank_fp FILE       Reference genbank filepath\n'
             '  --ref_proteins_fp FILE      Reference proteins filepath (FASTA)\n'
+            '  --ref_genes_fp FILE         Reference genes filepath (FASTA)\n'
             '  --ref_model_fp FILE         Reference model filepath (JSON, XML [SMBL v3.1])\n'
             '  --min_coverage FLOAT        Alignment minimum coverage\n'
             '  --min_pident FLOAT          Alignment minimum percentage identity\n'
@@ -166,7 +185,6 @@ def help_text(command):
             '  --memote_report_fp FILE     MEMOTE report output filepath\n'
             '  --output_fp FILE            Output filepath\n'
             '\nOther:\n'
-            '  --ref_genes_fp FILE         Reference genes filepath (FASTA)\n'
             '  --no_reannotation           Do not reannotate genbank file\n'
         )
     elif command == 'patch_model':
