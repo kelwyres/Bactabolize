@@ -121,7 +121,7 @@ def check_arguments(args):
                     if args_present == 0:
                         msg = f'{msg_part} is required'
                     elif args_present > 1:
-                        msg = f'can only specify one of: {msg_part}'
+                        msg = f'can only specify one of {msg_part}'
                     args_error_msgs.append(msg)
             elif req_type == 'all':
                 args_present = list()
