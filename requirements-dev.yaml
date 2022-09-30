@@ -16,7 +16,9 @@ dependencies:
   - pylint >=2.5
   # Dependencies
   - biopython ==1.79
+  - blast ==2.12.0
   - cobra ==0.21.0
+  - prodigal ==2.6.3
   - depinfo ==1.7.0  # required by MEMOTE
   - pip:
     - memote ==0.13.0
