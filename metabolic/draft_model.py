@@ -1,8 +1,9 @@
 import contextlib
+import math
+import os
 import pathlib
 import sys
 import tempfile
-import os
 
 
 import Bio.Seq
@@ -85,7 +86,7 @@ Please cite:
 
 def create_troubleshooter(model, model_draft, blast_results, prefix):
     # Determine what required products model cannot product and missing reactions/genes
-    reactions_missing = gapfill_model(model, model_draft)
+    reactions_missing, nonzero_threshold = gapfill_model(model, model_draft)
     metabolites_missing = check_biomass_metabolites(model_draft.copy())
     # Collect BLAST results
     blastp_hits = dict()
@@ -100,7 +101,15 @@ def create_troubleshooter(model, model_draft, blast_results, prefix):
             blastn_hits[(reaction, gene)] = blast_results['blastn'].get(gene.id, list())
     # Write summary info
     output_fp = pathlib.Path(f'{prefix}_summary.txt')
-    write_troubleshoot_summary(model, metabolites_missing, reactions_missing, blastp_hits, blastn_hits, output_fp)
+    write_troubleshoot_summary(
+        model,
+        metabolites_missing,
+        reactions_missing,
+        nonzero_threshold,
+        blastp_hits,
+        blastn_hits,
+        output_fp,
+    )
     # Write BLAST results
     write_blast_results(blastp_hits, pathlib.Path(f'{prefix}_blastp.tsv'))
     write_blast_results(blastn_hits, pathlib.Path(f'{prefix}_blastn.tsv'))
@@ -130,17 +139,42 @@ def check_biomass_metabolites(model):
 
 
 def gapfill_model(model, model_draft):
-    gapfilled = cobra.flux_analysis.gapfill(model_draft, model, demand_reactions=False, iterations=5)
+    # Attempt gapfilling with thresholds ranging from default 1e-6 to 0
+    integer_thresholds = [math.pow(10, y) for y in (-6, -7, -10, -20, -50, -math.inf)]
+    for threshold in integer_thresholds:
+        gapfiller = cobra.flux_analysis.gapfilling.GapFiller(
+            model=model_draft,
+            universal=model,
+            demand_reactions=False,
+            integer_threshold=threshold,
+        )
+        try:
+            gapfilled = gapfiller.fill(
+                iterations=5,
+            )
+            break
+        except RuntimeError:
+            continue
+
+    # Gather missing reactions
     reactions_missing = dict()
     for result in gapfilled:
         for reaction in result:
             if reaction not in reactions_missing:
                 reactions_missing[reaction] = 0
             reactions_missing[reaction] += 1
-    return reactions_missing
+    return reactions_missing, threshold
 
 
-def write_troubleshoot_summary(model, metabolites_missing, reactions_missing, blastp_hits, blastn_hits, output_fp):
+def write_troubleshoot_summary(
+    model,
+    metabolites_missing,
+    reactions_missing,
+    nonzero_threshold,
+    blastp_hits,
+    blastn_hits,
+    output_fp,
+):
     # pylint: disable=cell-var-from-loop,consider-using-with,too-many-branches
     # Set base URLs for reaction annotations
     reaction_external_urls = {
@@ -167,7 +201,10 @@ def write_troubleshoot_summary(model, metabolites_missing, reactions_missing, bl
                     continue
                 for url_id in url_ids:
                     print('\t', reaction_external_urls[url_type] + url_id, sep='', file=fh)
-        print('\nMissing reactions required to fix model (5 gapfill iterations)', sep='', file=fh)
+
+        msg = f'Missing reactions required to fix model (iterations: 5; threshold: {nonzero_threshold})'
+        print(f'\n{msg}', sep='', file=fh)
+
         for reaction, count in reactions_missing.items():
             print(reaction.id, f'{count}/5', file=fh)
         print('\n', 'Reaction info', sep='', end='', file=fh)
