@@ -1,4 +1,4 @@
-name: metabolic
+name: bactabolize
 
 channels:
   - bioconda

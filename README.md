@@ -1,7 +1,7 @@
 # Bactabolize
 
-A high-throughput genome-scale metabolic model construction pipeline. Bactabolize allows you to provide an input genome
-(annotated or unannotated) and construct a strain-specific metabolic model using a reference model. Growth experience
+A high-throughput genome-scale Bactabolize model construction pipeline. Bactabolize allows you to provide an input genome
+(annotated or unannotated) and construct a strain-specific Bactabolize model using a reference model. Growth experience
 such as Flux Balance Analysis (FBA) and single gene knockout analysis can then be performed on the models under a variety of growth conditions and mediums.
 
 ## Table of contents
@@ -27,12 +27,12 @@ conda create -n -y Bactabolize_v_0.0.1 python=3.9
 conda activate Bactabolize_v_0.0.1
 
 # Install
-conda install -y -c scwatts -c bioconda -c conda-forge metabolic
+conda install -y -c scwatts -c bioconda -c conda-forge bactabolize
 
-### Construct and test metabolic models
+### Construct and test Bactabolize models
 
 # Create draft model
-metabolic draft_model \
+bactabolize draft_model \
     --assembly_fp input_assembly.fasta \
     --ref_genes_fp reference_model_genes.ffn \
     --ref_proteins_fp reference_model_genes.faa \
@@ -42,7 +42,7 @@ metabolic draft_model \
     --min_pident 80
 
 # Run FBA
-metabolic fba \
+bactabolize fba \
     --model_fp input_assembly_model.json \
     --fba_spec_fp FBA_spec_files/M9_media_spec.json \
     --output_fp input_assembly_model_FBA.tsv \
@@ -51,20 +51,20 @@ metabolic fba \
 
 ## Model construction
 
-Metabolic model construction is run using the `metabolic draft_model` command. Once a model is constructed, metabolic
+Metabolic model construction is run using the `bactabolize draft_model` command. Once a model is constructed, Bactabolize
 then tests the model for growth on M9 minimal media with glucose. If the model does not grow under these conditions,
-`metabolic patch_model` should be run to add additional reactions.
+`bactabolize patch_model` should be run to add additional reactions.
 
 ### Options
 
 #### Required
 
-`--assembly_fp` - Input assembly for which a metabolic model will be generated. This can be either an
+`--assembly_fp` - Input assembly for which a Bactabolize model will be generated. This can be either an
 unannotated **fasta** file or an annotated **genbank** file. Bactabolize will honour the genbank annotations. **IMPORTANT:** Recommended minimum assembly quality: ≤200 assembly graph dead ends (calculate from .gfa or fastg). If only contigs are available, ≤130 contigs.
 
 `--output_fp` - Output filename
 
-`--ref_model_fp` - Reference of metabolic model in .json format.
+`--ref_model_fp` - Reference of Bactabolize model in .json format.
 
 The reference genome data used to generate the input assembly model can be provided as nucleotide (.ffn) AND protein
 multifasta (.faa) files. Useful if reference is a pan-model or multi-strain model and does not exist in a traditional
@@ -100,7 +100,7 @@ similarly-functional but different residues.
 
 ```bash
 # Create draft model for genbank input assembly using genbank reference, at 25% query coverage and 80% protein similarity
-metabolic draft_model \
+bactabolize draft_model \
     --assembly_fp input_assembly.gbk \
     --ref_genbank_fp reference.gbk \
     --ref_model_fp reference_model.json \
@@ -109,7 +109,7 @@ metabolic draft_model \
     --min_ppos 80
 
 # Create draft model for fasta input assembly using multifasta reference, at 25% query coverage and 75% protein identity. Produce MEMOTE report
-metabolic draft_model \
+bactabolize draft_model \
     --assembly_fp input_assembly.fasta \
     --ref_genes_fp reference_model_genes.ffn \
     --ref_proteins_fp reference_model_genes.faa \
@@ -164,14 +164,14 @@ between -1 and -1000. -10 or -20 is probably most reasonable. DEFAULT: -1000
 
 ```bash
 # Produce FBA on input on M9 minimal media with an objective value of -20
-metabolic fba \
+bactabolize fba \
     --model_fp input_assembly_model.json \
     --fba_spec_fp FBA_spec_files/M9_media_spec.json \
     --output_fp input_assembly_model_FBA.tsv \
     --fba_open_value -20
 
 # Produce FBA on input on TSA media with an objective value of -10
-metabolic fba \
+bactabolize fba \
     --model_fp input_assembly_model.json \
     --fba_spec_fp FBA_spec_files/TSA_media_spec.json \
     --output_fp input_assembly_model_FBA.tsv \
@@ -246,7 +246,7 @@ bacterial medias (including TSA, LB, nutrient media, BG11 etc) have been include
 The ability of a draft model to produce biomass on minimal media is assessed during creation. When a model fails this test,
 troubleshooting information describing metabolites, reactions, and genes required to produce biomass is written to disk.
 
-In order to fix the model you must then add these missing reactions into a 'patch' file. Only the reactions are required, their metabolites and associated genes (if any) will be added automatically. Then the `metabolic patch_model` command can be run, which will perform targeted gap-filling to repair the model. Example `patch.json` file:
+In order to fix the model you must then add these missing reactions into a 'patch' file. Only the reactions are required, their metabolites and associated genes (if any) will be added automatically. Then the `bactabolize patch_model` command can be run, which will perform targeted gap-filling to repair the model. Example `patch.json` file:
 
 ```json
 {
@@ -274,14 +274,14 @@ This patch file specifies that the `K_variicola_variicola_342` model requires tw
 # K_variicola_variicola_342.json fails to produce biomass as it lacks lacks DTDP-4-dehydrorhamnose 3,5-epimerase and
 # DTDP-4-dehydrorhamnose reductase, which are required to create DTDP-L-rhamnose
 # Here we assume DTDP-L-rhamnose is not essential for growth and patch the model accordingly
-metabolic patch_model \
+bactabolize patch_model \
     --draft_model_fp K_variicola_variicola_342.json \
     --ref_model_fp iYL1228_annotated.json \
     --patch_fp patch.json \
     --output_fp K_variicola_variicola_342_patched.json
 
 # Assess model with FBA
-metabolic fba \
+bactabolize fba \
     --model_fp K_variicola_variicola_342_patched.json \
     --fba_spec_fp FBA_spec_files/M9_media.json \
     --output_fp K_variicola_variicola_342_patched_FBA.tsv \
@@ -332,8 +332,8 @@ Install as editable python package
 pip install -e .
 
 # Check
-which -a metabolic
-metabolic --version
+which -a bactabolize
+bactabolize --version
 ```
 
 ## License

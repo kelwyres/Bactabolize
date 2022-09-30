@@ -2,20 +2,20 @@
 import setuptools
 
 
-import metabolic
+import bactabolize
 
 
 setuptools.setup(
-    name='metabolic',
-    version=metabolic.__version__,
-    description='metabolic python package',
+    name='Bactabolize',
+    version=bactabolize.__version__,
+    description='Bactabolize python package',
     author='Stephen Watts',
     license='GPLv3',
-    url='https://github.com/scwatts/metabolic_pipeline',
+    url='https://github.com/scwatts/bactabolize',
     test_suite='tests',
     packages=setuptools.find_packages(),
-    package_data={'metabolic': ['data/*.json']},
+    package_data={'bactabolize': ['data/*.json']},
     entry_points={
-        'console_scripts': ['metabolic=metabolic.__main__:entry'],
+        'console_scripts': ['bactabolize=bactabolize.__main__:entry'],
     },
 )

@@ -9,7 +9,7 @@ process assembly_qc {
 
   script:
   """
-  metabolic assembly_qc --assembly_fp ${assembly_fp} --output_fp ${isolate_id}_stats.tsv
+  bactabolize assembly_qc --assembly_fp ${assembly_fp} --output_fp ${isolate_id}_stats.tsv
   """
 }
 
@@ -24,7 +24,7 @@ process annotate {
 
   script:
   """
-  metabolic annotate --assembly_fp ${assembly_fp} --output_fp ${isolate_id}_annotated.gbk
+  bactabolize annotate --assembly_fp ${assembly_fp} --output_fp ${isolate_id}_annotated.gbk
   """
 }
 
@@ -42,7 +42,7 @@ process draft_model {
 
   script:
   """
-  metabolic draft_model --assembly_fp ${assembly_fp} --ref_genbank_fp ${ref_genbank_fp} --ref_model_fp ${ref_model_fp} --output_fp ${isolate_id}_model.json
+  bactabolize draft_model --assembly_fp ${assembly_fp} --ref_genbank_fp ${ref_genbank_fp} --ref_model_fp ${ref_model_fp} --output_fp ${isolate_id}_model.json
   """
 }
 
@@ -59,6 +59,6 @@ process model_fba {
   fba_spec_opt = (params.fba_spec_fp) ? "--fba_spec_fp ${params.fba_spec_fp}" : ''
   fba_types_opt = (params.fba_types) ? "--fba_types ${params.fba_types}" : ''
   """
-  metabolic model_fba --model_fp ${model_fp} ${fba_spec_opt} ${fba_types_opt} --output_fp ${isolate_id}_fba.tsv
+  bactabolize model_fba --model_fp ${model_fp} ${fba_spec_opt} ${fba_types_opt} --output_fp ${isolate_id}_fba.tsv
   """
 }

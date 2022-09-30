@@ -3,7 +3,7 @@ conda_env/
 nextflow/data
 misc/
 example_code/
-metabolic.egg-info/
+bactabolize.egg-info/
 .nextflow*
 nextflow/work/
 output/

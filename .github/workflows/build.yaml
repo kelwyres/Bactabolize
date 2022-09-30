@@ -65,7 +65,7 @@ jobs:
         run: |
           conda mambabuild \
             --token "${{ secrets.ANACONDA_TOKEN }}" \
-            conda/metabolic/
+            conda/bactabolize/
 
   build_and_publish_on_dockerhub:
     runs-on: ubuntu-latest
@@ -78,7 +78,7 @@ jobs:
       run:
         shell: bash -l {0}
     env:
-      DOCKERHUB_REPO: "docker.io/scwatts/metabolic_pipeline"
+      DOCKERHUB_REPO: "docker.io/scwatts/bactabolize"
       VERSION: ${{ needs.get_version.outputs.version }}
     steps:
       - name: build_docker_image
