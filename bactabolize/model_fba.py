@@ -9,6 +9,7 @@ from cobra.io import read_sbml_model
 
 
 from . import fba
+from . import media_definitions
 
 
 def run(model_fp, fba_open_value, spec_fp, output_fp):
@@ -69,14 +70,17 @@ def fba_potential_sources(model, fba_open_value, spec):
                 for source_name in fba_categories:
                     reaction_id = spec['default_element_sources'][source_name]
                     reaction_bounds[reaction_id] = 0
-                # Open reaction investigated
+                # Open reaction set
                 reaction_bounds[reaction_name] = fba_open_value
-                # Run in aerobic and anaerobic atmosphere
-                for atmosphere in ('aerobic', 'anaerobic'):
+
+                # Set atmospheric conditions
+                for atmosphere in spec['atmosphere']:
                     if atmosphere == 'aerobic':
                         reaction_bounds['EX_o2_e'] = -20
-                    else:
+                    elif atmosphere == 'anaerobic':
                         reaction_bounds['EX_o2_e'] = 0
+                    else:
+                        raise ValueError
                     # Run FBA
                     objective_value = fba.run_fba(model, reaction_bounds)
                     data = (reaction_name, ','.join(fba_categories), atmosphere, objective_value)
@@ -90,12 +94,14 @@ def fba_media(model, spec):
     reaction_bounds = {r.id: 0 for r in model.exchanges}
     for reaction_id, lower_bound in spec['exchanges'].items():
         reaction_bounds[reaction_id] = lower_bound
-    # Aerobic and anerobic
-    for atmosphere in ('aerobic', 'anaerobic'):
+    # Set atmospheric conditions
+    for atmosphere in spec['atmosphere']:
         if atmosphere == 'aerobic':
             reaction_bounds['EX_o2_e'] = -20
-        else:
+        elif atmosphere == 'anaerobic':
             reaction_bounds['EX_o2_e'] = 0
+        else:
+            raise ValueError
         # Run FBA
         objective_value = fba.run_fba(model, reaction_bounds)
         data = (atmosphere, objective_value)
@@ -123,12 +129,21 @@ def validate_spec(fba_spec):
     if 'fba_type' not in fba_spec:
         print('error: no fba_types defined', file=sys.stderr)
         sys.exit(1)
-    if 'exchanges' not in fba_spec:
-        print('error: no exchanges defined', file=sys.stderr)
+    if 'atmosphere' not in fba_spec:
+        print('error: no atmosphere defined', file=sys.stderr)
+        sys.exit(1)
+    if 'exchanges' not in fba_spec and 'media_type' not in fba_spec:
+        print('error: no exchanges or media_type defined', file=sys.stderr)
         sys.exit(1)
     if 'default_element_sources' not in fba_spec:
         print('error: no default_element_sources defined', file=sys.stderr)
         sys.exit(1)
+
+    # Read in media_type
+    if 'exchanges' not in fba_spec:
+        media = media_definitions.get(fba_spec['media_type'])
+        fba_spec['exchanges'] = media['exchanges']
+
     # Field types
     if not isinstance(fba_spec['fba_type'], list):
         print('error: fba_type field is not a list', file=sys.stderr)
@@ -139,12 +154,21 @@ def validate_spec(fba_spec):
     if not isinstance(fba_spec['default_element_sources'], dict):
         print('error: default_element_sources field is not a dictionary', file=sys.stderr)
         sys.exit(1)
-    # Valid FBA types to run
+
+    # Validate FBA types to run
     fba_type_valid = {'defined_exchanges_only', 'potential_element_sources'}
     for fba_type in fba_spec['fba_type']:
         if fba_type not in fba_type_valid:
             print('error: got bad fba_type: {fba_type}', file=sys.stderr)
             sys.exit(1)
+
+    # Validate atmosphere type
+    atmosphere_valid = {'aerobic', 'anaerobic'}
+    for atmosphere in fba_spec['atmosphere']:
+        if atmosphere not in atmosphere_valid:
+            print('error: got bad atmosphere value: {fba_spec["atmosphere"]}', file=sys.stderr)
+            sys.exit(1)
+
     # Exchange lower bounds are numeric
     for exchange_value in fba_spec['exchanges'].values():
         if not isinstance(exchange_value, int) and not isinstance(exchange_value, float):

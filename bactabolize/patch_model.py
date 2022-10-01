@@ -10,7 +10,7 @@ from . import media_definitions
 from . import util
 
 
-def run(draft_model_fp, ref_model_fp, patch_fp, memote_fp, output_fp):
+def run(draft_model_fp, ref_model_fp, patch_fp, media_type, memote_fp, output_fp):
     # pylint: disable=too-many-branches,too-many-statements
     print('\n========================================')
     print('Patching model ' + os.path.splitext(os.path.basename(draft_model_fp))[0])
@@ -55,10 +55,11 @@ def run(draft_model_fp, ref_model_fp, patch_fp, memote_fp, output_fp):
     with output_fp.open('w') as fh:
         cobra.io.save_json_model(model_draft, fh)
         cobra.io.write_sbml_model(model_draft, str(output_fp).rsplit('.', 1)[0] + '.xml')  # .xml output
-    # Check if model now optimises on m9
+    # Check if model now optimises on set media
     for reaction in model_draft.exchanges:
         reaction.lower_bound = 0
-    for reaction_id, lower_bound in media_definitions.M9.items():
+    media = media_definitions.get(media_type)
+    for reaction_id, lower_bound in media['exchanges'].items():
         try:
             reaction = model_draft.reactions.get_by_id(reaction_id)
         except KeyError:

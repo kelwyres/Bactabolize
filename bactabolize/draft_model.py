@@ -20,7 +20,7 @@ from . import media_definitions
 from . import util
 
 
-def run(assembly_fp, ref_genes_fp, ref_proteins_fp, model, alignment_thresholds, memote_fp, output_fp):
+def run(assembly_fp, ref_genes_fp, ref_proteins_fp, model, alignment_thresholds, media_type, memote_fp, output_fp):
     print('\n========================================')
     print('running draft model creation of ' + os.path.splitext(os.path.basename(assembly_fp))[0])
     print('========================================')
@@ -46,19 +46,20 @@ def run(assembly_fp, ref_genes_fp, ref_proteins_fp, model, alignment_thresholds,
     with output_fp.open('w') as fh:
         cobra.io.save_json_model(model_draft, fh)
         cobra.io.write_sbml_model(model_draft, str(output_fp).rsplit('.', 1)[0] + '.xml')  # .xml output
-    assess_model(model, model_draft, blast_results, output_fp)
+    assess_model(model, model_draft, blast_results, media_type, output_fp)
 
     # Generate MEMOTE report file if requested
     if memote_fp:
         util.generate_memote_report(model_draft, memote_fp)
 
 
-def assess_model(model, model_draft, blast_results, output_fp):
+def assess_model(model, model_draft, blast_results, media_type, output_fp):
     # Assess model by observing whether the objective function for biomass optimises
-    # We perform an FBA on minimal media (m9)
+    # We perform an set media
     for reaction in model_draft.exchanges:
         reaction.lower_bound = 0
-    for reaction_id, lower_bound in media_definitions.M9.items():
+    media = media_definitions.get(media_type)
+    for reaction_id, lower_bound in media['exchanges'].items():
         try:
             reaction = model_draft.reactions.get_by_id(reaction_id)
         except KeyError:

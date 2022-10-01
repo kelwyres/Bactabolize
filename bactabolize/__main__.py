@@ -19,7 +19,7 @@ def entry():
     if args.command == 'draft_model':
         run_draft_model(args)
     elif args.command == 'patch_model':
-        patch_model.run(args.draft_model_fp, args.ref_model_fp, args.patch_fp, args.memote_report_fp, args.output_fp)
+        patch_model.run(args.draft_model_fp, args.ref_model_fp, args.patch_fp, args.media_type, args.memote_report_fp, args.output_fp)
     elif args.command == 'fba':
         model_fba.run(args.model_fp, args.fba_open_value, args.fba_spec_fp, args.output_fp)
     else:
@@ -64,6 +64,7 @@ def run_draft_model(args):
         ref_proteins_fp,
         model,
         alignment_thresholds,
+        args.media_type,
         args.memote_report_fp,
         output_fp,
     )

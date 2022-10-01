@@ -14,7 +14,7 @@ setuptools.setup(
     url='https://github.com/scwatts/bactabolize',
     test_suite='tests',
     packages=setuptools.find_packages(),
-    package_data={'bactabolize': ['data/*.json']},
+    package_data={'bactabolize': ['data/**']},
     entry_points={
         'console_scripts': ['bactabolize=bactabolize.__main__:entry'],
     },
