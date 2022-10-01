@@ -7,4 +7,3 @@ ${PYTHON} -m pip install -vv .
 #  * https://pip.pypa.io/en/stable/topics/configuration/#environment-variables
 #  * https://github.com/conda/conda-build/blob/e4d9b3/conda_build/build.py#L2593
 PIP_NO_INDEX=False ${PYTHON} -m pip install 'memote ==0.13.0'
-
