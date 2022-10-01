@@ -18,18 +18,9 @@ such as Flux Balance Analysis (FBA) and single gene knockout analysis can then b
 ## Quickstart
 
 ```bash
-### Installation
-
-# Create environment
-conda create -n -y Bactabolize_v_0.0.1 python=3.9
-
-# Activate environment
-conda activate Bactabolize_v_0.0.1
-
-# Install
-conda install -y -c scwatts -c bioconda -c conda-forge bactabolize
-
-### Construct and test Bactabolize models
+# Create and activate environment
+conda create -n bactabolize -y bactabolize
+conda activate bactabolize
 
 # Create draft model
 bactabolize draft_model \
