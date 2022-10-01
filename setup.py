@@ -6,7 +6,7 @@ import bactabolize
 
 
 setuptools.setup(
-    name='Bactabolize',
+    name='bactabolize',
     version=bactabolize.__version__,
     description='Bactabolize python package',
     author='Stephen Watts',
