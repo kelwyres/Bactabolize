@@ -8,6 +8,7 @@ from . import __version__
 
 
 class ArgumentParserCustomHelp(argparse.ArgumentParser):
+
     def parse_args(self, args=None, namespace=None):
         args, argv = self.parse_known_args(args, namespace)
         if argv:
@@ -80,6 +81,7 @@ def check_arguments(args):
     if args.version:
         print(f'{__program_name__} {__version__}', file=sys.stdout)
         sys.exit(0)
+
     # Check we have required arguments, this is purposely decouped from argparse
     required_args = {
         'draft_model': {
@@ -99,6 +101,7 @@ def check_arguments(args):
             'single': ('model_fp', 'fba_spec_fp', 'output_fp'),
         },
     }
+
     if not args.command:
         msg = f'{__program_name__}: error: you must provide a command to execute'
         print(help_text(args.command), file=sys.stderr)
@@ -106,6 +109,7 @@ def check_arguments(args):
         sys.exit(1)
     else:
         assert args.command in required_args
+
     args_error_msgs = list()
     for req_type, required_set in required_args[args.command].items():
         for required_item in required_set:
@@ -138,6 +142,7 @@ def check_arguments(args):
             else:
                 print(f'error: argument requirement type: {req_type}')
                 sys.exit(1)
+
     if args_error_msgs:
         msg_initial = f'{__program_name__}: error: the following argument errors were found:'
         print(help_text(args.command), file=sys.stderr)
@@ -145,6 +150,7 @@ def check_arguments(args):
         for msg in args_error_msgs:
             print('\t', msg, sep='', file=sys.stderr)
         sys.exit(1)
+
     # Check all input file objects exist
     for arg, value in args.__dict__.items():
         if not value or arg in {'output_fp', 'memote_report_fp'}:

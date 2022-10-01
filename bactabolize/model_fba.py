@@ -23,6 +23,7 @@ def run(model_fp, fba_open_value, spec_fp, output_fp):
         elif model_fp.suffix == '.xml':
             model = read_sbml_model(fh)
     spec = parse_spec(spec_fp)
+
     # Run FBA
     results = dict()
     for fba_name, fba_spec in spec.items():
@@ -35,6 +36,7 @@ def run(model_fp, fba_open_value, spec_fp, output_fp):
             else:
                 assert False
             results[fba_name][fba_type] = fba_output
+
     # Write results
     with output_fp.open('w') as fh:
         header_tokens = ('fba_type', 'spec_name', 'atmosphere', 'exchange', 'categories', 'objective_value')
@@ -111,10 +113,12 @@ def parse_spec(spec_fp):
 
 def validate_spec(fba_spec):
     # pylint: disable=too-many-branches,too-many-statements
+
     # Is a dict and has required data
     if not isinstance(fba_spec, dict):
         print('error: fba spec is not a dictionary', file=sys.stderr)
         sys.exit(1)
+
     # Fields
     if 'fba_type' not in fba_spec:
         print('error: no fba_types defined', file=sys.stderr)
@@ -146,6 +150,7 @@ def validate_spec(fba_spec):
         if not isinstance(exchange_value, int) and not isinstance(exchange_value, float):
             print(f'error: found non-numeric exchange LB: {exchange_value}', file=sys.stderr)
             sys.exit(1)
+
     # All defaults are defined
     sources_valid = {'carbon', 'phosphorus', 'nitrogen', 'sulfur'}
     sources_present = set(fba_spec['default_element_sources'])
@@ -161,6 +166,7 @@ def validate_spec(fba_spec):
         plurality = 'sources' if len(undefined) > 1 else 'source'
         print(f'error: undefined default {plurality} found: {undefined_str}', file=sys.stderr)
         sys.exit(1)
+
     # Default exchanges present in defined exchanges
     source_exchanges_present = set(fba_spec['default_element_sources'].values())
     missing = source_exchanges_present.difference(fba_spec['exchanges'])
@@ -169,6 +175,7 @@ def validate_spec(fba_spec):
         plurality = 'sources' if len(missing) > 1 else 'source'
         print(f'error: default {plurality} not defined in exchanges: {missing_str}', file=sys.stderr)
         sys.exit(1)
+
     # O2 and CO2 should not be in media
     if 'EX_o2_e' in fba_spec['exchanges']:
         print('error: O2 present in exchange list', file=sys.stderr)
