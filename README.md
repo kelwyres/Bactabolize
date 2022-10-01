@@ -37,9 +37,9 @@ bactabolize draft_model \
     --ref_genes_fp reference_model_genes.ffn \
     --ref_proteins_fp reference_model_genes.faa \
     --ref_model_fp reference_model.json \
-    --output_fp input_assembly_model \
     --min_coverage 25 \
-    --min_pident 80
+    --min_pident 80 \
+    --output_fp input_assembly_model
 
 # Run FBA
 bactabolize fba \
