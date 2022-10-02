@@ -1,0 +1,16 @@
+{
+  "TSA_sheep_blood": {
+    "fba_type": [
+        "defined_exchanges_only",
+        "potential_element_sources"
+    ],
+    "atmosphere": ["aerobic", "anaerobic"],
+    "media_type": "tsa_sheep_blood",
+    "default_element_sources": {
+      "carbon": "EX_glc__D_e",
+      "phosphorus": "EX_pi_e",
+      "nitrogen": "EX_nh4_e",
+      "sulfur": "EX_so4_e"
+    }
+  }
+}

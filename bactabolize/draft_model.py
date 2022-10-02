@@ -20,14 +20,18 @@ from . import media_definitions
 from . import util
 
 
-def run(assembly_fp, ref_genes_fp, ref_proteins_fp, model, alignment_thresholds, memote_fp, output_fp):
+def run(config):
     print('\n========================================')
-    print('running draft model creation of ' + os.path.splitext(os.path.basename(assembly_fp))[0])
+    print('running draft model creation of ' + os.path.splitext(os.path.basename(config.assembly_fp))[0])
     print('========================================')
     # Get orthologs of genes in model
-    model_genes = {gene.id for gene in model.genes}
+    model_genes = {gene.id for gene in config.model.genes}
     isolate_orthologs, blast_results = identify(
-        assembly_fp, ref_genes_fp, ref_proteins_fp, model_genes, alignment_thresholds
+        config.assembly_fp,
+        config.model_ref_genes_fp,
+        config.model_ref_proteins_fp,
+        model_genes,
+        config.alignment_thresholds
     )
     # Remove genes from model that have no ortholog in the isolate
     missing_genes = list()
@@ -35,36 +39,54 @@ def run(assembly_fp, ref_genes_fp, ref_proteins_fp, model, alignment_thresholds,
         # NOTE: must handle artificial genes better
         if gene == 'KPN_SPONT':
             continue
-        missing_genes.append(model.genes.get_by_id(gene))
+        missing_genes.append(config.model.genes.get_by_id(gene))
     # Mutate a copy of the model and rename genes
-    model_draft = model.copy()
-    model_draft.id = assembly_fp.stem
+    model_draft = config.model.copy()
+    model_draft.id = config.assembly_fp.stem
     cobra.manipulation.remove_genes(model_draft, missing_genes, remove_reactions=True)
     cobra.manipulation.modify.rename_genes(model_draft, isolate_orthologs)
 
     # Write model to disk and assess model
-    with output_fp.open('w') as fh:
+    with config.model_output_fp.open('w') as fh:
         cobra.io.save_json_model(model_draft, fh)
-        cobra.io.write_sbml_model(model_draft, str(output_fp).rsplit('.', 1)[0] + '.xml')  # .xml output
-    assess_model(model, model_draft, blast_results, output_fp)
+        cobra.io.write_sbml_model(model_draft, str(config.model_output_fp).rsplit('.', 1)[0] + '.xml')  # .xml output
+    assess_model(
+        config.model,
+        model_draft,
+        blast_results,
+        config.media_type,
+        config.atmosphere_type,
+        config.model_output_fp,
+    )
 
     # Generate MEMOTE report file if requested
-    if memote_fp:
-        util.generate_memote_report(model_draft, memote_fp)
+    if config.memote_report_fp:
+        util.generate_memote_report(model_draft, config.memote_report_fp)
 
 
-def assess_model(model, model_draft, blast_results, output_fp):
+def assess_model(model, model_draft, blast_results, media_type, atmosphere_type, output_fp):
     # Assess model by observing whether the objective function for biomass optimises
-    # We perform an FBA on minimal media (m9)
+    # We perform an set media
     for reaction in model_draft.exchanges:
         reaction.lower_bound = 0
-    for reaction_id, lower_bound in media_definitions.M9.items():
+    media = media_definitions.get(media_type)
+    for reaction_id, lower_bound in media['exchanges'].items():
         try:
             reaction = model_draft.reactions.get_by_id(reaction_id)
         except KeyError:
             msg = f'warning: draft model does not contain reaction {reaction_id}'
             print(msg, file=sys.stderr)
         reaction.lower_bound = lower_bound
+
+    # Set atmospheric conditions
+    reaction_oxygen = model_draft.reactions.get_by_id('EX_o2_e')
+    if atmosphere_type == 'aerobic':
+        reaction_oxygen.lower_bound = -20
+    elif atmosphere_type == 'anaerobic':
+        reaction_oxygen.lower_bound = 0
+    elif atmosphere_type is not None:
+        raise ValueError
+
     solution = model_draft.optimize()
 
     # Threshold for whether a model produces biomass
