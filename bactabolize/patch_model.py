@@ -10,25 +10,25 @@ from . import media_definitions
 from . import util
 
 
-def run(draft_model_fp, ref_model_fp, patch_fp, media_type, memote_fp, output_fp):
+def run(config):
     # pylint: disable=too-many-branches,too-many-statements
     print('\n========================================')
-    print('Patching model ' + os.path.splitext(os.path.basename(draft_model_fp))[0])
+    print('Patching model ' + os.path.splitext(os.path.basename(config.draft_model_fp))[0])
     print('========================================')
     # Read in models and patch file
-    with draft_model_fp.open('r') as fh:
-        if draft_model_fp.suffix == '.json':
+    with config.draft_model_fp.open('r') as fh:
+        if config.draft_model_fp.suffix == '.json':
             model_draft = cobra.io.load_json_model(fh)
-        elif draft_model_fp.suffix == '.xml':
+        elif config.draft_model_fp.suffix == '.xml':
             model_draft = read_sbml_model(fh)
 
-    with ref_model_fp.open('r') as fh:
-        if ref_model_fp.suffix == '.json':
+    with config.ref_model_fp.open('r') as fh:
+        if config.ref_model_fp.suffix == '.json':
             model_ref = cobra.io.load_json_model(fh)
-        elif ref_model_fp.suffix == '.xml':
+        elif config.ref_model_fp.suffix == '.xml':
             model_ref = read_sbml_model(fh)
 
-    patch = parse_patch(patch_fp, model_draft.id)
+    patch = parse_patch(config.patch_fp, model_draft.id)
     # Apply patch
     for reaction_id, op in patch['reactions'].items():
         if op == 'remove':
@@ -52,13 +52,13 @@ def run(draft_model_fp, ref_model_fp, patch_fp, media_type, memote_fp, output_fp
             print(f'error: got bad operation {op} for {metabolite_id}', file=sys.stderr)
             sys.exit(1)
     # Write model to disk
-    with output_fp.open('w') as fh:
+    with config.output_fp.open('w') as fh:
         cobra.io.save_json_model(model_draft, fh)
-        cobra.io.write_sbml_model(model_draft, str(output_fp).rsplit('.', 1)[0] + '.xml')  # .xml output
+        cobra.io.write_sbml_model(model_draft, str(config.output_fp).rsplit('.', 1)[0] + '.xml')  # .xml output
     # Check if model now optimises on set media
     for reaction in model_draft.exchanges:
         reaction.lower_bound = 0
-    media = media_definitions.get(media_type)
+    media = media_definitions.get(config.media_type)
     for reaction_id, lower_bound in media['exchanges'].items():
         try:
             reaction = model_draft.reactions.get_by_id(reaction_id)
@@ -79,8 +79,8 @@ Please cite:
         ''')
 
     # Generate MEMOTE report file if requested
-    if memote_fp:
-        util.generate_memote_report(model_draft, memote_fp)
+    if config.memote_report_fp:
+        util.generate_memote_report(model_draft, config.memote_report_fp)
 
 
 def parse_patch(patch_fp, model_name):

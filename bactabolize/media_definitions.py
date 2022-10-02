@@ -10,7 +10,7 @@ _MEDIA_DEFS = None
 def _discover_package_media_files():
     file_fp = pathlib.Path(__file__).absolute()
     media_dir = file_fp.parent / 'data' / 'media_definitions'
-    return [fp for fp in media_dir.glob('*json')]
+    return list(media_dir.glob('*json'))
 
 
 def _create_media_map():

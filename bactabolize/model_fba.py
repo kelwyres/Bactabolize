@@ -12,18 +12,18 @@ from . import fba
 from . import media_definitions
 
 
-def run(model_fp, fba_open_value, spec_fp, output_fp):
+def run(config):
     # pylint: disable=too-many-branches
     print('\n========================================')
-    print('running FBA on ' + os.path.splitext(os.path.basename(model_fp))[0])
+    print('running FBA on ' + os.path.splitext(os.path.basename(config.model_fp))[0])
     print('========================================')
     # Read in model and spec
-    with model_fp.open('r') as fh:
-        if model_fp.suffix == '.json':
+    with config.model_fp.open('r') as fh:
+        if config.model_fp.suffix == '.json':
             model = cobra.io.load_json_model(fh)
-        elif model_fp.suffix == '.xml':
+        elif config.model_fp.suffix == '.xml':
             model = read_sbml_model(fh)
-    spec = parse_spec(spec_fp)
+    spec = parse_spec(config.fba_spec_fp)
 
     # Run FBA
     results = dict()
@@ -31,7 +31,7 @@ def run(model_fp, fba_open_value, spec_fp, output_fp):
         results[fba_name] = dict()
         for fba_type in fba_spec['fba_type']:
             if fba_type == 'potential_element_sources':
-                fba_output = fba_potential_sources(model.copy(), fba_open_value, fba_spec)
+                fba_output = fba_potential_sources(model.copy(), config.fba_open_value, fba_spec)
             elif fba_type == 'defined_exchanges_only':
                 fba_output = fba_media(model.copy(), fba_spec)
             else:
@@ -39,7 +39,7 @@ def run(model_fp, fba_open_value, spec_fp, output_fp):
             results[fba_name][fba_type] = fba_output
 
     # Write results
-    with output_fp.open('w') as fh:
+    with config.output_fp.open('w') as fh:
         header_tokens = ('fba_type', 'spec_name', 'atmosphere', 'exchange', 'categories', 'objective_value')
         print(*header_tokens, sep='\t', file=fh)
         for fba_name, fba_data in results.items():
