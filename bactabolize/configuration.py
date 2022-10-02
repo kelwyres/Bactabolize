@@ -7,6 +7,7 @@ class ConfigDraftModel:
         self.ref_genes_fp = args.ref_genes_fp
         self.ref_proteins_fp = args.ref_proteins_fp
         self.media_type = args.media_type
+        self.atmosphere_type = args.atmosphere_type
         self.min_coverage = args.min_coverage
         self.min_pident = args.min_pident
         self.min_ppos = args.min_ppos
@@ -30,6 +31,7 @@ class ConfigPatchModel:
         self.ref_model_fp = args.ref_model_fp
         self.patch_fp = args.patch_fp
         self.media_type = args.media_type
+        self.atmosphere_type = args.atmosphere_type
         self.output_fp = args.output_fp
         self.memote_report_fp = args.memote_report_fp
 

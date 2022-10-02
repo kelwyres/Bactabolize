@@ -66,7 +66,18 @@ def run(config):
             msg = f'warning: draft model does not contain reaction {reaction_id}'
             print(msg, file=sys.stderr)
         reaction.lower_bound = lower_bound
+
+    # Set atmospheric conditions
+    reaction_oxygen = model_draft.reactions.get_by_id('EX_o2_e')
+    if config.atmosphere_type == 'aerobic':
+        reaction_oxygen.lower_bound = -20
+    elif config.atmosphere_type == 'anaerobic':
+        reaction_oxygen.lower_bound = 0
+    elif config.atmosphere_type is not None:
+        raise ValueError
+
     solution = model_draft.optimize()
+
     # Threshold for whether a model produces biomass
     if solution.objective_value < 1e-4:
         print('error: ' + str(model_draft) + ' model failed to produce biomass on minimal media', file=sys.stderr)

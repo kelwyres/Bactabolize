@@ -50,14 +50,21 @@ def run(config):
     with config.model_output_fp.open('w') as fh:
         cobra.io.save_json_model(model_draft, fh)
         cobra.io.write_sbml_model(model_draft, str(config.model_output_fp).rsplit('.', 1)[0] + '.xml')  # .xml output
-    assess_model(config.model, model_draft, blast_results, config.media_type, config.model_output_fp)
+    assess_model(
+        config.model,
+        model_draft,
+        blast_results,
+        config.media_type,
+        config.atmosphere_type,
+        config.model_output_fp,
+    )
 
     # Generate MEMOTE report file if requested
     if config.memote_report_fp:
         util.generate_memote_report(model_draft, config.memote_report_fp)
 
 
-def assess_model(model, model_draft, blast_results, media_type, output_fp):
+def assess_model(model, model_draft, blast_results, media_type, atmosphere_type, output_fp):
     # Assess model by observing whether the objective function for biomass optimises
     # We perform an set media
     for reaction in model_draft.exchanges:
@@ -70,6 +77,16 @@ def assess_model(model, model_draft, blast_results, media_type, output_fp):
             msg = f'warning: draft model does not contain reaction {reaction_id}'
             print(msg, file=sys.stderr)
         reaction.lower_bound = lower_bound
+
+    # Set atmospheric conditions
+    reaction_oxygen = model_draft.reactions.get_by_id('EX_o2_e')
+    if atmosphere_type == 'aerobic':
+        reaction_oxygen.lower_bound = -20
+    elif atmosphere_type == 'anaerobic':
+        reaction_oxygen.lower_bound = 0
+    elif atmosphere_type is not None:
+        raise ValueError
+
     solution = model_draft.optimize()
 
     # Threshold for whether a model produces biomass
