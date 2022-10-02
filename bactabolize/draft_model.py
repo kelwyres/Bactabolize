@@ -56,6 +56,7 @@ def run(config):
         blast_results,
         config.media_type,
         config.atmosphere_type,
+        config.biomass_reaction_id,
         config.model_output_fp,
     )
 
@@ -64,7 +65,15 @@ def run(config):
         util.generate_memote_report(model_draft, config.memote_report_fp)
 
 
-def assess_model(model, model_draft, blast_results, media_type, atmosphere_type, output_fp):
+def assess_model(
+    model,
+    model_draft,
+    blast_results,
+    media_type,
+    atmosphere_type,
+    biomass_reaction_id,
+    output_fp,
+):
     # Assess model by observing whether the objective function for biomass optimises
     # We perform an set media
     for reaction in model_draft.exchanges:
@@ -96,7 +105,7 @@ def assess_model(model, model_draft, blast_results, media_type, atmosphere_type,
             'Construct patch.json manually using ' + str(model_draft) + '_model.json.troubleshoot_summary.txt and fix draft ' + str(model_draft) + ' model via patch_model command'
         )
         print(msg, file=sys.stderr)
-        create_troubleshooter(model, model_draft, blast_results, f'{output_fp}.troubleshoot')
+        create_troubleshooter(model, model_draft, blast_results, biomass_reaction_id, f'{output_fp}.troubleshoot')
         sys.exit(101)
     else:
         print(str(model_draft) +''' model produces biomass on minimal media.
@@ -106,10 +115,10 @@ Please cite:
 - Ebrahim, A., Lerman, J.A., Palsson, B.O. et al. COBRApy: COnstraints-Based Reconstruction and Analysis for Python. BMC Syst Biol 7, 74 (2013). https://doi.org/10.1186/1752-0509-7-74
         ''')
 
-def create_troubleshooter(model, model_draft, blast_results, prefix):
+def create_troubleshooter(model, model_draft, blast_results, biomass_reaction_id, prefix):
     # Determine what required products model cannot product and missing reactions/genes
     reactions_missing, nonzero_threshold = gapfill_model(model, model_draft)
-    metabolites_missing = check_biomass_metabolites(model_draft.copy())
+    metabolites_missing = check_biomass_metabolites(model_draft.copy(), biomass_reaction_id)
     # Collect BLAST results
     blastp_hits = dict()
     blastn_hits = dict()
@@ -130,6 +139,7 @@ def create_troubleshooter(model, model_draft, blast_results, prefix):
         nonzero_threshold,
         blastp_hits,
         blastn_hits,
+        biomass_reaction_id,
         output_fp,
     )
     # Write BLAST results
@@ -137,9 +147,9 @@ def create_troubleshooter(model, model_draft, blast_results, prefix):
     write_blast_results(blastn_hits, pathlib.Path(f'{prefix}_blastn.tsv'))
 
 
-def check_biomass_metabolites(model):
+def check_biomass_metabolites(model, biomass_reaction_id):
     metabolites_missing = list()
-    reaction_biomass = model.reactions.get_by_id('BIOMASS_')
+    reaction_biomass = model.reactions.get_by_id(biomass_reaction_id)
     for metabolite in reaction_biomass.metabolites:
         # Create a drain reaction for the metabolite, add to model, and set as objective
         reaction = cobra.core.reaction.Reaction(
@@ -195,6 +205,7 @@ def write_troubleshoot_summary(
     nonzero_threshold,
     blastp_hits,
     blastn_hits,
+    biomass_reaction_id,
     output_fp,
 ):
     # pylint: disable=cell-var-from-loop,consider-using-with,too-many-branches
@@ -213,8 +224,8 @@ def write_troubleshoot_summary(
         print('Missing metabolites required for biomass production:', end='', file=fh)
         for metabolite in metabolites_missing:
             reactions = model.reactions.query(lambda r: metabolite.id in {m.id for m in r.metabolites})
-            if 'BIOMASS_' in reactions:
-                reactions.remove('BIOMASS_')
+            if biomass_reaction_id in reactions:
+                reactions.remove(biomass_reaction_id)
             print('\nid:', metabolite.id, file=fh)
             print('name:', metabolite.name, file=fh)
             print('reactions:', ', '.join(r.id for r in reactions), file=fh)

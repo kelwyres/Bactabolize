@@ -39,7 +39,7 @@ def run(config):
         else:
             print(f'error: got bad operation {op} for {reaction_id}', file=sys.stderr)
             sys.exit(1)
-    biomass_reaction = model_draft.reactions.get_by_id('BIOMASS_')
+    biomass_reaction = model_draft.reactions.get_by_id(config.biomass_reaction_id)
     for metabolite_id, op in patch['biomass_metabolites'].items():
         if op == 'remove':
             metabolite = model_draft.metabolites.get_by_id(metabolite_id)

@@ -11,6 +11,7 @@ class ConfigDraftModel:
         self.min_coverage = args.min_coverage
         self.min_pident = args.min_pident
         self.min_ppos = args.min_ppos
+        self.biomass_reaction_id = args.biomass_reaction_id
         self.no_reannotation = args.no_reannotation
         self.memote_report_fp = args.memote_report_fp
         self.output_fp = args.output_fp
@@ -32,6 +33,7 @@ class ConfigPatchModel:
         self.patch_fp = args.patch_fp
         self.media_type = args.media_type
         self.atmosphere_type = args.atmosphere_type
+        self.biomass_reaction_id = args.biomass_reaction_id
         self.output_fp = args.output_fp
         self.memote_report_fp = args.memote_report_fp
 
