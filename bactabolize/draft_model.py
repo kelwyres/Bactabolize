@@ -1,6 +1,5 @@
 import contextlib
 import math
-import os
 import pathlib
 import sys
 import tempfile
@@ -31,7 +30,7 @@ def run(config):
         config.model_ref_genes_fp,
         config.model_ref_proteins_fp,
         model_genes,
-        config.alignment_thresholds
+        config.alignment_thresholds,
     )
     # Remove genes from model that have no ortholog in the isolate
     missing_genes = list()
@@ -74,6 +73,7 @@ def assess_model(
     biomass_reaction_id,
     output_fp,
 ):
+    # pylint: disable=too-many-branches
     # Assess model by observing whether the objective function for biomass optimises
     # We perform an set media
     for reaction in model_draft.exchanges:
@@ -101,19 +101,26 @@ def assess_model(
     # Threshold for whether a model produces biomass
     if solution.objective_value < 1e-4:
         msg = (
-            'error: ' + str(model_draft) + ' model failed to produce biomass on minimal media, '
-            'Construct patch.json manually using ' + str(model_draft) + '_model.json.troubleshoot_summary.txt and fix draft ' + str(model_draft) + ' model via patch_model command'
+            f'error: {model_draft} model failed to produce biomass on minimal media, '
+            f'construct patch.json manually using {model_draft}'
+            f'_model.json.troubleshoot_summary.txt and fix draft {model_draft}'
+            f' model via patch_model command'
         )
+
         print(msg, file=sys.stderr)
         create_troubleshooter(model, model_draft, blast_results, biomass_reaction_id, f'{output_fp}.troubleshoot')
         sys.exit(101)
     else:
-        print(str(model_draft) +''' model produces biomass on minimal media.
+        print(f'{model_draft} model produces biomass on minimal media')
+        msg = (
+            'Please cite:\n'
+            '  - bioRxiv and later, published paper here\n'
+            '  - Ebrahim, A., Lerman, J.A., Palsson, B.O. et al. '
+            'COBRApy: COnstraints-Based Reconstruction and Analysis for Python. '
+            'BMC Syst Biol 7, 74 (2013). https://doi.org/10.1186/1752-0509-7-74'
+        )
+        print(msg)
 
-Please cite:
-- bioRxiv and later, published paper here
-- Ebrahim, A., Lerman, J.A., Palsson, B.O. et al. COBRApy: COnstraints-Based Reconstruction and Analysis for Python. BMC Syst Biol 7, 74 (2013). https://doi.org/10.1186/1752-0509-7-74
-        ''')
 
 def create_troubleshooter(model, model_draft, blast_results, biomass_reaction_id, prefix):
     # Determine what required products model cannot product and missing reactions/genes
@@ -171,6 +178,7 @@ def check_biomass_metabolites(model, biomass_reaction_id):
 
 
 def gapfill_model(model, model_draft):
+    # pylint: disable=undefined-loop-variable
     # Attempt gapfilling with thresholds ranging from default 1e-6 to 0
     integer_thresholds = [math.pow(10, y) for y in (-6, -7, -10, -20, -50, -math.inf)]
     for threshold in integer_thresholds:

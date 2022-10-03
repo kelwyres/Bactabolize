@@ -9,7 +9,6 @@ from . import media_definitions
 
 
 class ArgumentParserCustomHelp(argparse.ArgumentParser):
-
     def parse_args(self, args=None, namespace=None):
         args, argv = self.parse_known_args(args, namespace)
         if argv:
@@ -81,7 +80,7 @@ def parse():
 
 
 def check_arguments(args):
-    # pylint: disable=no-else-continue,too-many-branches
+    # pylint: disable=no-else-continue,too-many-branches,too-many-statements
     if args.help:
         print(help_text(args.command), file=sys.stdout)
         sys.exit(0)
@@ -97,9 +96,7 @@ def check_arguments(args):
                 ('ref_genbank_fp', 'ref_proteins_fp'),
                 ('ref_genbank_fp', 'ref_genes_fp'),
             ),
-            'all': (
-                ('ref_proteins_fp', 'ref_genes_fp'),
-            ),
+            'all': (('ref_proteins_fp', 'ref_genes_fp'),),
         },
         'patch_model': {
             'single': ('draft_model_fp', 'ref_model_fp', 'patch_fp', 'output_fp'),

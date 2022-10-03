@@ -1,5 +1,7 @@
-class ConfigDraftModel:
+# pylint: disable=too-many-instance-attributes
 
+
+class ConfigDraftModel:
     def __init__(self, args):
         self.ref_model_fp = args.ref_model_fp
         self.assembly_fp = args.assembly_fp
@@ -19,13 +21,12 @@ class ConfigDraftModel:
         self.alignment_thresholds = None
         self.assembly_genbank_fp = None
         self.model = None
-        self.model_genes_fp  = None
+        self.model_genes_fp = None
         self.model_proteins_fp = None
         self.model_output_fp = None
 
 
 class ConfigPatchModel:
-
     def __init__(self, args):
 
         self.draft_model_fp = args.draft_model_fp
@@ -39,7 +40,6 @@ class ConfigPatchModel:
 
 
 class ConfigFba:
-
     def __init__(self, args):
 
         self.model_fp = args.model_fp

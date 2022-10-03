@@ -80,14 +80,18 @@ def run(config):
 
     # Threshold for whether a model produces biomass
     if solution.objective_value < 1e-4:
-        print('error: ' + str(model_draft) + ' model failed to produce biomass on minimal media', file=sys.stderr)
+        print(f'error: {model_draft} model failed to produce biomass on minimal media', file=sys.stderr)
         sys.exit(101)
     else:
-        print(str(model_draft) +''' model produces biomass on minimal media.
-Please cite:
-- bioRxiv and later, published paper here
-- Ebrahim, A., Lerman, J.A., Palsson, B.O. et al. COBRApy: COnstraints-Based Reconstruction and Analysis for Python. BMC Syst Biol 7, 74 (2013). https://doi.org/10.1186/1752-0509-7-74
-        ''')
+        print(f'{model_draft} model produces biomass on minimal media')
+        msg = (
+            'Please cite:\n'
+            '  - bioRxiv and later, published paper here\n'
+            '  - Ebrahim, A., Lerman, J.A., Palsson, B.O. et al. '
+            'COBRApy: COnstraints-Based Reconstruction and Analysis for Python. '
+            'BMC Syst Biol 7, 74 (2013). https://doi.org/10.1186/1752-0509-7-74'
+        )
+        print(msg)
 
     # Generate MEMOTE report file if requested
     if config.memote_report_fp:

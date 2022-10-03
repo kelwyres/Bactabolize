@@ -23,7 +23,7 @@ def available():
 
 
 def get(name):
-    if (media_fp := _MEDIA_DEFS.get(name)):
+    if media_fp := _MEDIA_DEFS.get(name):
         with media_fp.open('r') as fh:
             return json.load(fh)
     else:

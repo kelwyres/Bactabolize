@@ -1,8 +1,9 @@
 ![Bactabolize_logo](https://user-images.githubusercontent.com/19924405/193505313-edd9453a-e4eb-4730-81b1-a2bd9e652721.png)
 
-A high-throughput genome-scale Bactabolize model construction pipeline. Bactabolize allows you to provide an input genome
-(annotated or unannotated) and construct a strain-specific Bactabolize model using a reference model. Growth experience
-such as Flux Balance Analysis (FBA) and single gene knockout analysis can then be performed on the models under a variety of growth conditions and mediums.
+A high-throughput genome-scale Bactabolize model construction pipeline. Bactabolize allows you to provide an input
+genome (annotated or unannotated) and construct a strain-specific Bactabolize model using a reference model. Growth
+experience such as Flux Balance Analysis (FBA) and single gene knockout analysis can then be performed on the models
+under a variety of growth conditions and mediums.
 
 ## Table of contents
 
@@ -11,7 +12,9 @@ such as Flux Balance Analysis (FBA) and single gene knockout analysis can then b
 * [Model construction](#model-construction)
 * [Growth profiles and Flux Balance Analysis](#growth-profiles-and-flux-balance-analysis)
 * [Troubleshooting models](#troubleshooting-models)
+* [Reference models](#reference-models)
 * [Requirements](#requirements)
+* [Development](#requirements)
 * [Citation](#citation)
 * [License](#license)
 
@@ -44,16 +47,18 @@ bactabolize fba \
 
 ## Model construction
 
-Metabolic model construction is run using the `bactabolize draft_model` command. Once a model is constructed, Bactabolize
-then tests the model for growth on M9 minimal media with glucose. If the model does not grow under these conditions,
-`bactabolize patch_model` should be run to add additional reactions.
+Metabolic model construction is run using the `bactabolize draft_model` command. Once a model is constructed,
+Bactabolize then tests the model for growth on M9 minimal media with glucose. If the model does not grow under these
+conditions, `bactabolize patch_model` should be run to add additional reactions.
 
 ### Options
 
 #### Required
 
-`--assembly_fp` - Input assembly for which a Bactabolize model will be generated. This can be either an
-unannotated **fasta** file or an annotated **genbank** file. Bactabolize will honour the genbank annotations. **IMPORTANT:** Recommended minimum assembly quality: ≤200 assembly graph dead ends (calculate from .gfa or fastg). If only contigs are available, ≤130 contigs.
+`--assembly_fp` - Input assembly for which a Bactabolize model will be generated. This can be either an unannotated
+**fasta** file or an annotated **genbank** file. Bactabolize will honour the genbank annotations. **IMPORTANT:**
+Recommended minimum assembly quality: ≤200 assembly graph dead ends (calculate from .gfa or fastg). If only contigs are
+available, ≤130 contigs.
 
 `--output_fp` - Output filename
 
@@ -75,21 +80,22 @@ Alternatively, reference genome data can be provided by a genbank file. Useful i
 
 #### Optional
 
-`--media_type` - Choose growth media for model building. One of: bg11, lb_carveme, lb, m9, nutrient, tsa, tsa_sheep_blood. DEFAULT: m9
+`--media_type` - Choose growth media for model building. One of: bg11, lb_carveme, lb, m9, nutrient, tsa,
+tsa_sheep_blood. DEFAULT: m9
 
 `--atmosphere_type` - Choose atmosphere for model building. One of: aerobic, anaerobic. DEFAULT: aerobic
 
-`--min_coverage` - Set minimum query coverage percentage for bi-directional best hit for ortholog
-identification. DEFAULT: 25
+`--min_coverage` - Set minimum query coverage percentage for bi-directional best hit for ortholog identification.
+DEFAULT: 25
 
-`--min_pident` - Set minimum identity percentage for bi-directional best hit for ortholog identification.
-DEFAULT: 80
+`--min_pident` - Set minimum identity percentage for bi-directional best hit for ortholog identification. DEFAULT: 80
 
 `--min_ppos` - Set minimum protein similarity (positives) percentage for bi-directional best hit for ortholog
 identification. DEFAULT: OFF. Can be used instead of `--min_pident` to allow for greater tolerance of
 similarly-functional but different residues.
 
-`--memote_report_fp` - MEMOTE model quality report output filepath. Note that this will add >5 minutes of compute time PER assembly
+`--memote_report_fp` - MEMOTE model quality report output filepath. Note that this will add >5 minutes of compute time
+PER assembly
 
 `--no_reannotation` - Will prevent the re-annotation of the input genbank file with prodigal. DEFAULT: Off.
 
@@ -105,7 +111,8 @@ bactabolize draft_model \
     --min_coverage 25 \
     --min_ppos 80
 
-# Create draft model for fasta input assembly using multifasta reference, at 25% query coverage and 75% protein identity. Produce MEMOTE report
+# Create draft model for fasta input assembly using multifasta reference, at 25% query coverage and 75% protein
+# identity. Produce MEMOTE report
 bactabolize draft_model \
     --assembly_fp input_assembly.fasta \
     --ref_genes_fp reference_model_genes.ffn \
@@ -231,17 +238,21 @@ media that it is performed on, and the default element sources. Here is an examp
 }
 ```
 
-This spec defines a single media setting, `M9`, to perform FBA. The `fba_type` field sets the type of FBA to run; both simple
-media assessment and identification of potential element sources will be done here. The `exchanges` field specifies the media
-and `default_element_sources` specifies the default exchanges to use when assessing potential element sources. 7 common
-bacterial medias (including TSA, LB, nutrient media, BG11 etc) have been included in the `FBA_spec_files` directory.
+This spec defines a single media setting, `M9`, to perform FBA. The `fba_type` field sets the type of FBA to run; both
+simple media assessment and identification of potential element sources will be done here. The `exchanges` field
+specifies the media and `default_element_sources` specifies the default exchanges to use when assessing potential
+element sources. 7 common bacterial medias (including TSA, LB, nutrient media, BG11 etc) have been included in the
+`FBA_spec_files` directory.
 
 ## Troubleshooting models
 
-The ability of a draft model to produce biomass on minimal media is assessed during creation. When a model fails this test,
-troubleshooting information describing metabolites, reactions, and genes required to produce biomass is written to disk.
+The ability of a draft model to produce biomass on minimal media is assessed during creation. When a model fails this
+test, troubleshooting information describing metabolites, reactions, and genes required to produce biomass is written to
+disk.
 
-In order to fix the model you must then add these missing reactions into a 'patch' file. Only the reactions are required, their metabolites and associated genes (if any) will be added automatically. Then the `bactabolize patch_model` command can be run, which will perform targeted gap-filling to repair the model. Example `patch.json` file:
+In order to fix the model you must then add these missing reactions into a 'patch' file. Only the reactions are
+required, their metabolites and associated genes (if any) will be added automatically. Then the `bactabolize
+patch_model` command can be run, which will perform targeted gap-filling to repair the model. Example `patch.json` file:
 
 ```json
 {
@@ -258,12 +269,11 @@ In order to fix the model you must then add these missing reactions into a 'patc
 
 This patch file specifies that the `K_variicola_variicola_342` model requires two reactions to be added.
 
-#### patch_model requirements
+### patch_model requirements
 
-- Add missing `reactions` to patch file
-- Make sure the model name, in this case, `K_variicola_variicola_342`, matches the
-`"id":"K_variicola_variicola_342"`, found just above the `"compartments":{` line in the .json file
-
+* Add missing `reactions` to patch file
+* Make sure the model name, in this case, `K_variicola_variicola_342`, matches the `"id":"K_variicola_variicola_342"`,
+  found just above the `"compartments":{` line in the .json file
 
 ```bash
 # K_variicola_variicola_342.json fails to produce biomass as it lacks lacks DTDP-4-dehydrorhamnose 3,5-epimerase and
@@ -283,9 +293,9 @@ bactabolize fba \
     --fba_open_value -20
 ```
 
-### Options
+#### Options
 
-#### Required
+##### Required
 
 `--draft_model_fp` - Input draft model which requires gap-filling (.json)
 
@@ -295,29 +305,32 @@ bactabolize fba \
 
 `--output_fp` - Output filename
 
-#### Optional
+##### Optional
 
-`--media_type` - Choose growth media for model building. One of: bg11, lb_carveme, lb, m9, nutrient, tsa, tsa_sheep_blood. DEFAULT: m9
+`--media_type` - Choose growth media for model building. One of: bg11, lb_carveme, lb, m9, nutrient, tsa,
+tsa_sheep_blood. DEFAULT: m9
 
 `--atmosphere_type` - Choose atmosphere for model building. One of: aerobic, anaerobic. DEFAULT: aerobic
 
-`--memote_report_fp` - MEMOTE model quality report output filepath. Note that this will add >5 minutes of compute time PER assembly
+`--memote_report_fp` - MEMOTE model quality report output filepath. Note that this will add >5 minutes of compute time
+PER assembly
 
+## Reference models
 
-### Reference models
-
-To run individual FBA on extracellular metabolites, they must be annotated with the respective chemical formula in the model.
-If you have a model that contains `metanetx` identifiers for metabolites (i.e. a BiGG model), you can add metabolite formulas
-using the [`BiGG model compound annotator`](https://github.com/scwatts/bigg_model_compound_annotator).
+To run individual FBA on extracellular metabolites, they must be annotated with the respective chemical formula in the
+model. If you have a model that contains `metanetx` identifiers for metabolites (i.e. a BiGG model), you can add
+metabolite formulas using the [`BiGG model compound
+annotator`](https://github.com/scwatts/bigg_model_compound_annotator).
 
 ## Requirements
 
 ## Citation
 
 Please cite the Bactabolize and COBRApy papers if you make use of Bactabolize
-- bioRxiv and later, published paper here
-- Ebrahim, A., Lerman, J.A., Palsson, B.O. et al. COBRApy: COnstraints-Based Reconstruction and Analysis for Python. BMC Syst Biol 7, 74 (2013). https://doi.org/10.1186/1752-0509-7-74
 
+* bioRxiv and later, published paper here
+* Ebrahim, A., Lerman, J.A., Palsson, B.O. et al. COBRApy: COnstraints-Based Reconstruction and Analysis for Python. BMC
+  Syst Biol 7, 74 (2013). <https://doi.org/10.1186/1752-0509-7-74>
 
 ## Development
 
