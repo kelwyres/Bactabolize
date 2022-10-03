@@ -1,4 +1,4 @@
-![Bactabolize_logo](https://user-images.githubusercontent.com/19924405/193492398-1bf119fe-acdd-4df1-9ffe-a48b2b8f52bf.svg)
+![Bactabolize_logo](https://user-images.githubusercontent.com/19924405/193505313-edd9453a-e4eb-4730-81b1-a2bd9e652721.png)
 
 A high-throughput genome-scale Bactabolize model construction pipeline. Bactabolize allows you to provide an input genome
 (annotated or unannotated) and construct a strain-specific Bactabolize model using a reference model. Growth experience
