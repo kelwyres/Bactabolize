@@ -1,3 +1,6 @@
+![Bactabolize_logo](https://user-images.githubusercontent.com/19924405/193489832-ea3dbe99-f143-4a20-bfb2-bb80b7440a17.svg)
+
+
 # Bactabolize
 
 A high-throughput genome-scale Bactabolize model construction pipeline. Bactabolize allows you to provide an input genome
@@ -28,6 +31,8 @@ bactabolize draft_model \
     --ref_genes_fp reference_model_genes.ffn \
     --ref_proteins_fp reference_model_genes.faa \
     --ref_model_fp reference_model.json \
+    --media_type m9 \
+    --atmosphere_type aerobic \
     --min_coverage 25 \
     --min_pident 80 \
     --output_fp input_assembly_model
@@ -72,6 +77,10 @@ Alternatively, reference genome data can be provided by a genbank file. Useful i
 `ref_genbank_fp` - Reference genome (genbank). Corresponds to `--ref_model_fp`
 
 #### Optional
+
+`--media_type` - Choose growth media for model building. One of: bg11, lb_carveme, lb, m9, nutrient, tsa, tsa_sheep_blood. DEFAULT: m9
+
+`--atmosphere_type` - Choose atmosphere for model building. One of: aerobic, anaerobic. DEFAULT: aerobic
 
 `--min_coverage` - Set minimum query coverage percentage for bi-directional best hit for ortholog
 identification. DEFAULT: 25
@@ -148,8 +157,6 @@ one of the four elements, all combinations are tested.
 
 `--fba_open_value` - Set objective value for nutrient sources tested during FBA. Should be a negative value
 between -1 and -1000. -10 or -20 is probably most reasonable. DEFAULT: -1000
-
-`--memote_report_fp` - MEMOTE model quality report output filepath. Note that this will add >5 minutes of compute time PER assembly
 
 ### Examples
 
@@ -290,6 +297,15 @@ bactabolize fba \
 `--patch_fp` - Missing reactions to add to input draft model (.json)
 
 `--output_fp` - Output filename
+
+#### Optional
+
+`--media_type` - Choose growth media for model building. One of: bg11, lb_carveme, lb, m9, nutrient, tsa, tsa_sheep_blood. DEFAULT: m9
+
+`--atmosphere_type` - Choose atmosphere for model building. One of: aerobic, anaerobic. DEFAULT: aerobic
+
+`--memote_report_fp` - MEMOTE model quality report output filepath. Note that this will add >5 minutes of compute time PER assembly
+
 
 ### Reference models
 
