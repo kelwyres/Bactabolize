@@ -22,12 +22,12 @@ from . import util
 
 def run(config):
     print('\n========================================')
-    print('running draft model creation of ' + os.path.splitext(os.path.basename(config.assembly_fp))[0])
+    print('running draft model creation of ' + config.assembly_genbank_fp.stem)
     print('========================================')
     # Get orthologs of genes in model
     model_genes = {gene.id for gene in config.model.genes}
     isolate_orthologs, blast_results = identify(
-        config.assembly_fp,
+        config.assembly_genbank_fp,
         config.model_ref_genes_fp,
         config.model_ref_proteins_fp,
         model_genes,
@@ -42,7 +42,7 @@ def run(config):
         missing_genes.append(config.model.genes.get_by_id(gene))
     # Mutate a copy of the model and rename genes
     model_draft = config.model.copy()
-    model_draft.id = config.assembly_fp.stem
+    model_draft.id = config.assembly_genbank_fp.stem
     cobra.manipulation.remove_genes(model_draft, missing_genes, remove_reactions=True)
     cobra.manipulation.modify.rename_genes(model_draft, isolate_orthologs)
 
