@@ -22,7 +22,7 @@ under a variety of growth conditions and mediums.
 
 ```bash
 # Create and activate environment
-conda create -n bactabolize -y bactabolize
+conda create -n bactabolize -y -c scwatts -c bioconda -c conda-forge 'bactabolize==0.1.0'
 conda activate bactabolize
 
 # Create draft model
