@@ -326,25 +326,12 @@ annotator`](https://github.com/scwatts/bigg_model_compound_annotator).
 
 ## Requirements
 
-- python 3.9
-- biopython 1.79
-- blast 2.12.0
-- cobra 0.21.0
-- prodigal 2.6.3
-- memote 0.13.0
-- click-config-file
-- click-log
-- cookiecutter
-- depinfo 1.7.0
-- gitpython
-- goodtables 2.0
-- importlib_resources
-- jinja2
-- numpydoc
-- pylru
-- pytest >=4.0
-- requests
-- sqlalchemy
+* python ==3.9
+* biopython 1.79
+* blast 2.12.0
+* cobra 0.21.0
+* prodigal 2.6.3
+* memote 0.13.0
 
 ## Citation
 
