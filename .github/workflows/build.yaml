@@ -24,11 +24,13 @@ jobs:
           elif [[ "${GITHUB_REF}" == 'refs/heads/main' ]]; then
             DEV_VERSION="${CURRENT_VERSION}"+dev$(echo "${GITHUB_SHA}" | cut -c-7)
             echo "::set-output name=version::${DEV_VERSION}"
+            echo "::set-output name=bump_version::yes"
           else
             echo "got bad gh ref: ${GITHUB_REF}" 1>&2
             exit 1
           fi
     outputs:
+      bump_version: ${{ steps.get_version.outputs.bump_version }}
       version: ${{ steps.get_version.outputs.version }}
 
   build_and_publish_on_conda:
@@ -56,6 +58,7 @@ jobs:
         run: |
           mamba install boa anaconda-client bump2version
       - name: Set version
+        if: ${{ needs.get_version.outputs.bump_version == 'yes' }}
         run: |
           bump2version patch \
             --new-version "${VERSION}" \
