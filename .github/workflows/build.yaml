@@ -64,7 +64,7 @@ jobs:
             --new-version "${VERSION}" \
             --allow-dirty \
             --no-commit
-      - name: build_and_upload_conda_package
+      - name: Build and upload Conda package
         run: |
           conda mambabuild \
             --token "${{ secrets.ANACONDA_TOKEN }}" \
@@ -84,18 +84,21 @@ jobs:
       DOCKERHUB_REPO: "docker.io/scwatts/bactabolize"
       VERSION: ${{ needs.get_version.outputs.version }}
     steps:
-      - name: build_docker_image
+      - name: Checkout code
+        id: git_checkout
+        uses: actions/checkout@v3
+      - name: Build Docker image
         run: |
           docker build \
             --tag "${DOCKERHUB_REPO}:${VERSION}" \
             --file docker/Dockerfile \
             ./
-      - name: dockerhub_auth
+      - name: DockerHub auth
         run: |
           echo "${{ secrets.DOCKERHUB_TOKEN }}" | \
             docker login \
               --username "${{ secrets.DOCKERHUB_USERNAME }}" \
               --password-stdin
-      - name: upload_docker_image
+      - name: DockerHub push
         run: |
           docker push "${DOCKERHUB_REPO}:${VERSION}"
