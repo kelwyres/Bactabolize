@@ -39,18 +39,18 @@ def run(config):
         else:
             print(f'error: got bad operation {op} for {reaction_id}', file=sys.stderr)
             sys.exit(1)
-    biomass_reaction = model_draft.reactions.get_by_id(config.biomass_reaction_id)
-    for metabolite_id, op in patch['biomass_metabolites'].items():
-        if op == 'remove':
-            metabolite = model_draft.metabolites.get_by_id(metabolite_id)
-            coefficient = biomass_reaction.metabolites[metabolite]
-            biomass_reaction.subtract_metabolites({metabolite: coefficient})
-        elif op == 'add':
-            # NOTE: need to check if we'd ever need to add a biomass metabolite
-            raise NotImplementedError
-        else:
-            print(f'error: got bad operation {op} for {metabolite_id}', file=sys.stderr)
-            sys.exit(1)
+#    biomass_reaction = model_draft.reactions.get_by_id(config.biomass_reaction_id)
+#    for metabolite_id, op in patch['biomass_metabolites'].items():
+#        if op == 'remove':
+#            metabolite = model_draft.metabolites.get_by_id(metabolite_id)
+#            coefficient = biomass_reaction.metabolites[metabolite]
+#            biomass_reaction.subtract_metabolites({metabolite: coefficient})
+#        elif op == 'add':
+#            # NOTE: need to check if we'd ever need to add a biomass metabolite
+#            raise NotImplementedError
+#        else:
+#            print(f'error: got bad operation {op} for {metabolite_id}', file=sys.stderr)
+#            sys.exit(1)
     # Write model to disk
     with config.output_fp.open('w') as fh:
         cobra.io.save_json_model(model_draft, fh)
