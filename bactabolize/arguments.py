@@ -170,6 +170,7 @@ def check_arguments(args):
 
 
 def help_text(command):
+    media_choices = ', '.join(sorted(media_definitions.available()))
     info_text = f'\nProgram: {__program_name__}\nVersion: {__version__}\n'
     if not command:
         help_text_str = (
@@ -192,8 +193,10 @@ def help_text(command):
             '  --min_coverage FLOAT        Alignment minimum coverage [default: 25]\n'
             '  --min_pident FLOAT          Alignment minimum percentage identity [default: 80]\n'
             '  --min_ppos FLOAT            Alignment minimum percentage positive matches\n'
-            '  --media_type STR            Media type used to validate model [default: m9]\n'
-            '  --atmosphere_type STR       Atmosphere type used to validate model\n'
+            '  --media_type STR            Media type used to validate model '
+            f'[choices: {media_choices}] [default: m9]\n'
+            '  --atmosphere_type STR       Atmosphere type used to validate model '
+            '[choices: aerobic, anaerobic]\n'
             '  --biomass_reaction_id STR   Identifier of the biomass reaction [default: BIOMASS_]\n'
             '  --memote_report_fp FILE     MEMOTE report output filepath\n'
             '  --output_fp FILE            Output filepath\n'
@@ -207,8 +210,10 @@ def help_text(command):
             '  --draft_model_fp FILE       Isolate model filepath\n'
             '  --ref_model_fp FILE         Reference model filepath\n'
             '  --patch_fp FILE             Patch file (JSON, XML [SMBL v3.1])\n'
-            '  --media_type STR            Media type used to validate model [default: m9]\n'
-            '  --atmosphere_type STR       Atmosphere type used to validate model\n'
+            '  --media_type STR            Media type used to validate model '
+            f'[choices: {media_choices}] [default: m9]\n'
+            '  --atmosphere_type STR       Atmosphere type used to validate model '
+            '[choices: aerobic, anaerobic]\n'
             '  --biomass_reaction_id STR   Identifier of the biomass reaction [default: BIOMASS_]\n'
             '  --memote_report_fp FILE     MEMOTE report output filepath\n'
             '  --output_fp FILE            Output filepath\n'
