@@ -64,6 +64,8 @@ available, ≤130 contigs.
 
 `--ref_model_fp` - Reference of Bactabolize model in .json format.
 
+`--biomass_reaction_id` - ID of reference model's Biomass function. DEFAULT: BIOMASS_
+
 The reference genome data used to generate the input assembly model can be provided as nucleotide (.ffn) AND protein
 multifasta (.faa) files. Useful if reference is a pan-model or multi-strain model and does not exist in a traditional
 genbank format.
@@ -260,8 +262,6 @@ patch_model` command can be run, which will perform targeted gap-filling to repa
     "reactions": {
       "TDPDRE": "add",
       "TDPDRR": "add"
-    },
-    "biomass_metabolites": {
     }
   }
 }
@@ -283,6 +283,8 @@ bactabolize patch_model \
     --draft_model_fp K_variicola_variicola_342.json \
     --ref_model_fp iYL1228_annotated.json \
     --patch_fp patch.json \
+    --media_type m9 \
+    --atmosphere_type aerobic \
     --output_fp K_variicola_variicola_342_patched.json
 
 # Assess model with FBA
@@ -323,6 +325,26 @@ metabolite formulas using the [`BiGG model compound
 annotator`](https://github.com/scwatts/bigg_model_compound_annotator).
 
 ## Requirements
+
+- python 3.9
+- biopython 1.79
+- blast 2.12.0
+- cobra 0.21.0
+- prodigal 2.6.3
+- memote 0.13.0
+- click-config-file
+- click-log
+- cookiecutter
+- depinfo 1.7.0
+- gitpython
+- goodtables 2.0
+- importlib_resources
+- jinja2
+- numpydoc
+- pylru
+- pytest >=4.0
+- requests
+- sqlalchemy
 
 ## Citation
 
