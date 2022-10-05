@@ -48,8 +48,7 @@ bactabolize fba \
 ## Model construction
 
 Metabolic model construction is run using the `bactabolize draft_model` command. Once a model is constructed,
-Bactabolize then tests the model for growth on M9 minimal media with glucose. If the model does not grow under these
-conditions, `bactabolize patch_model` should be run to add additional reactions.
+Bactabolize then tests the model for growth on your choice of media under your choice of atmosphere. If the model does not grow under these conditions, `bactabolize patch_model` should be run to add additional reactions.
 
 ### Options
 
@@ -82,7 +81,7 @@ Alternatively, reference genome data can be provided by a genbank file. Useful i
 
 #### Optional
 
-`--media_type` - Choose growth media for model building. One of: bg11, lb_carveme, lb, m9, nutrient, tsa,
+`--media_type` - Choose growth media for model building. One of: cdm_mendoza, bg11, lb, lb_carveme, m9, nutrient, pmm5_mendoza, pmm7_mendoza, tsa,
 tsa_sheep_blood. DEFAULT: m9
 
 `--atmosphere_type` - Choose atmosphere for model building. One of: aerobic, anaerobic. DEFAULT: aerobic
@@ -104,22 +103,29 @@ PER assembly
 ### Examples
 
 ```bash
-# Create draft model for genbank input assembly using genbank reference, at 25% query coverage and 80% protein similarity
+# Create draft model for genbank input assembly using genbank reference on M9 media
+# under aerobic conditions, at 25% query coverage and 80% protein similarity
 bactabolize draft_model \
     --assembly_fp input_assembly.gbk \
     --ref_genbank_fp reference.gbk \
     --ref_model_fp reference_model.json \
+    --biomass_reaction_id biomass_equation \
+    --media_type m9 \
+    --atmosphere_type aerobic \
     --output_fp input_assembly_model_qc_25_sim_85 \
     --min_coverage 25 \
     --min_ppos 80
 
-# Create draft model for fasta input assembly using multifasta reference, at 25% query coverage and 75% protein
-# identity. Produce MEMOTE report
+# Create draft model for fasta input assembly using multifasta reference, anerobically on PMM7 media
+# at 25% query coverage and 75% protein identity. Produce MEMOTE report
 bactabolize draft_model \
     --assembly_fp input_assembly.fasta \
     --ref_genes_fp reference_model_genes.ffn \
     --ref_proteins_fp reference_model_genes.faa \
     --ref_model_fp reference_model.json \
+    --biomass_reaction_id BIOMASS \
+    --media_type pmm7 \
+    --atmosphere_type anaerobic \
     --output_fp input_assembly_model_qc_25_sim_85 \
     --min_coverage 25 \
     --min_pident 75 \
@@ -170,14 +176,14 @@ between -1 and -1000. -10 or -20 is probably most reasonable. DEFAULT: -1000
 # Produce FBA on input on M9 minimal media with an objective value of -20
 bactabolize fba \
     --model_fp input_assembly_model.json \
-    --fba_spec_fp FBA_spec_files/M9_media_spec.json \
+    --fba_spec_fp data/fba_specs/m9_spec.json \
     --output_fp input_assembly_model_FBA.tsv \
     --fba_open_value -20
 
 # Produce FBA on input on TSA media with an objective value of -10
 bactabolize fba \
     --model_fp input_assembly_model.json \
-    --fba_spec_fp FBA_spec_files/TSA_media_spec.json \
+    --fba_spec_fp data/fba_specs/tsa_spec.json \
     --output_fp input_assembly_model_FBA.tsv \
     --fba_open_value -10
 ```
@@ -197,8 +203,8 @@ A `assembly_id`\_fba.tsv tab-delimited file will be produced:
 
 ### FBA spec file
 
-The `*_spec.json` file defines the type of FBA to perform, the
-media that it is performed on, and the default element sources. Here is an example:
+The `*_spec.json` file defines the media, atmosphere and default element sources
+FBA will use as a growth environment. Example:
 
 ```json
 {
@@ -207,29 +213,8 @@ media that it is performed on, and the default element sources. Here is an examp
         "defined_exchanges_only",
         "potential_element_sources"
     ],
-    "exchanges": {
-      "EX_ca2_e":      -1000,
-      "EX_cbl1_e":     -0.01,
-      "EX_cl_e":       -1000,
-      "EX_cobalt2_e":  -1000,
-      "EX_cu2_e":      -1000,
-      "EX_fe2_e":      -1000,
-      "EX_fe3_e":      -1000,
-      "EX_glc__D_e":   -20,
-      "EX_h2o_e":      -1000,
-      "EX_h_e":        -1000,
-      "EX_k_e":        -1000,
-      "EX_mg2_e":      -1000,
-      "EX_mn2_e":      -1000,
-      "EX_mobd_e":     -1000,
-      "EX_na1_e":      -1000,
-      "EX_nh4_e":      -1000,
-      "EX_ni2_e":      -1000,
-      "EX_pi_e":       -1000,
-      "EX_so4_e":      -1000,
-      "EX_tungs_e":    -1000,
-      "EX_zn2_e":      -1000
-    },
+    "atmosphere": ["aerobic", "anaerobic"],
+    "media_type": "m9",
     "default_element_sources": {
       "carbon": "EX_glc__D_e",
       "phosphorus": "EX_pi_e",
@@ -240,11 +225,13 @@ media that it is performed on, and the default element sources. Here is an examp
 }
 ```
 
-This spec defines a single media setting, `M9`, to perform FBA. The `fba_type` field sets the type of FBA to run; both
-simple media assessment and identification of potential element sources will be done here. The `exchanges` field
-specifies the media and `default_element_sources` specifies the default exchanges to use when assessing potential
-element sources. 7 common bacterial medias (including TSA, LB, nutrient media, BG11 etc) have been included in the
-`FBA_spec_files` directory.
+m9_spec.json details: The `fba_type` field sets the type of FBA to run; both
+simple media assessment and identification of potential element sources will be done here. The `atmosphere` allows
+aerobic and anerobic conditions to be tested. The `media_type` field specifies the growth media (m9). 
+`default_element_sources` specifies the default exchanges to replace when assessing potential element sources.
+
+See `data/fba_specs` directory to find commonly used bacterial medias, or add custom ones.
+
 
 ## Troubleshooting models
 
@@ -272,8 +259,8 @@ This patch file specifies that the `K_variicola_variicola_342` model requires tw
 ### patch_model requirements
 
 * Add missing `reactions` to patch file
-* Make sure the model name, in this case, `K_variicola_variicola_342`, matches the `"id":"K_variicola_variicola_342"`,
-  found just above the `"compartments":{` line in the .json file
+* Make sure the model name, in this case, `K_variicola_variicola_342`, matches the model name
+`"id":"K_variicola_variicola_342"`, found just above the `"compartments":{` line in the `.json` model file
 
 ```bash
 # K_variicola_variicola_342.json fails to produce biomass as it lacks lacks DTDP-4-dehydrorhamnose 3,5-epimerase and
@@ -290,7 +277,7 @@ bactabolize patch_model \
 # Assess model with FBA
 bactabolize fba \
     --model_fp K_variicola_variicola_342_patched.json \
-    --fba_spec_fp FBA_spec_files/M9_media.json \
+    --fba_spec_fp data/fba_specs/m9_spec.json \
     --output_fp K_variicola_variicola_342_patched_FBA.tsv \
     --fba_open_value -20
 ```
