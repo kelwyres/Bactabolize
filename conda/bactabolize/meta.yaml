@@ -20,6 +20,7 @@ requirements:
     - blast ==2.12.0
     - cobra ==0.21.0
     - prodigal ==2.6.3
+    - filelock ==3.8.0
     # Additional requirements for MEMOTE (pip installed without dependencies in build.sh)
     - click-config-file
     - click-log
