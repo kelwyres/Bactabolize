@@ -1,4 +1,11 @@
 from . import util
+import os
+import time
+import pathlib
+
+
+
+import filelock
 
 
 BlastFormat = {
@@ -32,26 +39,34 @@ class BlastResult:
 
 
 def run_blastp(query_fp, subject_fp):
-    # Create database
-    command_db = f'makeblastdb -in {subject_fp} -out {subject_fp} -dbtype prot'
-    util.execute_command(command_db)
+    # Create a database
+    create_blast_database(subject_fp, 'prot')
     # Run alignment
     command_opts = f'-evalue 0.001 -outfmt \'6 {" ".join(BlastFormat)}\''
     command_run = f'blastp -db {subject_fp} -query {query_fp} {command_opts}'
     result = util.execute_command(command_run)
     return parse_results(result.stdout)
 
-
 def run_blastn(query_fp, subject_fp):
     # Create database
-    command_db = f'makeblastdb -in {subject_fp} -out {subject_fp} -dbtype nucl'
-    util.execute_command(command_db)
+    create_blast_database(subject_fp, 'nucl')
     # Run alignment
     command_opts = f'-evalue 0.001 -outfmt \'6 {" ".join(BlastFormat)}\''
     command_run = f'blastn -db {subject_fp} -query {query_fp} {command_opts}'
     result = util.execute_command(command_run)
     return parse_results(result.stdout)
 
+def create_blast_database(subject_fp, db_type):
+    # Check if we already have a database
+    database_exts = ['pdb', 'psq', 'pto', 'ptf', 'pot', 'pin', 'phr']
+    database_fps = [pathlib.Path(f'{subject_fp}.{ext}') for ext in database_exts]
+    if any(not fp.exists() for fp in database_fps):
+        # Create a lock to prevent race condition; multiple concurrent processes could eval to here
+        with filelock.FileLock(f'{subject_fp}.lock', timeout=60):
+            # A second check for multiple concurrent processes to ensure database is created only once
+            if any(not fp.exists() for fp in database_fps):
+                command_db = f'makeblastdb -in {subject_fp} -out {subject_fp} -dbtype {db_type}'
+                util.execute_command(command_db)
 
 def filter_results(results, *, min_coverage=None, min_pident=None, min_ppos=None):
     results_filtered = dict()
