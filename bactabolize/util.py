@@ -16,7 +16,7 @@ def read_model_and_check(model_fp, genes_fp, proteins_fp):
     print('\n========================================')
     print('reading reference ' + os.path.splitext(os.path.basename(model_fp))[0] + ' model')
     print('========================================')
-    print('Ignore KPN_SPONT messages :)')
+    print('Ignore missing spontaneous reactions such as KPN_SPONT - no associated genes')
     with model_fp.open('r') as fh:
         if model_fp.suffix == '.json':
             model = cobra.io.load_json_model(fh)
