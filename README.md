@@ -36,7 +36,7 @@ bactabolize draft_model \
     --atmosphere_type aerobic \
     --min_coverage 25 \
     --min_pident 80 \
-    --output_fp input_assembly_model
+    --output_fp input_assembly
 
 # Run FBA
 bactabolize fba \
@@ -113,7 +113,7 @@ bactabolize draft_model \
     --biomass_reaction_id biomass_equation \
     --media_type m9 \
     --atmosphere_type aerobic \
-    --output_fp input_assembly_model_qc_25_sim_85 \
+    --output_fp input_assembly_qc_25_sim_85 \
     --min_coverage 25 \
     --min_ppos 80
 
@@ -127,7 +127,7 @@ bactabolize draft_model \
     --biomass_reaction_id BIOMASS \
     --media_type pmm7 \
     --atmosphere_type anaerobic \
-    --output_fp input_assembly_model_qc_25_sim_85 \
+    --output_fp input_assembly_qc_25_sim_85 \
     --min_coverage 25 \
     --min_pident 75 \
     --memote_report_fp input_report
