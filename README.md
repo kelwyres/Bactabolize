@@ -270,6 +270,7 @@ This patch file specifies that the `K_variicola_variicola_342` model requires tw
 bactabolize patch_model \
     --draft_model_fp K_variicola_variicola_342.json \
     --ref_model_fp iYL1228_annotated.json \
+    --biomass_reaction_id YOUR_BIOMASS_ID \
     --patch_fp patch.json \
     --media_type m9 \
     --atmosphere_type aerobic \
@@ -294,6 +295,8 @@ bactabolize fba \
 `--patch_fp` - Missing reactions to add to input draft model (.json)
 
 `--output_fp` - Output filename
+
+`--biomass_reaction_id` - ID of reference model's Biomass function. DEFAULT: BIOMASS_
 
 ##### Optional
 
