@@ -31,6 +31,7 @@ bactabolize draft_model \
     --ref_genes_fp reference_model_genes.ffn \
     --ref_proteins_fp reference_model_genes.faa \
     --ref_model_fp reference_model.json \
+    --biomass_reaction_id YOUR_BIOMASS_ID \
     --media_type m9 \
     --atmosphere_type aerobic \
     --min_coverage 25 \
