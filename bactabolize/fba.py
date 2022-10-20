@@ -45,6 +45,8 @@ def run_fba(model, exchange_bounds):
     # Prevent warnings from cobrapy
     with warnings.catch_warnings():
         warnings.simplefilter('ignore')
+        # Place timeout limit on most likely infeasible growth profiles (hanging longer than say, 20 seconds is unreasonable for a single simulation)
+        model.solver.configuration.timeout = 20
         # Attempt to optimise
         solution = model.optimize()
         if solution.status == 'infeasible':
