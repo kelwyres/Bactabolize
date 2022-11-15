@@ -1,0 +1,12 @@
+{
+  "KPN2285": {
+    "reactions": {
+      "PSD160": "add",
+      "PSD161": "add",
+      "PSD181": "add",
+      "PSD180": "add"
+    },
+    "biomass_metabolites": {
+    }
+  }
+}
