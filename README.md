@@ -56,6 +56,24 @@ Bactabolize then tests the model for growth on your choice of media under your c
 
 To accurately capture the metabolism of your intended isolates and build high-quality models, choosing a good reference model is essential. Many approaches will use single strain models, which may not have enough diversity to capture your intended isolate's reactions. Other approaches will use universal models, which can overestimate reaction presence in a genome. We have constructed a high-quality, curated [Klebsiella pneumoniae Species Complex (*Kp*SC) pan metabolic model](https://github.com/kelwyres/KpSC-pan-metabolic-model), built from 37 *Kp*SC genomes, for use as a *Klebsiella* reference model.
 
+### Growth mediums
+
+You can choose your growth medium in which to simulate growth of your model. Bactabolize comes with a list of pre-generated medias in the `data/fba_specs/` directory, but users can make custom medias as well.
+
+| Media type | Reference | File with ingredients |
+|-------|-----------|-----------------------|
+|   cdm_mendoza    |  [Mendoza *et al*., (2019)](https://doi.org/10.1186/s13059-019-1769-1)         |    cdm_mendoza_spec.json                   |
+|    bg11   | This study, [ThermoFisher](https://www.thermofisher.com/au/en/home/technical-resources/media-formulation.353.html)           |  bg11_spec.json  |
+|   lb    | This study. Peptone: [BD, 2015](https://legacy.bd.com/ds/technicalCenter/misc/lcn01558-bionutrients-manual.pdf), [Loginova *et al*., (1974)](https://doi.org/10.1007/BF00777001), [ThermoFisher, (2019)](https://assets.thermofisher.com/TFS-Assets/BPD/brochures/peptones-supplements-feeds-technical-reference-guide.pdf). Yeast extract: [Tomé, (2021)](https://doi.org/10.1021/acsfoodscitech.0c00131), [Plata *et al*., (2013)](https://doi.org/10.1007/s00216-013-7239-9), [](), [Liu *et al*., (2018)](https://doi.org/10.1016/j.ijbiomac.2018.06.145), [Blagović *et al*., (2001)](https://www.bib.irb.hr/94935?&rad=94935), [Blagović *et al*., (2005)](https://doi.org/10.1007/BF02931290), [Avramia *et al*., (2021)](https://doi.org/10.3390/ijms22020825)            |          lb_spec.json             |
+|  lb_carveme     |  [Machado *et al*., (2018)](https://doi.org/10.1093/nar/gky537)         |          lb_carveme_spec.json             |
+| m9      |   [Norsigian *et al*., (2010)](https://doi.org/10.1038/nprot.2009.203)        |     m9_spec.json                  |
+| nutrient      |  This study. Peptone: [BD, 2015](https://legacy.bd.com/ds/technicalCenter/misc/lcn01558-bionutrients-manual.pdf), [Loginova *et al*., (1974)](https://doi.org/10.1007/BF00777001), [ThermoFisher, (2019)](https://assets.thermofisher.com/TFS-Assets/BPD/brochures/peptones-supplements-feeds-technical-reference-guide.pdf). Beef extract: [BD, 2015](https://legacy.bd.com/ds/technicalCenter/misc/lcn01558-bionutrients-manual.pdf), [ThermoFisher, (2019)](https://assets.thermofisher.com/TFS-Assets/BPD/brochures/peptones-supplements-feeds-technical-reference-guide.pdf)           |        nutrient_spec.json               |
+|   pmm5_mendoza    |   [Mendoza *et al*., (2019)](https://doi.org/10.1186/s13059-019-1769-1)        |         pmm5_mendoza_spec.json              |
+|  pmm7_mendoza     |  [Mendoza *et al*., (2019)](https://doi.org/10.1186/s13059-019-1769-1)         |    pmm7_mendoza_spec.json                   |
+|  tsa     | This study. Tryptic soy: [BD, 2015](https://legacy.bd.com/ds/technicalCenter/misc/lcn01558-bionutrients-manual.pdf), [ThermoFisher, (2019)](https://assets.thermofisher.com/TFS-Assets/BPD/brochures/peptones-supplements-feeds-technical-reference-guide.pdf), [Hagely *et al*., (2013)](https://doi.org/10.1021/jf303985q), [Choct *et al*., (2010)](https://doi.org/10.5713/ajas.2010.90222)      |     tsa_spec.json                  |
+| tsa_sheep_blood      |   This study. Tryptic soy: [BD, 2015](https://legacy.bd.com/ds/technicalCenter/misc/lcn01558-bionutrients-manual.pdf), [ThermoFisher, (2019)](https://assets.thermofisher.com/TFS-Assets/BPD/brochures/peptones-supplements-feeds-technical-reference-guide.pdf), [Hagely *et al*., (2013)](https://doi.org/10.1021/jf303985q), [Choct *et al*., (2010)](https://doi.org/10.5713/ajas.2010.90222)        |    tsa_sheep_blood_spec.json                   |
+
+
 ### Options
 
 #### Required
