@@ -1,8 +1,8 @@
 <img src="https://user-images.githubusercontent.com/19924405/193505313-edd9453a-e4eb-4730-81b1-a2bd9e652721.png" width="50%">
 
-A high-throughput genome-scale Bactabolize model construction pipeline. Bactabolize allows you to provide an input
-genome (annotated or unannotated) and construct a strain-specific Bactabolize model using a reference model. Growth
-experience such as Flux Balance Analysis (FBA) and single gene knockout analysis can then be performed on the models
+A high-throughput genome-scale Bactabolize model construction pipeline. Bactabolize allows you to provide input
+genomes (annotated or unannotated) and rapidly construct strain-specific metabolic models using a reference model. Growth
+experiments such as Flux Balance Analysis (FBA) and Single Gene Knockout (SGK) analysis can then be performed on the models
 under a variety of growth conditions and mediums.
 
 ## Table of contents
@@ -12,10 +12,11 @@ under a variety of growth conditions and mediums.
 * [Model construction](#model-construction)
 * [Growth profiles and Flux Balance Analysis](#growth-profiles-and-flux-balance-analysis)
 * [Troubleshooting models](#troubleshooting-models)
-* [Reference models](#reference-models)
+* [Metabolite IDs](#metabolite-ids)
 * [Requirements](#requirements)
-* [Development](#requirements)
 * [Citation](#citation)
+* [References](#references)
+* [Development](#requirements)
 * [License](#license)
 
 ## Quickstart
@@ -50,6 +51,10 @@ bactabolize fba \
 
 Metabolic model construction is run using the `bactabolize draft_model` command. Once a model is constructed,
 Bactabolize then tests the model for growth on your choice of media under your choice of atmosphere. If the model does not grow under these conditions, `bactabolize patch_model` should be run to add additional reactions.
+
+### Reference model choice
+
+To accurately capture the metabolism of your intended isolates and build high-quality models, choosing a good reference model is essential. Many approaches will use single strain models, which may not have enough diversity to capture your intended isolate's reactions. Other approaches will use universal models, which can overestimate reaction presence in a genome. We have constructed a high-quality, curated [Klebsiella pneumoniae Species Complex (*Kp*SC) pan metabolic model](https://github.com/kelwyres/KpSC-pan-metabolic-model), built from 37 *Kp*SC genomes, for use as a *Klebsiella* reference model.
 
 ### Options
 
@@ -308,7 +313,7 @@ tsa_sheep_blood. DEFAULT: m9
 `--memote_report_fp` - MEMOTE model quality report output filepath. Note that this will add >5 minutes of compute time
 PER assembly
 
-## Reference models
+## Metabolite IDs
 
 To run individual FBA on extracellular metabolites, they must be annotated with the respective chemical formula in the
 model. If you have a model that contains `metanetx` identifiers for metabolites (i.e. a BiGG model), you can add
@@ -331,6 +336,10 @@ Please cite the Bactabolize and COBRApy papers if you make use of Bactabolize
 * bioRxiv and later, published paper here
 * Ebrahim, A., Lerman, J.A., Palsson, B.O. et al. COBRApy: COnstraints-Based Reconstruction and Analysis for Python. BMC
   Syst Biol 7, 74 (2013). <https://doi.org/10.1186/1752-0509-7-74>
+
+## References
+
+Bactabolize is based on the approach described in [Norsigian *et al*, (2020), *Nature Protocols*](https://www.nature.com/articles/s41596-019-0254-3), and leverages the [COBRApy toolkit](https://opencobra.github.io/cobrapy/) 
 
 ## Development
 
