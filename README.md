@@ -2,8 +2,7 @@
 
 A high-throughput genome-scale metabolic modelling pipeline. 
 
-Bactabolize allows you to provide input
-genomes (annotated or unannotated) and rapidly construct strain-specific metabolic models using a reference model. Growth
+Bactabolize takes as input a reference metabolic reconstruction and a query genome assembly (annotated or unannotated) and rapidly constructs a strain-specific metabolic model. Growth
 experiments such as Flux Balance Analysis (FBA) and Single Gene Knockout (SGK) analysis can then be performed on the models
 under a variety of growth conditions and mediums.
 
