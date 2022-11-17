@@ -330,6 +330,40 @@ model. If you have a model that contains `metanetx` identifiers for metabolites 
 metabolite formulas using the [`BiGG model compound
 annotator`](https://github.com/scwatts/bigg_model_compound_annotator).
 
+## Creation of custom medias
+Creating custom medias depends on the Bactabolize module you are using. If you want to add a custom media for `draft_model` or `patch_model` or `sgk`, go [here](#draft-patch-or-sgk-custom-medias). For `fba`, go [here](#fba-custom-medias).
+
+### Draft, patch or sgk custom medias
+
+1. Copy m9 media file as template to your working directory
+
+```
+cp miniconda3/envs/bactabolize/lib/{your-python-version}/site-packages/bactabolize/data/media_definitions/m9_media.json your_working_dir/custom_media.json
+```
+2. Make edits to the `custom_media.json`. Be sure to edit the `name` as well as the `exchanges`.
+3. Copy  `custom_media.json` into environment folder
+
+```
+cp your_working_dir/custom_media.json miniconda3/envs/bactabolize/lib/{your-python-version}/site-packages/bactabolize/data/media_definitions/
+```
+4. Run `bactabolize draft_model`, `patch_model` or `sgk` with `--media_type custom_media`
+
+
+### FBA custom medias
+
+1. Copy m9 spec file as template to your working directory
+
+```
+cp miniconda3/envs/bactabolize/lib/{your-python-version}/site-packages/bactabolize/data/fba_specs/m9_spec.json your_working_dir/custom_spec.json
+```
+2. Make edits to the custom_spec.json. Be sure to edit the `M9` dict header, along with `media_type`
+3. Copy `custom_spec.json` into environment folder
+```
+cp your_working_dir/custom_spec.json miniconda3/envs/bactabolize/lib/{your-python-version}/site-packages/bactabolize/data/fba_specs/
+```
+4. Run `bactabolize fba` with `--fba_spec_fp data/fba_specs/custom_spec.json`
+
+
 ## Requirements
 
 * python ==3.9
