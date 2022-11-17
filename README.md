@@ -13,6 +13,7 @@ Bactabolize is designed for rapid generation of strain-specific metabolic recons
 * [Growth profiles and Flux Balance Analysis](#growth-profiles-and-flux-balance-analysis)
 * [Troubleshooting models](#troubleshooting-models)
 * [Metabolite IDs](#metabolite-ids)
+* [Custom medias](#custom-medias)
 * [Requirements](#requirements)
 * [Citation](#citation)
 * [Development](#requirements)
@@ -330,7 +331,7 @@ model. If you have a model that contains `metanetx` identifiers for metabolites 
 metabolite formulas using the [`BiGG model compound
 annotator`](https://github.com/scwatts/bigg_model_compound_annotator).
 
-## Creation of custom medias
+## Custom medias
 Creating custom medias depends on the Bactabolize module you are using. If you want to add a custom media for `draft_model` or `patch_model` or `sgk`, go [here](#draft-patch-or-sgk-custom-medias). For `fba`, go [here](#fba-custom-medias).
 
 ### Draft, patch or sgk custom medias
