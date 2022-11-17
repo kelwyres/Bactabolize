@@ -1,10 +1,9 @@
 <img src="https://user-images.githubusercontent.com/19924405/193505313-edd9453a-e4eb-4730-81b1-a2bd9e652721.png" width="50%">
 
-A high-throughput genome-scale metabolic modelling pipeline. 
+A high-throughput genome-scale metabolic reconstruction and growth simulation pipeline.
 
-Bactabolize takes as input a reference metabolic reconstruction and a query genome assembly (annotated or unannotated) and rapidly constructs a strain-specific metabolic model. Growth
-experiments such as Flux Balance Analysis (FBA) and Single Gene Knockout (SGK) analysis can then be performed on the models
-under a variety of growth conditions and mediums.
+Bactabolize is designed for rapid generation of strain-specific metabolic reconstructions from bacterial genome data using the approach described in [Norsigian et al. Nature Protocols 2020](https://www.nature.com/articles/s41596-019-0254-3). It leverages the [COBRApy toolkit](https://opencobra.github.io/cobrapy/) and takes an input genome assembly (annotated or unannotated) to construct a strain-specific draft model by comparison to a reference (ideally a multi-strain or 'pan'-reference model). It also allows high-throughput growth phenotype simulation via Flux Balance Analysis (FBA) e.g. to predict substrate usage profiles and Single Gene Knockout analysis (SGK) to predict the impacts of single gene knockout mutations. These can be performed under a variety of growth conditions and mediums.
+
 
 ## Table of contents
 
@@ -16,11 +15,12 @@ under a variety of growth conditions and mediums.
 * [Metabolite IDs](#metabolite-ids)
 * [Requirements](#requirements)
 * [Citation](#citation)
-* [References](#references)
 * [Development](#requirements)
 * [License](#license)
 
 ## Quickstart
+
+The easiest way to install Bactabolize is via a conda environment. You can install conda as descrbed [here](https://conda.io/projects/conda/en/latest/user-guide/install/index.html). Then follow the steps below to create a conda environment for Bactabolize. Alternatively, [mamba](https://anaconda.org/conda-forge/mamba) can be used in place of conda, which allows for a faster install.
 
 ```bash
 # Create and activate environment
@@ -50,8 +50,7 @@ bactabolize fba \
 
 ## Model construction
 
-Metabolic model construction is run using the `bactabolize draft_model` command. Once a model is constructed,
-Bactabolize then tests the model for growth on your choice of media under your choice of atmosphere. If the model does not grow under these conditions, `bactabolize patch_model` should be run to add additional reactions.
+Metabolic reconstructions ('models') are generated via the `bactabolize draft_model` command. Once a model is constructed, Bactabolize will test the model for the ability to simulate growth on your choice of media under your choice of atmosphere (we recommend testing for conditions in which all of your strains are expected to grow e.g. for *Klebsiella pneumoniae* we use m9 minimal media plus aerobic atmosphere). If the model does not simulate growth under these conditions, Bactabolize will attempt to identify the essential missing reactions via the [COBRApy gap-filling](https://cobrapy.readthedocs.io/en/latest/gapfilling.html) function. `bactabolize patch_model` can be used to add these reactions into the model.
 
 ### Reference model choice
 
@@ -79,51 +78,43 @@ You can choose your growth medium in which to simulate growth of your model. Bac
 
 #### Required
 
-`--assembly_fp` - Input assembly for which a Bactabolize model will be generated. This can be either an unannotated
-**fasta** file or an annotated **genbank** file. Bactabolize will honour the genbank annotations. **IMPORTANT:**
-Recommended minimum assembly quality: ≤200 assembly graph dead ends (calculate from .gfa or fastg). If only contigs are
-available, ≤130 contigs.
+`--assembly_fp` - Input assembly for which a metabolic model will be generated. This can be either an unannotated
+**fasta** file or an annotated **genbank** file. Bactabolize will honour the genbank annotations. **IMPORTANT:** If you are using draft genome assemblies it is important to consider assembly quality and completeness. For *Klebsiella pneumoniae* we recommended minimum assembly quality: ≤200 assembly graph dead ends (calculate from .gfa or fastg). If only contigs are available, ≤130 contigs.
 
 `--output_fp` - Output filename
 
-`--ref_model_fp` - Reference of Bactabolize model in .json format.
+`--ref_model_fp` - Reference model in .json format. (You can find the latest *K. pneumoniae* pan-model [here](https://github.com/kelwyres/KpSC-pan-metabolic-model).
 
-`--biomass_reaction_id` - ID of reference model's Biomass function. DEFAULT: BIOMASS_
+`--biomass_reaction_id` - reaction ID of reference model's Biomass function. DEFAULT: BIOMASS_
 
-The reference genome data used to generate the input assembly model can be provided as nucleotide (.ffn) AND protein
-multifasta (.faa) files. Useful if reference is a pan-model or multi-strain model and does not exist in a traditional
-genbank format.
+The sequence data corresponding to the reference model can be provided as nucleotide (.ffn) AND protein multifasta (.faa) files (useful if the reference is a pan-model or multi-strain model for which the sequences do not exist in a single genbank file). Alternatively, the reference sequence data can be provided by a genbank file (useful if the reference is a single-strain model).
 
-`--ref_genes_fp` - Reference genes in nucleotide sequence (fasta). Corresponds to `--ref_proteins_fp` and
-`--ref_model_fp`
+`--ref_genes_fp` - Reference genes in nucleotide sequence (fasta)
 
-`--ref_proteins_fp` - Reference protein in amino acid sequence (fasta). Corresponds to `--ref_genes_fp` and
-`--ref_model_fp`
+AND
 
-Alternatively, reference genome data can be provided by a genbank file. Useful if reference is a single-strain model.
+`--ref_proteins_fp` - Reference protein in amino acid sequence (fasta).
 
-`ref_genbank_fp` - Reference genome (genbank). Corresponds to `--ref_model_fp`
+OR
+
+`ref_genbank_fp` - Reference genome (genbank).
 
 #### Optional
 
-`--media_type` - Choose growth media for model building. One of: cdm_mendoza, bg11, lb, lb_carveme, m9, nutrient, pmm5_mendoza, pmm7_mendoza, tsa,
+`--media_type` - Growth media for initial model growth simulation test. One of: cdm_mendoza, bg11, lb, lb_carveme, m9, nutrient, pmm5_mendoza, pmm7_mendoza, tsa,
 tsa_sheep_blood. DEFAULT: m9
 
 `--atmosphere_type` - Choose atmosphere for model building. One of: aerobic, anaerobic. DEFAULT: aerobic
 
-`--min_coverage` - Set minimum query coverage percentage for bi-directional best hit for ortholog identification.
-DEFAULT: 25
+`--min_coverage` - Set minimum query coverage (%) for for ortholog identification via bi-directional best hit blast+. DEFAULT: 25
 
-`--min_pident` - Set minimum identity percentage for bi-directional best hit for ortholog identification. DEFAULT: 80
+`--min_pident` - Set minimum identity (%) for for ortholog identification via bi-directional best hit blast+. DEFAULT: 80
 
-`--min_ppos` - Set minimum protein similarity (positives) percentage for bi-directional best hit for ortholog
-identification. DEFAULT: OFF. Can be used instead of `--min_pident` to allow for greater tolerance of
-similarly-functional but different residues.
+`--min_ppos` - Set minimum protein similarity (positives, %) for for ortholog identification via bi-directional best hit blast+. DEFAULT: OFF. Can be used instead of `--min_pident` to allow for greater tolerance of similarly-functional but different residues.
 
-`--memote_report_fp` - MEMOTE model quality report output filepath. Note that this will add >5 minutes of compute time
-PER assembly
+`--memote_report_fp` - output file path for [MEMOTE model quality report](https://github.com/opencobra/memote). Note that this will significantly increase compute time e.g. +5 minutes PER assembly on a standard 1.60GHz laptop.
 
-`--no_reannotation` - Will prevent the re-annotation of the input genbank file with prodigal. DEFAULT: Off.
+`--no_reannotation` - Will prevent the re-annotation of input genome assemblies if provided in genbank format. DEFAULT: Off. If set to `ON` [Prodigal](https://github.com/hyattpd/Prodigal) is used to identify coding regions.
 
 ### Examples
 
@@ -161,10 +152,10 @@ bactabolize draft_model \
 
 | Filename                      | Description                                      |
 | ---------                     |---------                                         |
-| `assembly_id`.gbk             | Prodigal annotation of input assembly            |
-| `assembly_id`\_model.json     | Metabolic model in .json format                  |
-| `assembly_id`\_model.xml      | Metabolic model in .xml ([SMBL Level 3 Version 1)](https://co.mbine.org/specifications/sbml.level-3.version-1.core.release-1) |
-| `assembly_id`\_model.html     | [MEMOTE](https://github.com/opencobra/memote) model report                             |
+| `assembly_id.gbk`             | Prodigal annotation of input assembly            |
+| `assembly_id_model.json`     | Metabolic model in .json format                  |
+| `assembly_id_model.xml`      | Metabolic model in .xml ([SMBL Level 3 Version 1)](https://synonym.caltech.edu/documents/specifications/level-3/)) |
+| `assembly_id_model.html`    | [MEMOTE](https://github.com/opencobra/memote) model report                             |
 
 ## Growth profiles and Flux Balance Analysis
 
@@ -215,7 +206,7 @@ bactabolize fba \
 
 ### FBA output file format
 
-A `assembly_id`\_fba.tsv tab-delimited file will be produced:
+An `assembly_id_fba.tsv` tab-delimited file will be produced:
 
 | Column name       | Description                                                                   |
 | ---------         |---------                                                                      |
@@ -288,7 +279,7 @@ This patch file specifies that the `K_variicola_variicola_342` model requires tw
 `"id":"K_variicola_variicola_342"`, found just above the `"compartments":{` line in the `.json` model file
 
 ```bash
-# K_variicola_variicola_342.json fails to produce biomass as it lacks lacks DTDP-4-dehydrorhamnose 3,5-epimerase and
+# K_variicola_variicola_342.json fails to produce biomass as it lacks DTDP-4-dehydrorhamnose 3,5-epimerase and
 # DTDP-4-dehydrorhamnose reductase, which are required to create DTDP-L-rhamnose
 # Here we assume DTDP-L-rhamnose is not essential for growth and patch the model accordingly
 bactabolize patch_model \
@@ -355,10 +346,6 @@ Please cite the Bactabolize and COBRApy papers if you make use of Bactabolize
 * bioRxiv and later, published paper here
 * Ebrahim, A., Lerman, J.A., Palsson, B.O. et al. COBRApy: COnstraints-Based Reconstruction and Analysis for Python. BMC
   Syst Biol 7, 74 (2013). <https://doi.org/10.1186/1752-0509-7-74>
-
-## References
-
-Bactabolize is based on the approach described in [Norsigian *et al*, (2020), *Nature Protocols*](https://www.nature.com/articles/s41596-019-0254-3), and leverages the [COBRApy toolkit](https://opencobra.github.io/cobrapy/) 
 
 ## Development
 
