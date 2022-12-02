@@ -10,4 +10,4 @@ Bactabolize is freely available under a [GNU General Public License v3.0](https:
 * Ebrahim, A., Lerman, J.A., Palsson, B.O. et al. COBRApy: COnstraints-Based Reconstruction and Analysis for Python. BMC
   Syst Biol 7, 74 (2013). <https://doi.org/10.1186/1752-0509-7-74>
 
-**Visit the wiki to find out more!**
+**Visit the [wiki](https://github.com/kelwyres/Bactabolize/wiki) to find out more!**
