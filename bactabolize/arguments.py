@@ -69,7 +69,7 @@ def parse():
 
     parser_fba = subparsers.add_parser('fba', add_help=False)
     parser_fba.add_argument('--model_fp', type=pathlib.Path)
-    parser_fba.add_argument('--fba_open_value', type=float, default=-1000)
+    parser_fba.add_argument('--fba_open_value', type=float, default=-20)
     parser_fba.add_argument('--fba_spec_fp', type=pathlib.Path)
     parser_fba.add_argument('--output_fp', type=pathlib.Path)
     parser_fba.add_argument('-h', '--help', action='store_true')
