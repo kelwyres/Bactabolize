@@ -13,7 +13,7 @@ dependencies:
   - flake8
   - pip
   - pre-commit
-  - pylint >=2.5
+  - pylint >=2.5,<=2.14  # NOTE(SW): upper bound on version to avoid installing broken package
   # Dependencies
   - biopython ==1.79
   - blast ==2.12.0

@@ -50,7 +50,7 @@ jobs:
         uses: conda-incubator/setup-miniconda@v2
         with:
           python-version: 3.9
-          mamba-version: "*"
+          miniforge-variant: Mambaforge-pypy3
           channels: umccr,bioconda,conda-forge,defaults
           channel-priority: true
       - name: Prepare env
