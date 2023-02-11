@@ -21,6 +21,7 @@ requirements:
     - cobra ==0.21.0
     - prodigal ==2.6.3
     - filelock ==3.8.0
+    - numpy ==1.23.5  # NOTE(SW): numpy >=1.24.0 is not compatible with cobra 0.21.0
     # Additional requirements for MEMOTE (pip installed without dependencies in build.sh)
     - click-config-file
     - click-log
