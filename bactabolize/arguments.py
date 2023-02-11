@@ -52,9 +52,8 @@ def parse():
     parser_draft.add_argument('--biomass_reaction_id', type=str, default='BIOMASS_')
     parser_draft.add_argument('--output_fp', type=pathlib.Path)
     parser_draft.add_argument('--memote_report_fp', type=pathlib.Path)
-    parser_draft.add_argument('-h', '--help', action='store_true')
-
     parser_draft.add_argument('--no_reannotation', action='store_true')
+    parser_draft.add_argument('-h', '--help', action='store_true')
 
     parser_patch = subparsers.add_parser('patch_model', add_help=False)
     parser_patch.add_argument('--draft_model_fp', type=pathlib.Path)
