@@ -64,7 +64,7 @@ jobs:
             --new-version "${VERSION}" \
             --allow-dirty \
             --no-commit
-      - name: Build and upload Conda package
+      - name: Build and upload conda package
         run: |
           conda mambabuild \
             --token "${{ secrets.ANACONDA_TOKEN }}" \
