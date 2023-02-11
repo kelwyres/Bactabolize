@@ -1,11 +1,10 @@
-from . import util
-import os
-import time
 import pathlib
 
 
-
 import filelock
+
+
+from . import util
 
 
 BlastFormat = {
@@ -47,6 +46,7 @@ def run_blastp(query_fp, subject_fp):
     result = util.execute_command(command_run)
     return parse_results(result.stdout)
 
+
 def run_blastn(query_fp, subject_fp):
     # Create database
     create_blast_database(subject_fp, 'nucl')
@@ -55,6 +55,7 @@ def run_blastn(query_fp, subject_fp):
     command_run = f'blastn -db {subject_fp} -query {query_fp} {command_opts}'
     result = util.execute_command(command_run)
     return parse_results(result.stdout)
+
 
 def create_blast_database(subject_fp, db_type):
     # Check if we already have a database
@@ -67,6 +68,7 @@ def create_blast_database(subject_fp, db_type):
             if any(not fp.exists() for fp in database_fps):
                 command_db = f'makeblastdb -in {subject_fp} -out {subject_fp} -dbtype {db_type}'
                 util.execute_command(command_db)
+
 
 def filter_results(results, *, min_coverage=None, min_pident=None, min_ppos=None):
     results_filtered = dict()
