@@ -46,3 +46,12 @@ class ConfigFba:
         self.fba_open_value = args.fba_open_value
         self.fba_spec_fp = args.fba_spec_fp
         self.output_fp = args.output_fp
+
+
+class ConfigSgk:
+    def __init__(self, args):
+
+        self.model_fp = args.model_fp
+        self.media_type = args.media_type
+        self.atmosphere_type = args.atmosphere_type
+        self.output_fp = args.output_fp

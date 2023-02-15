@@ -8,6 +8,7 @@ from . import arguments
 from . import configuration
 from . import draft_model
 from . import model_fba
+from . import model_sgk
 from . import patch_model
 from . import util
 
@@ -26,6 +27,9 @@ def entry():
     elif args.command == 'fba':
         config = configuration.ConfigFba(args)
         model_fba.run(config)
+    elif args.command == 'sgk':
+        config = configuration.ConfigSgk(args)
+        model_sgk.run(config)
     else:
         assert False
 

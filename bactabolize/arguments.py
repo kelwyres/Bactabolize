@@ -73,6 +73,13 @@ def parse():
     parser_fba.add_argument('--output_fp', type=pathlib.Path)
     parser_fba.add_argument('-h', '--help', action='store_true')
 
+    parser_sgk = subparsers.add_parser('sgk', add_help=False)
+    parser_sgk.add_argument('--model_fp', type=pathlib.Path)
+    parser_sgk.add_argument('--media_type', type=str, default='m9', choices=media_definitions.available())
+    parser_sgk.add_argument('--atmosphere_type', type=str, choices=['aerobic', 'anaerobic'])
+    parser_sgk.add_argument('--output_fp', type=pathlib.Path)
+    parser_sgk.add_argument('-h', '--help', action='store_true')
+
     args = parser.parse_args()
     check_arguments(args)
     return args
@@ -102,6 +109,9 @@ def check_arguments(args):
         },
         'fba': {
             'single': ('model_fp', 'fba_spec_fp', 'output_fp'),
+        },
+        'sgk': {
+            'single': ('model_fp', 'media_type', 'atmosphere_type', 'output_fp'),
         },
     }
 
@@ -177,7 +187,8 @@ def help_text(command):
             'Commands:\n'
             '  draft_model                 Create a draft model\n'
             '  patch_model                 Patch a draft model\n'
-            '  fba                         Simulate growth on media with FBA\n\n'
+            '  fba                         Simulate growth on media with FBA\n'
+            '  sgk                         Perform single gene knockout\n\n'
             f'For more information about commands, run: {__program_name__} <command> --help\n'
         )
     elif command == 'draft_model':
@@ -224,6 +235,17 @@ def help_text(command):
             '  --model_fp FILE             Isolate model filepath\n'
             '  --fba_open_value FLOAT      Open reaction value to use in FBA [default: -1000]\n'
             '  --fba_spec_fp FILE          FBA spec filepath (JSON, XML [SMBL v3.1])\n'
+            '  --output_fp FILE            Output filepath\n'
+        )
+    elif command == 'sgk':
+        help_text_str = (
+            f'Usage: {__program_name__} {command} [options]\n'
+            'Options:\n'
+            '  --model_fp FILE             Isolate model filepath\n'
+            '  --media_type STR            Media type used to validate model '
+            f'[choices: {media_choices}] [default: m9]\n'
+            '  --atmosphere_type STR       Atmosphere type used to validate model '
+            '[choices: aerobic, anaerobic]\n'
             '  --output_fp FILE            Output filepath\n'
         )
     else:
