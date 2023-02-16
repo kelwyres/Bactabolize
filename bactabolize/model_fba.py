@@ -1,8 +1,6 @@
 import itertools
 import json
 import sys
-import os
-
 
 import cobra.io
 from cobra.io import read_sbml_model
@@ -15,7 +13,7 @@ from . import media_definitions
 def run(config):
     # pylint: disable=too-many-branches
     print('\n========================================')
-    print('running FBA on ' + os.path.splitext(os.path.basename(config.model_fp))[0])
+    print('running FBA on ' + config.model_fp.stem)
     print('========================================')
     # Read in model and spec
     with config.model_fp.open('r') as fh:

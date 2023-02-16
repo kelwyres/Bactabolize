@@ -1,6 +1,5 @@
 import sys
 
-
 import cobra.flux_analysis
 import cobra.io
 
@@ -9,6 +8,9 @@ from . import media_definitions
 
 
 def run(config):
+    print('\n========================================')
+    print('running SGK on ' + config.model_fp.stem)
+    print('========================================')
     # Load model
     with config.model_fp.open('r') as fh:
         if config.model_fp.name.endswith('.sbml'):
@@ -27,6 +29,7 @@ def run(config):
     # Run single gene knockout analysis and write results to disk
     results = cobra.flux_analysis.single_gene_deletion(model)
     results.to_csv(config.output_fp, sep='\t', index=False)
+    print(config.model_fp.stem + ' Single Gene Knockout analysis complete')
 
 
 def set_growth_environment(model, media_type, atmosphere_type):

@@ -1,6 +1,5 @@
 import json
 import sys
-import os
 
 import cobra.io
 from cobra.io import read_sbml_model
@@ -13,7 +12,7 @@ from . import util
 def run(config):
     # pylint: disable=too-many-branches,too-many-statements
     print('\n========================================')
-    print('Patching model ' + os.path.splitext(os.path.basename(config.draft_model_fp))[0])
+    print('Patching model ' + config.model_fp.stem)
     print('========================================')
     # Read in models and patch file
     with config.draft_model_fp.open('r') as fh:
