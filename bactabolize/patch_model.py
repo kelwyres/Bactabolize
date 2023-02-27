@@ -5,7 +5,7 @@ import cobra.io
 from cobra.io import read_sbml_model
 
 
-from . import media_definitions
+from . import package_data
 from . import util
 
 
@@ -57,7 +57,7 @@ def run(config):
     # Check if model now optimises on set media
     for reaction in model_draft.exchanges:
         reaction.lower_bound = 0
-    media = media_definitions.get(config.media_type)
+    media = package_data.get_data('media_definitions', config.media_type)
     for reaction_id, lower_bound in media['exchanges'].items():
         try:
             reaction = model_draft.reactions.get_by_id(reaction_id)

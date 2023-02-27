@@ -5,7 +5,7 @@ import sys
 
 from . import __program_name__
 from . import __version__
-from . import media_definitions
+from . import package_data
 
 
 class ArgumentParserCustomHelp(argparse.ArgumentParser):
@@ -47,7 +47,9 @@ def parse():
     parser_draft.add_argument('--min_coverage', type=float, default=25)
     parser_draft.add_argument('--min_pident', type=float, default=80)
     parser_draft.add_argument('--min_ppos', type=float)
-    parser_draft.add_argument('--media_type', type=str, default='m9', choices=media_definitions.available())
+    parser_draft.add_argument(
+        '--media_type', type=str, default='m9', choices=package_data.available('media_definitions')
+    )
     parser_draft.add_argument('--atmosphere_type', type=str, choices=['aerobic', 'anaerobic'])
     parser_draft.add_argument('--biomass_reaction_id', type=str, default='BIOMASS_')
     parser_draft.add_argument('--output_fp', type=pathlib.Path)
@@ -59,7 +61,9 @@ def parse():
     parser_patch.add_argument('--draft_model_fp', type=pathlib.Path)
     parser_patch.add_argument('--ref_model_fp', type=pathlib.Path)
     parser_patch.add_argument('--patch_fp', type=pathlib.Path)
-    parser_patch.add_argument('--media_type', type=str, default='m9', choices=media_definitions.available())
+    parser_patch.add_argument(
+        '--media_type', type=str, default='m9', choices=package_data.available('media_definitions')
+    )
     parser_patch.add_argument('--atmosphere_type', type=str, choices=['aerobic', 'anaerobic'])
     parser_patch.add_argument('--output_fp', type=pathlib.Path)
     parser_patch.add_argument('--biomass_reaction_id', type=str, default='BIOMASS_')
@@ -70,12 +74,13 @@ def parse():
     parser_fba.add_argument('--model_fp', type=pathlib.Path)
     parser_fba.add_argument('--fba_open_value', type=float, default=-20)
     parser_fba.add_argument('--fba_spec_fp', type=pathlib.Path)
+    parser_fba.add_argument('--fba_spec_name', type=str, choices=package_data.available('fba_specs'))
     parser_fba.add_argument('--output_fp', type=pathlib.Path)
     parser_fba.add_argument('-h', '--help', action='store_true')
 
     parser_sgk = subparsers.add_parser('sgk', add_help=False)
     parser_sgk.add_argument('--model_fp', type=pathlib.Path)
-    parser_sgk.add_argument('--media_type', type=str, default='m9', choices=media_definitions.available())
+    parser_sgk.add_argument('--media_type', type=str, default='m9', choices=package_data.available('media_definitions'))
     parser_sgk.add_argument('--atmosphere_type', type=str, choices=['aerobic', 'anaerobic'])
     parser_sgk.add_argument('--output_fp', type=pathlib.Path)
     parser_sgk.add_argument('-h', '--help', action='store_true')
@@ -108,7 +113,8 @@ def check_arguments(args):
             'single': ('draft_model_fp', 'ref_model_fp', 'patch_fp', 'output_fp'),
         },
         'fba': {
-            'single': ('model_fp', 'fba_spec_fp', 'output_fp'),
+            'single': ('model_fp', 'output_fp'),
+            'exactly_one': (('fba_spec_fp', 'fba_spec_name'),),
         },
         'sgk': {
             'single': ('model_fp', 'media_type', 'atmosphere_type', 'output_fp'),
@@ -179,7 +185,9 @@ def check_arguments(args):
 
 
 def help_text(command):
-    media_choices = ', '.join(sorted(media_definitions.available()))
+    fba_spec_choices = ', '.join(sorted(package_data.available('fba_specs')))
+    media_choices = ', '.join(sorted(package_data.available('media_definitions')))
+
     info_text = f'\nProgram: {__program_name__}\nVersion: {__version__}\n'
     if not command:
         help_text_str = (
@@ -234,7 +242,8 @@ def help_text(command):
             'Options:\n'
             '  --model_fp FILE             Isolate model filepath\n'
             '  --fba_open_value FLOAT      Open reaction value to use in FBA [default: -1000]\n'
-            '  --fba_spec_fp FILE          FBA spec filepath (JSON, XML [SMBL v3.1])\n'
+            '  --fba_spec_fp FILE          Custom FBA spec filepath (JSON, XML [SMBL v3.1])\n'
+            f'  --fba_spec_name STR         Prepackaged FBA spec name [choices: {fba_spec_choices}]\n'
             '  --output_fp FILE            Output filepath\n'
         )
     elif command == 'sgk':

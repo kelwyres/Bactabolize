@@ -45,6 +45,7 @@ class ConfigFba:
         self.model_fp = args.model_fp
         self.fba_open_value = args.fba_open_value
         self.fba_spec_fp = args.fba_spec_fp
+        self.fba_spec_name = args.fba_spec_name
         self.output_fp = args.output_fp
 
 

@@ -4,7 +4,7 @@ import cobra.flux_analysis
 import cobra.io
 
 
-from . import media_definitions
+from . import package_data
 
 
 def run(config):
@@ -36,7 +36,7 @@ def set_growth_environment(model, media_type, atmosphere_type):
     # Set media type
     for reaction in model.exchanges:
         reaction.lower_bound = 0
-    media = media_definitions.get(media_type)
+    media = package_data.get_data('media_definitions', media_type)
     for reaction_id, lower_bound in media['exchanges'].items():
         try:
             reaction = model.reactions.get_by_id(reaction_id)

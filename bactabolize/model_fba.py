@@ -7,7 +7,7 @@ from cobra.io import read_sbml_model
 
 
 from . import fba
-from . import media_definitions
+from . import package_data
 
 
 def run(config):
@@ -21,7 +21,12 @@ def run(config):
             model = cobra.io.load_json_model(fh)
         elif config.model_fp.suffix == '.xml':
             model = read_sbml_model(fh)
-    spec = parse_spec(config.fba_spec_fp)
+    if config.fba_spec_fp:
+        spec = parse_spec(config.fba_spec_fp)
+    elif config.fba_spec_name:
+        spec = parse_spec(package_data.get_fp('fba_specs', config.fba_spec_name))
+    else:
+        assert False
 
     # Run FBA
     results = dict()
@@ -49,6 +54,7 @@ def run(config):
                     elif fba_type == 'defined_exchanges_only':
                         atmosphere, value = data
                         print(fba_type, fba_name, atmosphere, '-', '-', value, sep='\t', file=fh)
+        print(config.model_fp.stem + ' substrate usage analysis (FBA) complete')
 
 
 def fba_potential_sources(model, fba_open_value, spec):
@@ -139,7 +145,7 @@ def validate_spec(fba_spec):
 
     # Read in media_type
     if 'exchanges' not in fba_spec:
-        media = media_definitions.get(fba_spec['media_type'])
+        media = package_data.get_data('media_definitions', fba_spec['media_type'])
         fba_spec['exchanges'] = media['exchanges']
 
     # Field types
