@@ -57,9 +57,12 @@ jobs:
         id: prepare_env
         run: |
           mamba install boa anaconda-client bump2version
-      - name: Set version
+      # When on development branch (inferred from bump_version value), append '-dev' to package name and set
+      # commit-specific version
+      - name: Set package name and version
         if: ${{ needs.get_version.outputs.bump_version == 'yes' }}
         run: |
+          sed -i 's/name: bactabolize/name: bactabolize-dev/' conda/bactabolize/meta.yaml;
           bump2version patch \
             --new-version "${VERSION}" \
             --allow-dirty \
