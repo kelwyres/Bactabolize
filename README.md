@@ -20,4 +20,5 @@ Please cite the following papers if you make use of Bactabolize:
   Syst Biol 7, 74 (2013). <https://doi.org/10.1186/1752-0509-7-74>
 
 **Install and quick start [here](https://github.com/kelwyres/Bactabolize/wiki/1.-Quick-start)**
+
 **Visit the [wiki](https://github.com/kelwyres/Bactabolize/wiki) to find out more!**
