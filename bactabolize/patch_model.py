@@ -85,7 +85,9 @@ def run(config):
         print(f'{model_draft} model produces biomass on minimal media')
         msg = (
             'Please cite:\n'
-            '  - bioRxiv and later, published paper here\n'
+            '  - Vezina, B., Watts, S.C. et al. '
+            'Bactabolize: A tool for high-throughput generation of bacterial strain-specific metabolic models. '
+            'https://doi.org/10.1101/2023.02.26.530115 \n'
             '  - Ebrahim, A., Lerman, J.A., Palsson, B.O. et al. '
             'COBRApy: COnstraints-Based Reconstruction and Analysis for Python. '
             'BMC Syst Biol 7, 74 (2013). https://doi.org/10.1186/1752-0509-7-74'
