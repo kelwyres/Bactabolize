@@ -12,7 +12,7 @@ from . import util
 def run(config):
     # pylint: disable=too-many-branches,too-many-statements
     print('\n========================================')
-    print('Patching model ' + config.model_fp.stem)
+    print('Patching model ' + config.draft_model_fp.stem)
     print('========================================')
     # Read in models and patch file
     with config.draft_model_fp.open('r') as fh:
