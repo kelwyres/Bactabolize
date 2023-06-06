@@ -2,6 +2,12 @@
 
 A high-throughput genome-scale metabolic reconstruction and growth simulation pipeline.
 
+## How to run
+**Install and quick start [here](https://github.com/kelwyres/Bactabolize/wiki/1.-Quick-start)**
+
+**Visit the [wiki](https://github.com/kelwyres/Bactabolize/wiki) to find out more!**
+
+## Description
 Bactabolize is designed for rapid generation of strain-specific metabolic reconstructions from bacterial genome data
 using the approach described in [Norsigian et al. Nature Protocols
 2020](https://www.nature.com/articles/s41596-019-0254-3). It leverages the [COBRApy
@@ -11,6 +17,8 @@ It also allows high-throughput growth phenotype simulation via Flux Balance Anal
 usage profiles and Single Gene Knockout analysis (SGK) to predict the impacts of single gene knockout mutations. These
 can be performed under a variety of growth conditions and mediums.
 
+## Licence and citation
+
 Bactabolize is freely available under a [GNU General Public License v3.0](https://www.gnu.org/licenses/gpl-3.0.en.html).
 Please cite the following papers if you make use of Bactabolize:
 
@@ -19,6 +27,3 @@ Please cite the following papers if you make use of Bactabolize:
 * Ebrahim, A., Lerman, J.A., Palsson, B.O. et al. 'COBRApy: COnstraints-Based Reconstruction and Analysis for Python'. BMC
   Syst Biol 7, 74 (2013). <https://doi.org/10.1186/1752-0509-7-74>
 
-**Install and quick start [here](https://github.com/kelwyres/Bactabolize/wiki/1.-Quick-start)**
-
-**Visit the [wiki](https://github.com/kelwyres/Bactabolize/wiki) to find out more!**
