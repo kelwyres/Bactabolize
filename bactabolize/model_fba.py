@@ -28,6 +28,10 @@ def run(config):
     else:
         assert False
 
+    # Set all sink bounds to export only
+    for sink in model.sinks:
+        sink.lower_bound = 0
+
     # Run FBA
     results = dict()
     for fba_name, fba_spec in spec.items():
