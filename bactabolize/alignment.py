@@ -44,7 +44,10 @@ def run_blastp(query_fp, subject_fp):
     command_opts = f'-evalue 0.001 -outfmt \'6 {" ".join(BlastFormat)}\''
     command_run = f'blastp -db {subject_fp} -query {query_fp} {command_opts}'
     result = util.execute_command(command_run)
-    return parse_results(result.stdout)
+    if result.stdout != "":
+        return parse_results(result.stdout)
+    else:
+        return {}
 
 
 def run_blastn(query_fp, subject_fp):
@@ -54,7 +57,10 @@ def run_blastn(query_fp, subject_fp):
     command_opts = f'-evalue 0.001 -outfmt \'6 {" ".join(BlastFormat)}\''
     command_run = f'blastn -db {subject_fp} -query {query_fp} {command_opts}'
     result = util.execute_command(command_run)
-    return parse_results(result.stdout)
+    if result.stdout != "":
+        return parse_results(result.stdout)
+    else:
+        return {}
 
 
 def create_blast_database(subject_fp, db_type):
