@@ -138,7 +138,10 @@ def create_troubleshooter(model, model_draft, blast_results, biomass_reaction_id
             blastp_hits[(reaction, gene)] = hitsp
             if len(hitsp) > 0:
                 continue
-            blastn_hits[(reaction, gene)] = blast_results['blastn'].get(gene.id, list())
+            if len(blast_results['blastn']) != 0:
+                blastn_hits[(reaction, gene)] = blast_results['blastn'].get(gene.id, list())
+            else:
+                blastn_hits[(reaction, gene)] = []
     # Write summary info
     output_fp = pathlib.Path(f'{prefix}_summary.txt')
     write_troubleshoot_summary(
@@ -311,7 +314,10 @@ def identify(iso_fp, ref_genes_fp, ref_proteins_fp, model_genes, alignment_thres
             print(*[seq[i : i + 80] for i in range(0, len(seq), 80)], sep='\n', file=fout)
     # Run BLASTn (filtering with evalue <=1e-3, coverage >=80%, and pident >=80%)
     blastn_res_all = alignment.run_blastn(ref_genes_noorth_fp, iso_fasta_fp)
-    blastn_res = alignment.filter_results(blastn_res_all, min_coverage=80, min_pident=80)
+    if len(blastn_res_all) != 0:
+        blastn_res = alignment.filter_results(blastn_res_all, min_coverage=80, min_pident=80)
+    else:
+        blastn_res = {}
     # Discover unannotated model genes in isolate
     model_orthologs = discover_unannotated_orthologs(blastn_res, iso_fasta_fp, model_orthologs)
 
