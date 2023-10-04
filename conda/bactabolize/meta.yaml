@@ -29,7 +29,7 @@ requirements:
     - depinfo ==1.7.0
     - gitpython
     - goodtables ~=2.0
-    - importlib_resources
+    - importlib_resources ==5.12.0
     - jinja2
     - numpydoc
     - pylru
