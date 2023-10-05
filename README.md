@@ -22,8 +22,8 @@ can be performed under a variety of growth conditions and mediums.
 Bactabolize is freely available under a [GNU General Public License v3.0](https://www.gnu.org/licenses/gpl-3.0.en.html).
 Please cite the following papers if you make use of Bactabolize:
 
-* Vezina B. / Watts S.C. et al. 'Bactabolize: A tool for high-throughput generation of bacterial strain-specific metabolic models'. 
-  <https://doi.org/10.1101/2023.02.26.530115>
+* Vezina B. / Watts S.C. et al. 'Bactabolize: A tool for high-throughput generation of bacterial strain-specific metabolic models'. eLife (2023). 
+  [https://doi.org/10.1101/2023.02.26.530115](https://doi.org/10.7554/eLife.87406.2)
 * Ebrahim, A., Lerman, J.A., Palsson, B.O. et al. 'COBRApy: COnstraints-Based Reconstruction and Analysis for Python'. BMC
   Syst Biol 7, 74 (2013). <https://doi.org/10.1186/1752-0509-7-74>
 
