@@ -3,7 +3,7 @@ import math
 import pathlib
 import sys
 import tempfile
-
+import csv
 
 import Bio.Seq
 import Bio.SeqIO
@@ -43,6 +43,21 @@ def run(config):
     model_draft = config.model.copy()
     model_draft.id = config.assembly_genbank_fp.stem
     cobra.manipulation.remove_genes(model_draft, missing_genes, remove_reactions=True)
+
+    # Save original gene IDs prior to replacing with genome annotations
+    original_genes = []
+    for gene in model_draft.genes:
+        original_genes.append(gene.id)
+    model_draft.notes['Original_Genes'] = original_genes
+
+    # Same gene dictionary of reference model and genome annotations to csv 
+    gene_dict_fp = config.output_fp.parent / f'{config.output_fp.stem}_gene_dictionary.csv'
+    with open(gene_dict_fp, 'w') as csv_file:
+        writer = csv.writer(csv_file)
+        for key, value in isolate_orthologs.items():
+            writer.writerow([key, value])
+            
+    # Mutate a copy of the model and rename genes
     cobra.manipulation.modify.rename_genes(model_draft, isolate_orthologs)
 
     # Write model to disk and assess model
@@ -126,7 +141,7 @@ def assess_model(
 
 def create_troubleshooter(model, model_draft, blast_results, biomass_reaction_id, prefix):
     # Determine what required products model cannot product and missing reactions/genes
-    reactions_missing, nonzero_threshold = gapfill_model(model, model_draft)
+    reactions_missing, gapfilled, nonzero_threshold = gapfill_model(model, model_draft)
     metabolites_missing = check_biomass_metabolites(model_draft.copy(), biomass_reaction_id)
     # Collect BLAST results
     blastp_hits = dict()
@@ -148,6 +163,7 @@ def create_troubleshooter(model, model_draft, blast_results, biomass_reaction_id
         model,
         metabolites_missing,
         reactions_missing,
+        gapfilled,
         nonzero_threshold,
         blastp_hits,
         blastn_hits,
@@ -208,13 +224,14 @@ def gapfill_model(model, model_draft):
             if reaction not in reactions_missing:
                 reactions_missing[reaction] = 0
             reactions_missing[reaction] += 1
-    return reactions_missing, threshold
+    return reactions_missing, gapfilled, threshold
 
 
 def write_troubleshoot_summary(
     model,
     metabolites_missing,
     reactions_missing,
+    gapfilled,
     nonzero_threshold,
     blastp_hits,
     blastn_hits,
@@ -253,6 +270,13 @@ def write_troubleshoot_summary(
 
         for reaction, count in reactions_missing.items():
             print(reaction.id, f'{count}/5', file=fh)
+        # Reformat gapfilled information in troubleshoot summary to include all possible combinations
+        count = 1
+        for iteration in gapfilled:
+            print('\nIteration ', count, sep='', file=fh)
+            for reaction in iteration:
+                print(reaction.id, file=fh)
+            count += 1
         print('\n', 'Reaction info', sep='', end='', file=fh)
         for reaction in reactions_missing:
             print('\nid: ', reaction.id, sep='', file=fh)
