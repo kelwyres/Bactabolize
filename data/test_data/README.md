@@ -7,9 +7,9 @@ The [model_patching_example](https://github.com/kelwyres/Bactabolize/tree/main/d
 ## draft_model
 
 In-depth instructions found [here](https://github.com/kelwyres/Bactabolize/wiki/3.-Build-a-model)
-- KpSC reference model found here: [KpSC_pan-metabolic_model_v1.json](https://github.com/kelwyres/KpSC-pan-metabolic-model/blob/main/KpSC_pan-metabolic_model_v1.json)
-- KpSC reference gene data found here: [KpSC_pan-metabolic_model_v1_nucl.fna](https://github.com/kelwyres/KpSC-pan-metabolic-model/blob/main/KpSC_pan-metabolic_model_v1_nucl.fna)
-- KpSC reference protein data found here: [KpSC_pan-metabolic_model_v1_prots.faa](https://github.com/kelwyres/KpSC-pan-metabolic-model/blob/main/KpSC_pan-metabolic_model_v1_prots.faa)
+- KpSC v1 reference model found here: [KpSC_pan-metabolic_model_v1.json](https://github.com/kelwyres/KpSC-pan-metabolic-model/blob/main/Version-1/KpSC_pan-metabolic_model_v1.json)
+- KpSC v1 reference gene data found here: [KpSC_pan-metabolic_model_v1_nucl.fna](https://github.com/kelwyres/KpSC-pan-metabolic-model/blob/main/Version-1/KpSC_pan-metabolic_model_v1_nucl.fna)
+- KpSC v1 reference protein data found here: [KpSC_pan-metabolic_model_v1_prots.faa](https://github.com/kelwyres/KpSC-pan-metabolic-model/blob/main/Version-1/KpSC_pan-metabolic_model_v1_prots.faa)
 - KPN2285 patch file found here: [KPN2285_patch.json](https://github.com/kelwyres/Bactabolize/blob/main/data/test_data/model_patching_example/KPN2285_patch.json)
 
 Successful model building test data example:
