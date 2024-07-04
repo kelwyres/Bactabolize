@@ -1,0 +1,83 @@
+Missing metabolites required for biomass production:
+id: pe160_c
+name: Phosphatidylethanolamine (dihexadecanoyl, n-C16:0)
+reactions: 2AGPEAT160, PE160abcpp, PSD160
+
+id: pe160_p
+name: Phosphatidylethanolamine (dihexadecanoyl, n-C16:0)
+reactions: ALPATE160pp, PE160abcpp, PLIPA1E160pp, PLIPA2E160pp
+
+id: pe161_c
+name: Phosphatidylethanolamine (dihexadec-9enoyl, n-C16:1)
+reactions: 2AGPEAT161, CFAS160E, PE161abcpp, PSD161
+
+id: pe161_p
+name: Phosphatidylethanolamine (dihexadec-9enoyl, n-C16:1)
+reactions: PE161abcpp, PETNT161pp, PLIPA1E161pp, PLIPA2E161pp
+
+id: pe181_c
+name: Phosphatidylethanolamine (dioctadec-11-enoyl, n-C18:1)
+reactions: 2AGPEAT181, CFAS180E, PE181abcpp, PSD181
+
+id: pe181_p
+name: Phosphatidylethanolamine (dioctadec-11-enoyl, n-C18:1)
+reactions: PE181abcpp, PETNT181pp, PLIPA1E181pp, PLIPA2E181pp
+
+Missing reactions required to fix model (iterations: 5; threshold: 1e-07)
+PSD160 5/5
+PSD161 5/5
+PSD181 5/5
+
+Iteration 1
+PSD160
+PSD161
+PSD181
+
+Iteration 2
+PSD160
+PSD161
+PSD181
+
+Iteration 3
+PSD160
+PSD161
+PSD181
+
+Iteration 4
+PSD160
+PSD161
+PSD181
+
+Iteration 5
+PSD160
+PSD161
+PSD181
+
+Reaction info
+id: PSD160
+name: Phosphatidylserine decarboxylase (n-C16:0)
+subsystem: Glycerophospholipid Metabolism
+reaction: h_c + ps160_c --> co2_c + pe160_c
+genes: KPN_04557
+urls:
+
+id: PSD161
+name: Phosphatidylserine decarboxylase (n-C16:1)
+subsystem: Glycerophospholipid Metabolism
+reaction: h_c + ps161_c --> co2_c + pe161_c
+genes: KPN_04557
+urls:
+
+id: PSD181
+name: Phosphatidylserine decarboxylase (n-C18:1)
+subsystem: Glycerophospholipid Metabolism
+reaction: h_c + ps181_c --> co2_c + pe181_c
+genes: KPN_04557
+urls:
+
+BLASTp hits
+PSD160 KPN_04557 1
+PSD161 KPN_04557 1
+PSD181 KPN_04557 1
+
+BLASTn hits (only done for ORFs with no BLASTp result)

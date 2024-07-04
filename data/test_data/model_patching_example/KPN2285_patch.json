@@ -3,8 +3,7 @@
     "reactions": {
       "PSD160": "add",
       "PSD161": "add",
-      "PSD181": "add",
-      "PSD180": "add"
+      "PSD181": "add"
     },
     "biomass_metabolites": {
     }
