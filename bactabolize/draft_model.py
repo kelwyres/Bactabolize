@@ -25,13 +25,19 @@ def run(config):
     print('========================================')
     # Get orthologs of genes in model
     model_genes = {gene.id for gene in config.model.genes}
-    isolate_orthologs, blast_results = identify(
+    isolate_orthologs, blast_results, unannotated_sequences = identify(
         config.assembly_genbank_fp,
         config.model_ref_genes_fp,
         config.model_ref_proteins_fp,
         model_genes,
         config.alignment_thresholds,
     )
+
+    # Writing all identified unannotated sequences to a fasta file (can't be matched to genbank)
+    fasta_output = config.output_fp.parent / f'{config.output_fp.stem}_unannotated_sequences.fasta'
+    with open(fasta_output, "w") as output_handle:
+        Bio.SeqIO.write(unannotated_sequences, output_handle, "fasta")
+
     # Remove genes from model that have no ortholog in the isolate
     missing_genes = list()
     for gene in model_genes - set(isolate_orthologs):
@@ -343,12 +349,12 @@ def identify(iso_fp, ref_genes_fp, ref_proteins_fp, model_genes, alignment_thres
     else:
         blastn_res = {}
     # Discover unannotated model genes in isolate
-    model_orthologs = discover_unannotated_orthologs(blastn_res, iso_fasta_fp, model_orthologs)
+    model_orthologs, unannotated_sequences = discover_unannotated_orthologs(blastn_res, iso_fasta_fp, model_orthologs)
 
     # Return orthologs and BLAST results, explicitly remove temp directory
     dh.cleanup()
     blast_results = {'blastp_iso': blastp_iso_all, 'blastp_ref': blastp_ref_all, 'blastn': blastn_res_all}
-    return model_orthologs, blast_results
+    return model_orthologs, blast_results, unannotated_sequences
 
 
 def discover_orthologs(blastp_ref, blastp_iso):
@@ -370,6 +376,7 @@ def discover_unannotated_orthologs(blastn_res, iso_fasta_fp, model_orthologs):
     # pylint: disable=no-else-continue
     with iso_fasta_fp.open('r') as fh:
         iso_fasta = {des: Bio.Seq.Seq(seq) for des, seq in Bio.SeqIO.FastaIO.SimpleFastaParser(fh)}
+    unannotated_sequences = []
     for ref_gene_name, hits in blastn_res.items():
         assert ref_gene_name not in model_orthologs
         for hit in hits:
@@ -382,6 +389,9 @@ def discover_unannotated_orthologs(blastn_res, iso_fasta_fp, model_orthologs):
                 continue
             else:
                 model_orthologs[ref_gene_name] = f'{hit.qseqid}_unannotated'
+                # Record information for unannotated sequences
+                record = Bio.SeqIO.SeqRecord(nucleotide_seq, id=f'{hit.qseqid}_unannotated', description='')
+                unannotated_sequences.append(record)
                 break
     # Returning mutable to be explicit
-    return model_orthologs
+    return model_orthologs, unannotated_sequences
