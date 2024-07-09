@@ -17,6 +17,13 @@ It also allows high-throughput growth phenotype simulation via Flux Balance Anal
 usage profiles and Single Gene Knockout analysis (SGK) to predict the impacts of single gene knockout mutations. These
 can be performed under a variety of growth conditions and mediums.
 
+## Compatible pan-reference metabolic models
+
+|Species                        |Database                                                      |Reference    |
+|-----------                    |-----------                                                   |-----------  |
+|_Klebsiella pneumoniae_ Species Complex|[Model & Associated Sequences](https://github.com/kelwyres/KpSC-pan-metabolic-model)|[Cooper 2024, _MGen_](https://www.microbiologyresearch.org/content/journal/mgen/10.1099/mgen.0.001206)|
+|_Bacillus subtilis_            |[Model](https://github.com/SBGlab/Bacillus_Subtilis_multistrain_GEM/tree/main/iBB1018) & [Gene Annotations](https://www.ncbi.nlm.nih.gov/datasets/genome/GCF_000009045.1/)  |[Blázquez 2023, _Int. J. Mol. Sci._](https://www.mdpi.com/1422-0067/24/8/7091)|
+
 ## Licence and citation
 
 Bactabolize is freely available under a [GNU General Public License v3.0](https://www.gnu.org/licenses/gpl-3.0.en.html).
