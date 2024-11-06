@@ -126,12 +126,22 @@ def match_existing_orfs_updated_annotations(new_fp, existing_fp, overlap_min=0.8
         # Find overlaps
         positions = contig_positions_new[contig] + contig_positions_existing[contig]
         features_matched = discover_overlaps(positions, overlap_min)
-        # Discover those not matched
-        features_matched_flat = set()
-        for features in features_matched:
-            features_matched_flat.update(features)
-        new_unmatched = set(features_new[contig]).difference(features_matched_flat)
-        existing_unmatched = set(features_existing[contig]).difference(features_matched_flat)
+        
+        # Discover those not matched using location comparison
+        features_matched_new = [f[0] for f in features_matched]
+        features_matched_existing = [f[1] for f in features_matched]
+        
+        # Find unmatched features by comparing locations
+        new_unmatched = []
+        for feature in features_new[contig]:
+            if not any(f.location == feature.location for f in features_matched_new):
+                new_unmatched.append(feature)
+                
+        existing_unmatched = []
+        for feature in features_existing[contig]:
+            if not any(f.location == feature.location for f in features_matched_existing):
+                existing_unmatched.append(feature)
+
         # For each matched update bounds update locus tag, product, gene (if present) to match existing
         quals = ('locus_tag', 'product', 'gene')
         features_updated = list()
@@ -141,6 +151,7 @@ def match_existing_orfs_updated_annotations(new_fp, existing_fp, overlap_min=0.8
                     continue
                 feature_new.qualifiers[qual] = feature_existing.qualifiers[qual]
             features_updated.append(feature_new)
+            
         # Add existing ORFs that had no match
         features_updated.extend(new_unmatched)
         features_updated.extend(existing_unmatched)
@@ -152,6 +163,7 @@ def match_existing_orfs_updated_annotations(new_fp, existing_fp, overlap_min=0.8
         print(f'\t{len(existing_unmatched)} existing features unmatched')
         print(f'\t{len(new_unmatched)} re-annotated features unmatched')
         print(f'\t{len(features_updated)} total features')
+        
     # Update new genbank with new feature set
     update_genbank_annotations(new_fp, contig_features_updated)
 
@@ -179,7 +191,8 @@ def discover_overlaps(positions, overlap_min):
     # pylint: disable=too-many-branches
     in_new = list()
     in_existing = list()
-    features_matched = set()
+    # Change from set to list to store matches
+    features_matched = []
     for position in sorted(positions, key=lambda k: k['position']):
         # Add features we're entering and remove those we're exiting
         if position['type'] == 'start':
@@ -199,7 +212,12 @@ def discover_overlaps(positions, overlap_min):
             for feature_existing in in_existing:
                 if feature_new.strand != feature_existing.strand:
                     continue
-                if (feature_new, feature_existing) in features_matched:
+                # Check if this pair is already matched by comparing locations
+                already_matched = any(
+                    fn.location == feature_new.location and fe.location == feature_existing.location 
+                    for fn, fe in features_matched
+                )
+                if already_matched:
                     continue
                 # Get overlap
                 start = max(feature_new.location.start, feature_existing.location.start)
@@ -212,7 +230,7 @@ def discover_overlaps(positions, overlap_min):
                     # Update note to include overlap information
                     [note_new] = feature_new.qualifiers['note']
                     feature_new.qualifiers['note'][0] = f'{note_new};overlap:{overlap_new:.2f}'
-                    features_matched.add((feature_new, feature_existing))
+                    features_matched.append((feature_new, feature_existing))
     return features_matched
 
 
