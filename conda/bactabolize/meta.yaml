@@ -17,6 +17,13 @@ requirements:
   run:
     - python ==3.9
     - biopython ==1.79
+    - glpk ==5.0
+    - swiglpk ==5.0.10
+    - urllib3 ==2.2.2
+    - cchardet ==2.1.7
+    - tabulator ==1.25.1
+    - goodtables ==2.5.4
+    - openpyxl ==2.4.11
     - blast ==2.12.0
     - cobra ==0.21.0
     - prodigal ==2.6.3
@@ -28,7 +35,6 @@ requirements:
     - cookiecutter
     - depinfo ==1.7.0
     - gitpython
-    - goodtables ~=2.0
     - importlib_resources ==5.12.0
     - jinja2
     - numpydoc
