@@ -11,7 +11,7 @@ setuptools.setup(
     description='Bactabolize python package',
     author='Stephen Watts',
     license='GPLv3',
-    url='https://github.com/scwatts/bactabolize',
+    url='https://github.com/kelwyres/bactabolize',
     test_suite='tests',
     packages=setuptools.find_packages(),
     package_data={'bactabolize': ['data/**']},

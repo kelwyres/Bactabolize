@@ -1,6 +1,6 @@
 {
   "name": "TSA_sheep_blood",
-  "exchanges":
+  "exchanges": {
     "EX_14glucan_e":  -1000,
     "EX_1Dgali_e":    -1000,
     "EX_ala__L_e":    -1000,
