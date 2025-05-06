@@ -47,16 +47,15 @@ jobs:
         uses: actions/checkout@v3
       - name: Setup conda
         id: setup_conda
-        uses: conda-incubator/setup-miniconda@v2
+        uses: conda-incubator/setup-miniconda@v3
         with:
-          python-version: 3.9
-          miniforge-variant: Mambaforge-pypy3
           channels: umccr,bioconda,conda-forge,defaults
           channel-priority: true
+          python-version: 3.9
       - name: Prepare env
         id: prepare_env
         run: |
-          mamba install boa anaconda-client bump2version
+          conda install bump2version conda-build anaconda-client
       # When on development branch (inferred from bump_version value), append '-dev' to package name and set
       # commit-specific version
       - name: Set package name and version
@@ -69,7 +68,7 @@ jobs:
             --no-commit
       - name: Build and upload conda package
         run: |
-          conda mambabuild \
+          conda build \
             --token "${{ secrets.ANACONDA_TOKEN }}" \
             conda/bactabolize/
 
