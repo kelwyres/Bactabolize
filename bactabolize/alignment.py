@@ -38,6 +38,7 @@ class BlastResult:
 
 
 def run_blastp(query_fp, subject_fp):
+    # pylint: disable=no-else-return
     # Create a database
     create_blast_database(subject_fp, 'prot')
     # Run alignment
@@ -51,6 +52,7 @@ def run_blastp(query_fp, subject_fp):
 
 
 def run_blastn(query_fp, subject_fp):
+    # pylint: disable=no-else-return
     # Create database
     create_blast_database(subject_fp, 'nucl')
     # Run alignment
