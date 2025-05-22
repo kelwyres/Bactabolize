@@ -56,13 +56,13 @@ def run(config):
         original_genes.append(gene.id)
     model_draft.notes['Original_Genes'] = original_genes
 
-    # Same gene dictionary of reference model and genome annotations to csv 
+    # Same gene dictionary of reference model and genome annotations to csv
     gene_dict_fp = config.output_fp.parent / f'{config.output_fp.stem}_gene_dictionary.csv'
     with open(gene_dict_fp, 'w') as csv_file:
         writer = csv.writer(csv_file)
         for key, value in isolate_orthologs.items():
             writer.writerow([key, value])
-            
+
     # Mutate a copy of the model and rename genes
     cobra.manipulation.modify.rename_genes(model_draft, isolate_orthologs)
 

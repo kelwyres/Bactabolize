@@ -21,6 +21,9 @@ def run(config):
             model = cobra.io.load_json_model(fh)
         elif config.model_fp.suffix == '.xml':
             model = read_sbml_model(fh)
+        else:
+            assert False
+
     if config.fba_spec_fp:
         spec = parse_spec(config.fba_spec_fp)
     elif config.fba_spec_name:

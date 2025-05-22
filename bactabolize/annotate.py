@@ -33,6 +33,8 @@ def run(assembly_fp, output_fp):
     elif assembly_filetype == 'fasta':
         assembly_genbank_fp = None
         assembly_fasta_fp = assembly_fp
+    else:
+        assert False
     print('========================================')
     prodigal_data = run_prodigal(assembly_fasta_fp)
     prodigal_orfs = parse_prodigal_output(prodigal_data)
@@ -114,6 +116,7 @@ def get_qual_note(partial_str):
 
 
 def match_existing_orfs_updated_annotations(new_fp, existing_fp, overlap_min=0.80):
+    # pylint: disable=too-many-branches
     # Get features and create list of start and end objects for each
     features_new = collect_all_features(new_fp)
     features_existing = collect_all_features(existing_fp)
@@ -126,17 +129,17 @@ def match_existing_orfs_updated_annotations(new_fp, existing_fp, overlap_min=0.8
         # Find overlaps
         positions = contig_positions_new[contig] + contig_positions_existing[contig]
         features_matched = discover_overlaps(positions, overlap_min)
-        
+
         # Discover those not matched using location comparison
         features_matched_new = [f[0] for f in features_matched]
         features_matched_existing = [f[1] for f in features_matched]
-        
+
         # Find unmatched features by comparing locations
         new_unmatched = []
         for feature in features_new[contig]:
             if not any(f.location == feature.location for f in features_matched_new):
                 new_unmatched.append(feature)
-                
+
         existing_unmatched = []
         for feature in features_existing[contig]:
             if not any(f.location == feature.location for f in features_matched_existing):
@@ -151,7 +154,7 @@ def match_existing_orfs_updated_annotations(new_fp, existing_fp, overlap_min=0.8
                     continue
                 feature_new.qualifiers[qual] = feature_existing.qualifiers[qual]
             features_updated.append(feature_new)
-            
+
         # Add existing ORFs that had no match
         features_updated.extend(new_unmatched)
         features_updated.extend(existing_unmatched)
@@ -163,7 +166,7 @@ def match_existing_orfs_updated_annotations(new_fp, existing_fp, overlap_min=0.8
         print(f'\t{len(existing_unmatched)} existing features unmatched')
         print(f'\t{len(new_unmatched)} re-annotated features unmatched')
         print(f'\t{len(features_updated)} total features')
-        
+
     # Update new genbank with new feature set
     update_genbank_annotations(new_fp, contig_features_updated)
 
@@ -214,7 +217,7 @@ def discover_overlaps(positions, overlap_min):
                     continue
                 # Check if this pair is already matched by comparing locations
                 already_matched = any(
-                    fn.location == feature_new.location and fe.location == feature_existing.location 
+                    fn.location == feature_new.location and fe.location == feature_existing.location
                     for fn, fe in features_matched
                 )
                 if already_matched:
