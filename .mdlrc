@@ -1,2 +1,2 @@
-rules "~MD024"
+rules "~MD024,~MD036"
 style "#{File.dirname(__FILE__)}/.mdl_style.rb"

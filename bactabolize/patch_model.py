@@ -20,12 +20,16 @@ def run(config):
             model_draft = cobra.io.load_json_model(fh)
         elif config.draft_model_fp.suffix == '.xml':
             model_draft = read_sbml_model(fh)
+        else:
+            assert False
 
     with config.ref_model_fp.open('r') as fh:
         if config.ref_model_fp.suffix == '.json':
             model_ref = cobra.io.load_json_model(fh)
         elif config.ref_model_fp.suffix == '.xml':
             model_ref = read_sbml_model(fh)
+        else:
+            assert False
 
     patch = parse_patch(config.patch_fp, model_draft.id)
     # Apply patch
